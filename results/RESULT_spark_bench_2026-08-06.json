@@ -1,0 +1,112 @@
+[
+ {
+  "label": "A-kurz-c1",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 13.46,
+  "prompt_tokens_actual": 107,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 19.0
+ },
+ {
+  "label": "A-kurz-c1",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 13.6,
+  "prompt_tokens_actual": 108,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 18.8
+ },
+ {
+  "label": "A-kurz-c1",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 14.12,
+  "prompt_tokens_actual": 101,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 18.1
+ },
+ {
+  "label": "A-kurz-c2",
+  "sessions": 2,
+  "ok": 2,
+  "wall_s": 13.75,
+  "prompt_tokens_actual": 108,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 37.2
+ },
+ {
+  "label": "A-kurz-c4",
+  "sessions": 4,
+  "ok": 4,
+  "wall_s": 16.06,
+  "prompt_tokens_actual": 109,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 63.7
+ },
+ {
+  "label": "A-kurz-c8",
+  "sessions": 8,
+  "ok": 8,
+  "wall_s": 15.03,
+  "prompt_tokens_actual": 104,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 136.2
+ },
+ {
+  "label": "B-8k",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 11.78,
+  "prompt_tokens_actual": 7733,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 10.9
+ },
+ {
+  "label": "B-32k",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 33.43,
+  "prompt_tokens_actual": 30425,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 3.8
+ },
+ {
+  "label": "B-128k",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 172.43,
+  "prompt_tokens_actual": 122189,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 0.7
+ },
+ {
+  "label": "B-240k",
+  "sessions": 1,
+  "ok": 1,
+  "wall_s": 456.58,
+  "prompt_tokens_actual": 229256,
+  "ttft_mean_s": null,
+  "ttft_max_s": null,
+  "decode_toks_per_session_mean": null,
+  "aggregate_toks": 0.3
+ }
+]

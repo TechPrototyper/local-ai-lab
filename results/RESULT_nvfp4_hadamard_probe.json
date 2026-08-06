@@ -1,0 +1,15 @@
+{"_provenance": {"probe": "nvfp4_hadamard_probe", "run": "2026-08-06 ~07:50 CEST, RTX 5090 host; JSON reconstructed verbatim from captured probe stdout", "vllm": "0.1.dev1+gdfed053c9.d20260720", "torch": "2.11.0+cu130", "device": "NVIDIA GeForce RTX 5090", "capability": [12, 0], "tokens": 512, "head_size": 128, "script": "nvfp4_hadamard_probe.py (this directory)"},
+ "rows": [
+  {"amax": null, "scale_mode": "unit", "rotate": false, "v_scale_value": 1.0, "V_rel_l2_bulk": 0.09531, "V_bulk_zero_frac": 0.06802},
+  {"amax": null, "scale_mode": "amax6", "rotate": false, "v_scale_value": 0.7865, "V_rel_l2_bulk": 0.09516, "V_bulk_zero_frac": 0.06791},
+  {"amax": null, "scale_mode": "unit", "rotate": true, "v_scale_value": 1.0, "V_rel_l2_bulk": 0.09513, "V_bulk_zero_frac": 0.0},
+  {"amax": null, "scale_mode": "amax6", "rotate": true, "v_scale_value": 0.7865, "V_rel_l2_bulk": 0.09503, "V_bulk_zero_frac": 0.0},
+  {"amax": 42000.0, "scale_mode": "unit", "rotate": false, "v_scale_value": 1.0, "V_rel_l2_bulk": 0.0962, "V_bulk_zero_frac": 0.06823, "V_rel_l2_outlier": 0.93598, "V_outlier_recon_mean": 2688.0},
+  {"amax": 42000.0, "scale_mode": "amax6", "rotate": false, "v_scale_value": 6997.3335, "V_rel_l2_bulk": 1.0, "V_bulk_zero_frac": 1.0, "V_rel_l2_outlier": 0.0, "V_outlier_recon_mean": 41984.0},
+  {"amax": 42000.0, "scale_mode": "unit", "rotate": true, "v_scale_value": 1.0, "V_rel_l2_bulk": 0.1038, "V_bulk_zero_frac": 0.0, "V_rel_l2_outlier": 0.63782, "V_outlier_recon_mean": 15205.6},
+  {"amax": 42000.0, "scale_mode": "amax6", "rotate": true, "v_scale_value": 1237.3334, "V_rel_l2_bulk": 1.0, "V_bulk_zero_frac": 0.99808, "V_rel_l2_outlier": 0.0003, "V_outlier_recon_mean": 41996.5},
+  {"amax": 125000.0, "scale_mode": "unit", "rotate": false, "v_scale_value": 1.0, "V_rel_l2_bulk": 0.0962, "V_bulk_zero_frac": 0.06823, "V_rel_l2_outlier": 0.97848, "V_outlier_recon_mean": 2688.0},
+  {"amax": 125000.0, "scale_mode": "amax6", "rotate": false, "v_scale_value": 20821.334, "V_rel_l2_bulk": 1.0, "V_bulk_zero_frac": 1.0, "V_rel_l2_outlier": 0.0, "V_outlier_recon_mean": 124928.0},
+  {"amax": 125000.0, "scale_mode": "unit", "rotate": true, "v_scale_value": 1.0, "V_rel_l2_bulk": 0.1038, "V_bulk_zero_frac": 0.0, "V_rel_l2_outlier": 0.87828, "V_outlier_recon_mean": 15205.6},
+  {"amax": 125000.0, "scale_mode": "amax6", "rotate": true, "v_scale_value": 3690.6667, "V_rel_l2_bulk": 1.0, "V_bulk_zero_frac": 0.99808, "V_rel_l2_outlier": 0.0027, "V_outlier_recon_mean": 125265.5}
+ ]}
