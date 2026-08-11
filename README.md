@@ -12,7 +12,7 @@ optimize *that* — not the technology you happen to like:
 | Box | Bottleneck order | Consequence |
 |---|---|---|
 | **RTX 5090** (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; speculative decoding stays *off* (it costs KV) |
-| **DGX Spark / GB10** (128 GB unified) | quality → **speed** → memory | MTP speculative decoding (+69% tok/s); memory is the abundant resource |
+| **DGX Spark / GB10** (128 GB unified) | quality → **speed** → memory | MTP speculative decoding bought +69% tok/s, off since 2026-08-09 (sm121-specific tool-calling bug, see `notes/`); memory remains the abundant resource |
 
 Same model, same quantization stack — opposite settings, each derived from
 measurement rather than habit.
@@ -33,6 +33,9 @@ measurement rather than habit.
 - **`results/`** — raw JSON exactly as measured, provenance included
 - **`benchmarks/`** — end-to-end serving benchmarks (TTFT, tok/s, concurrency)
 - **`recipes/`** — the serving configurations the measurements led to
+- **`notes/`** — internal findings and decisions that aren't a probe/
+  benchmark/recipe on their own (production decisions, incident write-ups,
+  cross-references, the upstream-engagement record)
 
 ## Method
 
@@ -40,6 +43,27 @@ Measure, then believe. Screening at n=250 is triage only (±2.7 pp on GSM8K);
 verdicts take the full n=1319 split and paired statistics. Mechanisms get
 model-free kernel round-trips so they stand independent of any benchmark.
 When a result kills a nice idea, the idea stays dead and the numbers stay up.
+
+## Changelog
+
+Retroactive back to the campaign start; going forward this table gets a row
+per change to this repo.
+
+| Date | Change | Why | Detail (path or "none") |
+|---|---|---|---|
+| 2026-08-01 | NVFP4 KV-cache calibration campaign run; baked amax scales found to hurt at 4-bit | investigate a reported quality deficit on calibrated NVFP4-KV | `probes/nvfp4_calib_scale_study.py` |
+| 2026-08-02 | Calibration finding posted as a comment on llm-compressor#2936 | share a measured KV-cache-side NVFP4 accuracy contributor | `notes/upstream-contributions.md` |
+| 2026-08-02 | FYI draft for vLLM#46329 written and reviewed, parked (not posted) | same finding, PR context — held back pending further review | `notes/upstream-contributions.md` |
+| 2026-08-06 | Hadamard/R2-rotation probe run; follow-up comment posted on llm-compressor#2936 | test a SpinQuant/R2 suggestion against the calibration finding | `probes/nvfp4_hadamard_probe.py` |
+| 2026-08-06 | GB10 production benchmark captured (NVFP4-KV + MTP, 262k context) | validate the sm121 target config before rollout | `benchmarks/spark_bench.py` |
+| 2026-08-09 | MTP speculative decoding disabled on sm121 (Spark) | `qwen3_5_mtp` × tool-calling caused empty / aborting tool-call chains | `notes/mtp-tool-calling.md` |
+| 2026-08-09 | Prefix caching enabled on sm121 | avoid re-prefilling the full agent context every turn | `recipes/dgx-spark-sm121.md` |
+| 2026-08-11 | `recipes/dgx-spark-sm121.md` corrected to match the on-box script (MTP off, current flags) | recipe had drifted from source-of-truth | `recipes/dgx-spark-sm121.md` |
+| 2026-08-11 | GB10 OOM-hardening (swappiness=10, earlyoom, per-container caps, oom_score_adj) | repeated thrash-wedge required physical reboots | `notes/gb10-oom-hardening.md` |
+| 2026-08-11 | Overflow banner removed from the LiteLLM callback (cluster-side) | banner text looping through replayed context caused a multi-hour generation runaway | `notes/banner-runaway.md` |
+| 2026-08-11 | GDN sm121 prefill datapoint measured, posted on vLLM#50288, discarded for production | +2.7–6.3% prefill, shrinking with context — not worth a 9th ch2lab commit | `notes/gdn-prod-decision.md` |
+| 2026-08-11 | Build stack documented (image line, 8-commit ch2lab stack, FlashInfer pins, local patch) | capture the current source-of-truth for the sm12x custom build | `recipes/build-stack.md` |
+| 2026-08-11 | Changelog table added to this README | establish changelog discipline going forward | none |
 
 ## Context
 
