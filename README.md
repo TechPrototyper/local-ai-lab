@@ -12,7 +12,7 @@ optimize *that* — not the technology you happen to like:
 | Box | Bottleneck order | Consequence |
 |---|---|---|
 | **RTX 5090** (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; speculative decoding stays *off* (it costs KV) |
-| **DGX Spark / GB10** (128 GB unified) | quality → **speed** → memory | MTP speculative decoding bought +69% tok/s, off since 2026-08-09 (sm121-specific tool-calling bug, see `notes/`); memory remains the abundant resource |
+| **DGX Spark / GB10** (128 GB unified) | quality → **speed** → memory | memory is abundant, so it is spent on long context and throughput (NVFP4 KV, prefix caching, 262k); MTP speculative decoding is *off* — it broke tool-calling on sm121 ([`notes/mtp-tool-calling.md`](notes/mtp-tool-calling.md)) |
 
 Same model, same quantization stack — opposite settings, each derived from
 measurement rather than habit.
@@ -64,6 +64,7 @@ per change to this repo.
 | 2026-08-11 | GDN sm121 prefill datapoint measured, posted on vLLM#50288, discarded for production | +2.7–6.3% prefill, shrinking with context — not worth a 9th ch2lab commit | `notes/gdn-prod-decision.md` |
 | 2026-08-11 | Build stack documented (image line, 8-commit ch2lab stack, FlashInfer pins, local patch) | capture the current source-of-truth for the sm12x custom build | `recipes/build-stack.md` |
 | 2026-08-11 | Changelog table added to this README | establish changelog discipline going forward | none |
+| 2026-08-11 | Framing table (Spark row) rewritten to lead with the current config; MTP-off demoted from headline to a linked reference | the front table should show the current state, not a disabled-feature narrative | `notes/mtp-tool-calling.md` |
 
 ## Context
 
