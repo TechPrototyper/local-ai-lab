@@ -9,12 +9,13 @@ image does not contain vLLM itself.** vLLM and FlashInfer are supplied via
 a source-mount contract at runtime:
 
 ```
--v /home/timw/nvfp4-work/vllm:/vllm-src
--v /home/timw/nvfp4-work/flashinfer:/fi
+-v $WORK_DIR/vllm:/vllm-src
+-v $WORK_DIR/flashinfer:/fi
 ```
 
-Do not delete or move these directories while a recipe built on this image
-is running.
+where `$WORK_DIR` is the local checkout directory holding the `vllm` and
+`flashinfer` source trees. Do not delete or move these directories while a
+recipe built on this image is running.
 
 ## Commit stack
 

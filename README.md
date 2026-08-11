@@ -65,6 +65,7 @@ per change to this repo.
 | 2026-08-11 | Build stack documented (image line, 8-commit ch2lab stack, FlashInfer pins, local patch) | capture the current source-of-truth for the sm12x custom build | `recipes/build-stack.md` |
 | 2026-08-11 | Changelog table added to this README | establish changelog discipline going forward | none |
 | 2026-08-11 | Framing table (Spark row) rewritten to lead with the current config; MTP-off demoted from headline to a linked reference | the front table should show the current state, not a disabled-feature narrative | `notes/mtp-tool-calling.md` |
+| 2026-08-11 | `recipes/build-stack.md` mount paths genericized to `$WORK_DIR` | keep host-specific paths out of the public notebook | `recipes/build-stack.md` |
 
 ## Context
 
