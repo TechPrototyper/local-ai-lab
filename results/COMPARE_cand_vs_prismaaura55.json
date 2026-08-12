@@ -1,0 +1,61 @@
+{
+ "candidate_arm": "cand-export27b",
+ "baseline_arm": "ref-prismaaura55",
+ "candidate_file": "RESULT_cand-export27b.json",
+ "baseline_file": "RESULT_ref-prismaaura55.json",
+ "gsm8k": {
+  "n": 250,
+  "candidate_accuracy": 0.972,
+  "baseline_accuracy": 0.956,
+  "delta": 0.016000000000000014,
+  "confusion": {
+   "both_correct": 236,
+   "both_wrong": 4,
+   "improved_by_candidate": 7,
+   "regressed_by_candidate": 3
+  },
+  "mcnemar_p": 0.34375,
+  "mcnemar_method": "exact (internal binomial, math.comb)",
+  "mcnemar_discordant_n": 10
+ },
+ "needle": {
+  "candidate": {
+   "hits": 9,
+   "total": 9,
+   "rate": 1.0
+  },
+  "baseline": {
+   "hits": 9,
+   "total": 9,
+   "rate": 1.0
+  }
+ },
+ "tools": null,
+ "determinism": {
+  "candidate": {
+   "stable": 5,
+   "total": 5
+  },
+  "baseline": {
+   "stable": 5,
+   "total": 5
+  }
+ },
+ "perf": {
+  "single_stream_toks": {
+   "candidate": 10.7,
+   "baseline": 11.5,
+   "delta_pct": -7.0
+  },
+  "batched8_agg_toks": {
+   "candidate": 79.2,
+   "baseline": 85.3,
+   "delta_pct": -7.2
+  },
+  "batch_wall_s": {
+   "candidate": 25.9,
+   "baseline": 24.0,
+   "delta_pct": 7.9
+  }
+ }
+}

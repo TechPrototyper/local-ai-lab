@@ -1,0 +1,2648 @@
+{
+ "arm": "ref-prismaaura55",
+ "model": "qwen3.6-27b-ref",
+ "base_url": "http://localhost:8011",
+ "started_unix": 1786555345.7278812,
+ "gsm8k": {
+  "n": 250,
+  "accuracy": 0.956,
+  "thinking_rate": 1.0,
+  "mean_reasoning_chars": 7679.004,
+  "mean_completion_tokens": 2697.74,
+  "truncated": 30,
+  "errors": 0,
+  "error_samples": [],
+  "wrong_indices": [
+   12,
+   16,
+   45,
+   85,
+   87,
+   93,
+   119,
+   161,
+   184,
+   201,
+   241
+  ],
+  "per_item": [
+   {
+    "correct": true,
+    "pred": 18.0,
+    "gold": 18.0,
+    "reasoning_len": 2589,
+    "content_len": 478,
+    "completion_tokens": 963,
+    "finish": "stop",
+    "latency": 89.57681274414062
+   },
+   {
+    "correct": true,
+    "pred": 3.0,
+    "gold": 3.0,
+    "reasoning_len": 2203,
+    "content_len": 155,
+    "completion_tokens": 704,
+    "finish": "stop",
+    "latency": 65.45937895774841
+   },
+   {
+    "correct": true,
+    "pred": 70000.0,
+    "gold": 70000.0,
+    "reasoning_len": 23266,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.4485130310059
+   },
+   {
+    "correct": true,
+    "pred": 540.0,
+    "gold": 540.0,
+    "reasoning_len": 3122,
+    "content_len": 260,
+    "completion_tokens": 1025,
+    "finish": "stop",
+    "latency": 95.36653184890747
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 3821,
+    "content_len": 451,
+    "completion_tokens": 1247,
+    "finish": "stop",
+    "latency": 116.04279494285583
+   },
+   {
+    "correct": true,
+    "pred": 64.0,
+    "gold": 64.0,
+    "reasoning_len": 7160,
+    "content_len": 398,
+    "completion_tokens": 2369,
+    "finish": "stop",
+    "latency": 220.69155263900757
+   },
+   {
+    "correct": true,
+    "pred": 260.0,
+    "gold": 260.0,
+    "reasoning_len": 2459,
+    "content_len": 577,
+    "completion_tokens": 1038,
+    "finish": "stop",
+    "latency": 96.59885692596436
+   },
+   {
+    "correct": true,
+    "pred": 160.0,
+    "gold": 160.0,
+    "reasoning_len": 24625,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.538165807724
+   },
+   {
+    "correct": true,
+    "pred": 45.0,
+    "gold": 45.0,
+    "reasoning_len": 18013,
+    "content_len": 1582,
+    "completion_tokens": 6288,
+    "finish": "stop",
+    "latency": 593.5570375919342
+   },
+   {
+    "correct": true,
+    "pred": 460.0,
+    "gold": 460.0,
+    "reasoning_len": 23821,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 775.4905087947845
+   },
+   {
+    "correct": true,
+    "pred": 366.0,
+    "gold": 366.0,
+    "reasoning_len": 2983,
+    "content_len": 316,
+    "completion_tokens": 1233,
+    "finish": "stop",
+    "latency": 115.10472798347473
+   },
+   {
+    "correct": true,
+    "pred": 694.0,
+    "gold": 694.0,
+    "reasoning_len": 22737,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 775.5711596012115
+   },
+   {
+    "correct": false,
+    "pred": 12.0,
+    "gold": 13.0,
+    "reasoning_len": 13557,
+    "content_len": 1138,
+    "completion_tokens": 4734,
+    "finish": "stop",
+    "latency": 446.5211238861084
+   },
+   {
+    "correct": true,
+    "pred": 18.0,
+    "gold": 18.0,
+    "reasoning_len": 8282,
+    "content_len": 1298,
+    "completion_tokens": 3306,
+    "finish": "stop",
+    "latency": 312.5187940597534
+   },
+   {
+    "correct": true,
+    "pred": 60.0,
+    "gold": 60.0,
+    "reasoning_len": 5070,
+    "content_len": 730,
+    "completion_tokens": 1797,
+    "finish": "stop",
+    "latency": 169.28703379631042
+   },
+   {
+    "correct": true,
+    "pred": 125.0,
+    "gold": 125.0,
+    "reasoning_len": 24428,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 777.548009634018
+   },
+   {
+    "correct": false,
+    "pred": 2.0,
+    "gold": 230.0,
+    "reasoning_len": 30315,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 776.6296327114105
+   },
+   {
+    "correct": true,
+    "pred": 57500.0,
+    "gold": 57500.0,
+    "reasoning_len": 4034,
+    "content_len": 376,
+    "completion_tokens": 1530,
+    "finish": "stop",
+    "latency": 146.14801239967346
+   },
+   {
+    "correct": true,
+    "pred": 7.0,
+    "gold": 7.0,
+    "reasoning_len": 3339,
+    "content_len": 338,
+    "completion_tokens": 1180,
+    "finish": "stop",
+    "latency": 112.96349096298218
+   },
+   {
+    "correct": true,
+    "pred": 6.0,
+    "gold": 6.0,
+    "reasoning_len": 5386,
+    "content_len": 1299,
+    "completion_tokens": 2124,
+    "finish": "stop",
+    "latency": 201.95432114601135
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 26050,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.7438385486603
+   },
+   {
+    "correct": true,
+    "pred": 14.0,
+    "gold": 14.0,
+    "reasoning_len": 3618,
+    "content_len": 559,
+    "completion_tokens": 1362,
+    "finish": "stop",
+    "latency": 129.08617067337036
+   },
+   {
+    "correct": true,
+    "pred": 7.0,
+    "gold": 7.0,
+    "reasoning_len": 4104,
+    "content_len": 272,
+    "completion_tokens": 1403,
+    "finish": "stop",
+    "latency": 132.9656252861023
+   },
+   {
+    "correct": true,
+    "pred": 8.0,
+    "gold": 8.0,
+    "reasoning_len": 2956,
+    "content_len": 201,
+    "completion_tokens": 962,
+    "finish": "stop",
+    "latency": 90.69527959823608
+   },
+   {
+    "correct": true,
+    "pred": 26.0,
+    "gold": 26.0,
+    "reasoning_len": 3847,
+    "content_len": 692,
+    "completion_tokens": 1719,
+    "finish": "stop",
+    "latency": 162.0208477973938
+   },
+   {
+    "correct": true,
+    "pred": 2.0,
+    "gold": 2.0,
+    "reasoning_len": 3707,
+    "content_len": 452,
+    "completion_tokens": 1476,
+    "finish": "stop",
+    "latency": 139.26027631759644
+   },
+   {
+    "correct": true,
+    "pred": 243.0,
+    "gold": 243.0,
+    "reasoning_len": 9027,
+    "content_len": 788,
+    "completion_tokens": 3923,
+    "finish": "stop",
+    "latency": 370.4386239051819
+   },
+   {
+    "correct": true,
+    "pred": 16.0,
+    "gold": 16.0,
+    "reasoning_len": 3582,
+    "content_len": 527,
+    "completion_tokens": 1376,
+    "finish": "stop",
+    "latency": 129.78275966644287
+   },
+   {
+    "correct": true,
+    "pred": 25.0,
+    "gold": 25.0,
+    "reasoning_len": 2822,
+    "content_len": 567,
+    "completion_tokens": 1113,
+    "finish": "stop",
+    "latency": 105.20508551597595
+   },
+   {
+    "correct": true,
+    "pred": 104.0,
+    "gold": 104.0,
+    "reasoning_len": 3627,
+    "content_len": 338,
+    "completion_tokens": 1274,
+    "finish": "stop",
+    "latency": 120.73553252220154
+   },
+   {
+    "correct": true,
+    "pred": 109.0,
+    "gold": 109.0,
+    "reasoning_len": 2300,
+    "content_len": 634,
+    "completion_tokens": 1138,
+    "finish": "stop",
+    "latency": 107.77266001701355
+   },
+   {
+    "correct": true,
+    "pred": 80.0,
+    "gold": 80.0,
+    "reasoning_len": 3161,
+    "content_len": 751,
+    "completion_tokens": 1423,
+    "finish": "stop",
+    "latency": 134.78510856628418
+   },
+   {
+    "correct": true,
+    "pred": 35.0,
+    "gold": 35.0,
+    "reasoning_len": 2940,
+    "content_len": 222,
+    "completion_tokens": 989,
+    "finish": "stop",
+    "latency": 93.72024703025818
+   },
+   {
+    "correct": true,
+    "pred": 70.0,
+    "gold": 70.0,
+    "reasoning_len": 2161,
+    "content_len": 684,
+    "completion_tokens": 1055,
+    "finish": "stop",
+    "latency": 99.76944398880005
+   },
+   {
+    "correct": true,
+    "pred": 23.0,
+    "gold": 23.0,
+    "reasoning_len": 2429,
+    "content_len": 469,
+    "completion_tokens": 1003,
+    "finish": "stop",
+    "latency": 94.83947110176086
+   },
+   {
+    "correct": true,
+    "pred": 9.0,
+    "gold": 9.0,
+    "reasoning_len": 2538,
+    "content_len": 440,
+    "completion_tokens": 1013,
+    "finish": "stop",
+    "latency": 95.76111626625061
+   },
+   {
+    "correct": true,
+    "pred": 75.0,
+    "gold": 75.0,
+    "reasoning_len": 15779,
+    "content_len": 675,
+    "completion_tokens": 5445,
+    "finish": "stop",
+    "latency": 514.1473999023438
+   },
+   {
+    "correct": true,
+    "pred": 2.0,
+    "gold": 2.0,
+    "reasoning_len": 21815,
+    "content_len": 1001,
+    "completion_tokens": 6855,
+    "finish": "stop",
+    "latency": 647.1829686164856
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 24376,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.7709038257599
+   },
+   {
+    "correct": true,
+    "pred": 18.0,
+    "gold": 18.0,
+    "reasoning_len": 13381,
+    "content_len": 1436,
+    "completion_tokens": 4932,
+    "finish": "stop",
+    "latency": 465.87045407295227
+   },
+   {
+    "correct": true,
+    "pred": 8.0,
+    "gold": 8.0,
+    "reasoning_len": 3310,
+    "content_len": 253,
+    "completion_tokens": 1078,
+    "finish": "stop",
+    "latency": 101.68074297904968
+   },
+   {
+    "correct": true,
+    "pred": 200.0,
+    "gold": 200.0,
+    "reasoning_len": 8250,
+    "content_len": 836,
+    "completion_tokens": 2843,
+    "finish": "stop",
+    "latency": 268.44288420677185
+   },
+   {
+    "correct": true,
+    "pred": 26.0,
+    "gold": 26.0,
+    "reasoning_len": 2464,
+    "content_len": 450,
+    "completion_tokens": 923,
+    "finish": "stop",
+    "latency": 86.89433932304382
+   },
+   {
+    "correct": true,
+    "pred": 48.0,
+    "gold": 48.0,
+    "reasoning_len": 6370,
+    "content_len": 871,
+    "completion_tokens": 2543,
+    "finish": "stop",
+    "latency": 240.49571084976196
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 5054,
+    "content_len": 688,
+    "completion_tokens": 1914,
+    "finish": "stop",
+    "latency": 181.24682784080505
+   },
+   {
+    "correct": false,
+    "pred": 44.0,
+    "gold": 104.0,
+    "reasoning_len": 26614,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 775.8126487731934
+   },
+   {
+    "correct": true,
+    "pred": 163.0,
+    "gold": 163.0,
+    "reasoning_len": 2893,
+    "content_len": 977,
+    "completion_tokens": 1297,
+    "finish": "stop",
+    "latency": 122.68568396568298
+   },
+   {
+    "correct": true,
+    "pred": 800.0,
+    "gold": 800.0,
+    "reasoning_len": 3051,
+    "content_len": 708,
+    "completion_tokens": 1334,
+    "finish": "stop",
+    "latency": 126.2150547504425
+   },
+   {
+    "correct": true,
+    "pred": 8.0,
+    "gold": 8.0,
+    "reasoning_len": 2616,
+    "content_len": 433,
+    "completion_tokens": 992,
+    "finish": "stop",
+    "latency": 93.92033362388611
+   },
+   {
+    "correct": true,
+    "pred": 30.0,
+    "gold": 30.0,
+    "reasoning_len": 3844,
+    "content_len": 337,
+    "completion_tokens": 1334,
+    "finish": "stop",
+    "latency": 126.03719449043274
+   },
+   {
+    "correct": true,
+    "pred": 294.0,
+    "gold": 294.0,
+    "reasoning_len": 23168,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 777.1727907657623
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 25640,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 777.2073254585266
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 3505,
+    "content_len": 688,
+    "completion_tokens": 1424,
+    "finish": "stop",
+    "latency": 134.50870633125305
+   },
+   {
+    "correct": true,
+    "pred": 40.0,
+    "gold": 40.0,
+    "reasoning_len": 10489,
+    "content_len": 996,
+    "completion_tokens": 3688,
+    "finish": "stop",
+    "latency": 348.56660890579224
+   },
+   {
+    "correct": true,
+    "pred": 40.0,
+    "gold": 40.0,
+    "reasoning_len": 27362,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 777.417328119278
+   },
+   {
+    "correct": true,
+    "pred": 14.0,
+    "gold": 14.0,
+    "reasoning_len": 892,
+    "content_len": 198,
+    "completion_tokens": 415,
+    "finish": "stop",
+    "latency": 39.26483201980591
+   },
+   {
+    "correct": true,
+    "pred": 3.0,
+    "gold": 3.0,
+    "reasoning_len": 1845,
+    "content_len": 404,
+    "completion_tokens": 764,
+    "finish": "stop",
+    "latency": 72.17552375793457
+   },
+   {
+    "correct": true,
+    "pred": 83.0,
+    "gold": 83.0,
+    "reasoning_len": 2515,
+    "content_len": 701,
+    "completion_tokens": 1201,
+    "finish": "stop",
+    "latency": 113.67205214500427
+   },
+   {
+    "correct": true,
+    "pred": 57.0,
+    "gold": 57.0,
+    "reasoning_len": 16959,
+    "content_len": 718,
+    "completion_tokens": 5760,
+    "finish": "stop",
+    "latency": 547.6624820232391
+   },
+   {
+    "correct": true,
+    "pred": 187.0,
+    "gold": 187.0,
+    "reasoning_len": 2475,
+    "content_len": 315,
+    "completion_tokens": 916,
+    "finish": "stop",
+    "latency": 86.95469307899475
+   },
+   {
+    "correct": true,
+    "pred": 17.0,
+    "gold": 17.0,
+    "reasoning_len": 8545,
+    "content_len": 560,
+    "completion_tokens": 2922,
+    "finish": "stop",
+    "latency": 277.69926500320435
+   },
+   {
+    "correct": true,
+    "pred": 1430.0,
+    "gold": 1430.0,
+    "reasoning_len": 4076,
+    "content_len": 332,
+    "completion_tokens": 1504,
+    "finish": "stop",
+    "latency": 142.75355195999146
+   },
+   {
+    "correct": true,
+    "pred": 25000.0,
+    "gold": 25000.0,
+    "reasoning_len": 19982,
+    "content_len": 1573,
+    "completion_tokens": 7045,
+    "finish": "stop",
+    "latency": 668.1839754581451
+   },
+   {
+    "correct": true,
+    "pred": 1596.0,
+    "gold": 1596.0,
+    "reasoning_len": 9552,
+    "content_len": 1000,
+    "completion_tokens": 3738,
+    "finish": "stop",
+    "latency": 356.00580763816833
+   },
+   {
+    "correct": true,
+    "pred": 300.0,
+    "gold": 300.0,
+    "reasoning_len": 2768,
+    "content_len": 584,
+    "completion_tokens": 1088,
+    "finish": "stop",
+    "latency": 103.9722352027893
+   },
+   {
+    "correct": true,
+    "pred": 36.0,
+    "gold": 36.0,
+    "reasoning_len": 25981,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 775.0722682476044
+   },
+   {
+    "correct": true,
+    "pred": 48.0,
+    "gold": 48.0,
+    "reasoning_len": 3095,
+    "content_len": 645,
+    "completion_tokens": 1195,
+    "finish": "stop",
+    "latency": 113.75140690803528
+   },
+   {
+    "correct": true,
+    "pred": 595.0,
+    "gold": 595.0,
+    "reasoning_len": 3067,
+    "content_len": 594,
+    "completion_tokens": 1330,
+    "finish": "stop",
+    "latency": 126.0255036354065
+   },
+   {
+    "correct": true,
+    "pred": 36.0,
+    "gold": 36.0,
+    "reasoning_len": 2509,
+    "content_len": 346,
+    "completion_tokens": 933,
+    "finish": "stop",
+    "latency": 88.29845356941223
+   },
+   {
+    "correct": true,
+    "pred": 60.0,
+    "gold": 60.0,
+    "reasoning_len": 2487,
+    "content_len": 379,
+    "completion_tokens": 971,
+    "finish": "stop",
+    "latency": 91.87037229537964
+   },
+   {
+    "correct": true,
+    "pred": 7425.0,
+    "gold": 7425.0,
+    "reasoning_len": 5497,
+    "content_len": 475,
+    "completion_tokens": 1993,
+    "finish": "stop",
+    "latency": 187.8711884021759
+   },
+   {
+    "correct": true,
+    "pred": 60.0,
+    "gold": 60.0,
+    "reasoning_len": 2429,
+    "content_len": 267,
+    "completion_tokens": 794,
+    "finish": "stop",
+    "latency": 74.91620445251465
+   },
+   {
+    "correct": true,
+    "pred": 221.0,
+    "gold": 221.0,
+    "reasoning_len": 22035,
+    "content_len": 600,
+    "completion_tokens": 7495,
+    "finish": "stop",
+    "latency": 708.6371684074402
+   },
+   {
+    "correct": true,
+    "pred": 255.0,
+    "gold": 255.0,
+    "reasoning_len": 25041,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.6228840351105
+   },
+   {
+    "correct": true,
+    "pred": 88.0,
+    "gold": 88.0,
+    "reasoning_len": 18578,
+    "content_len": 974,
+    "completion_tokens": 6739,
+    "finish": "stop",
+    "latency": 636.9111332893372
+   },
+   {
+    "correct": true,
+    "pred": 60.0,
+    "gold": 60.0,
+    "reasoning_len": 3435,
+    "content_len": 1111,
+    "completion_tokens": 1617,
+    "finish": "stop",
+    "latency": 152.21259546279907
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 3702,
+    "content_len": 1062,
+    "completion_tokens": 1730,
+    "finish": "stop",
+    "latency": 162.94432067871094
+   },
+   {
+    "correct": true,
+    "pred": 100.0,
+    "gold": 100.0,
+    "reasoning_len": 3819,
+    "content_len": 387,
+    "completion_tokens": 1432,
+    "finish": "stop",
+    "latency": 134.92723107337952
+   },
+   {
+    "correct": true,
+    "pred": 6.0,
+    "gold": 6.0,
+    "reasoning_len": 22080,
+    "content_len": 1350,
+    "completion_tokens": 7538,
+    "finish": "stop",
+    "latency": 713.3636476993561
+   },
+   {
+    "correct": true,
+    "pred": 70.0,
+    "gold": 70.0,
+    "reasoning_len": 4979,
+    "content_len": 384,
+    "completion_tokens": 1724,
+    "finish": "stop",
+    "latency": 162.49085474014282
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 2462,
+    "content_len": 705,
+    "completion_tokens": 1073,
+    "finish": "stop",
+    "latency": 101.3058934211731
+   },
+   {
+    "correct": true,
+    "pred": 17.0,
+    "gold": 17.0,
+    "reasoning_len": 1970,
+    "content_len": 423,
+    "completion_tokens": 950,
+    "finish": "stop",
+    "latency": 89.87650275230408
+   },
+   {
+    "correct": true,
+    "pred": 623.0,
+    "gold": 623.0,
+    "reasoning_len": 2398,
+    "content_len": 457,
+    "completion_tokens": 1073,
+    "finish": "stop",
+    "latency": 101.68199324607849
+   },
+   {
+    "correct": true,
+    "pred": 600.0,
+    "gold": 600.0,
+    "reasoning_len": 2191,
+    "content_len": 381,
+    "completion_tokens": 875,
+    "finish": "stop",
+    "latency": 82.90880370140076
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 3946,
+    "content_len": 444,
+    "completion_tokens": 1556,
+    "finish": "stop",
+    "latency": 147.79491209983826
+   },
+   {
+    "correct": false,
+    "pred": 48.0,
+    "gold": 44.0,
+    "reasoning_len": 23250,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 776.1429948806763
+   },
+   {
+    "correct": true,
+    "pred": 22.0,
+    "gold": 22.0,
+    "reasoning_len": 3023,
+    "content_len": 388,
+    "completion_tokens": 1078,
+    "finish": "stop",
+    "latency": 102.63539171218872
+   },
+   {
+    "correct": false,
+    "pred": 8.0,
+    "gold": 9360.0,
+    "reasoning_len": 26117,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 775.6761360168457
+   },
+   {
+    "correct": true,
+    "pred": 8000.0,
+    "gold": 8000.0,
+    "reasoning_len": 3367,
+    "content_len": 319,
+    "completion_tokens": 1343,
+    "finish": "stop",
+    "latency": 127.73798251152039
+   },
+   {
+    "correct": true,
+    "pred": 24.0,
+    "gold": 24.0,
+    "reasoning_len": 3379,
+    "content_len": 153,
+    "completion_tokens": 1169,
+    "finish": "stop",
+    "latency": 111.13443398475647
+   },
+   {
+    "correct": true,
+    "pred": 225.0,
+    "gold": 225.0,
+    "reasoning_len": 3526,
+    "content_len": 731,
+    "completion_tokens": 1336,
+    "finish": "stop",
+    "latency": 126.84717082977295
+   },
+   {
+    "correct": true,
+    "pred": 28.0,
+    "gold": 28.0,
+    "reasoning_len": 2122,
+    "content_len": 537,
+    "completion_tokens": 950,
+    "finish": "stop",
+    "latency": 90.24634099006653
+   },
+   {
+    "correct": true,
+    "pred": 4.0,
+    "gold": 4.0,
+    "reasoning_len": 3338,
+    "content_len": 442,
+    "completion_tokens": 1311,
+    "finish": "stop",
+    "latency": 124.41888785362244
+   },
+   {
+    "correct": false,
+    "pred": null,
+    "gold": 36.0,
+    "reasoning_len": 26085,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.8440878391266
+   },
+   {
+    "correct": true,
+    "pred": 348.0,
+    "gold": 348.0,
+    "reasoning_len": 3830,
+    "content_len": 457,
+    "completion_tokens": 1557,
+    "finish": "stop",
+    "latency": 147.27368068695068
+   },
+   {
+    "correct": true,
+    "pred": 40.0,
+    "gold": 40.0,
+    "reasoning_len": 3719,
+    "content_len": 315,
+    "completion_tokens": 1444,
+    "finish": "stop",
+    "latency": 136.37950992584229
+   },
+   {
+    "correct": true,
+    "pred": 3.0,
+    "gold": 3.0,
+    "reasoning_len": 1858,
+    "content_len": 416,
+    "completion_tokens": 746,
+    "finish": "stop",
+    "latency": 70.4603271484375
+   },
+   {
+    "correct": true,
+    "pred": 12.0,
+    "gold": 12.0,
+    "reasoning_len": 2947,
+    "content_len": 579,
+    "completion_tokens": 1044,
+    "finish": "stop",
+    "latency": 98.66769289970398
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 12696,
+    "content_len": 833,
+    "completion_tokens": 4131,
+    "finish": "stop",
+    "latency": 391.04683923721313
+   },
+   {
+    "correct": true,
+    "pred": 58.0,
+    "gold": 58.0,
+    "reasoning_len": 6258,
+    "content_len": 510,
+    "completion_tokens": 2077,
+    "finish": "stop",
+    "latency": 196.18067264556885
+   },
+   {
+    "correct": true,
+    "pred": 175.0,
+    "gold": 175.0,
+    "reasoning_len": 11038,
+    "content_len": 665,
+    "completion_tokens": 3856,
+    "finish": "stop",
+    "latency": 365.0534839630127
+   },
+   {
+    "correct": true,
+    "pred": 6.0,
+    "gold": 6.0,
+    "reasoning_len": 2230,
+    "content_len": 519,
+    "completion_tokens": 877,
+    "finish": "stop",
+    "latency": 82.67313408851624
+   },
+   {
+    "correct": true,
+    "pred": 26.0,
+    "gold": 26.0,
+    "reasoning_len": 8117,
+    "content_len": 443,
+    "completion_tokens": 2291,
+    "finish": "stop",
+    "latency": 216.75570249557495
+   },
+   {
+    "correct": true,
+    "pred": 140.0,
+    "gold": 140.0,
+    "reasoning_len": 3703,
+    "content_len": 601,
+    "completion_tokens": 1420,
+    "finish": "stop",
+    "latency": 134.58725571632385
+   },
+   {
+    "correct": true,
+    "pred": 500.0,
+    "gold": 500.0,
+    "reasoning_len": 2675,
+    "content_len": 585,
+    "completion_tokens": 1130,
+    "finish": "stop",
+    "latency": 107.571608543396
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 1084,
+    "content_len": 146,
+    "completion_tokens": 435,
+    "finish": "stop",
+    "latency": 41.50053644180298
+   },
+   {
+    "correct": true,
+    "pred": 72.0,
+    "gold": 72.0,
+    "reasoning_len": 9887,
+    "content_len": 1326,
+    "completion_tokens": 3438,
+    "finish": "stop",
+    "latency": 324.79008865356445
+   },
+   {
+    "correct": true,
+    "pred": 3.0,
+    "gold": 3.0,
+    "reasoning_len": 2929,
+    "content_len": 792,
+    "completion_tokens": 1356,
+    "finish": "stop",
+    "latency": 128.72285509109497
+   },
+   {
+    "correct": true,
+    "pred": 50.0,
+    "gold": 50.0,
+    "reasoning_len": 2881,
+    "content_len": 825,
+    "completion_tokens": 1236,
+    "finish": "stop",
+    "latency": 117.07726788520813
+   },
+   {
+    "correct": true,
+    "pred": 28.0,
+    "gold": 28.0,
+    "reasoning_len": 4523,
+    "content_len": 290,
+    "completion_tokens": 1647,
+    "finish": "stop",
+    "latency": 155.50458002090454
+   },
+   {
+    "correct": true,
+    "pred": 45.0,
+    "gold": 45.0,
+    "reasoning_len": 2889,
+    "content_len": 556,
+    "completion_tokens": 1186,
+    "finish": "stop",
+    "latency": 111.92190051078796
+   },
+   {
+    "correct": true,
+    "pred": 16.0,
+    "gold": 16.0,
+    "reasoning_len": 12104,
+    "content_len": 1143,
+    "completion_tokens": 4184,
+    "finish": "stop",
+    "latency": 393.51573061943054
+   },
+   {
+    "correct": true,
+    "pred": 24.0,
+    "gold": 24.0,
+    "reasoning_len": 3528,
+    "content_len": 573,
+    "completion_tokens": 1139,
+    "finish": "stop",
+    "latency": 107.31676173210144
+   },
+   {
+    "correct": true,
+    "pred": 25.0,
+    "gold": 25.0,
+    "reasoning_len": 3027,
+    "content_len": 253,
+    "completion_tokens": 978,
+    "finish": "stop",
+    "latency": 92.10761857032776
+   },
+   {
+    "correct": true,
+    "pred": 6.0,
+    "gold": 6.0,
+    "reasoning_len": 2838,
+    "content_len": 486,
+    "completion_tokens": 1122,
+    "finish": "stop",
+    "latency": 105.6749918460846
+   },
+   {
+    "correct": true,
+    "pred": 90.0,
+    "gold": 90.0,
+    "reasoning_len": 21883,
+    "content_len": 1335,
+    "completion_tokens": 7691,
+    "finish": "stop",
+    "latency": 725.2847647666931
+   },
+   {
+    "correct": true,
+    "pred": 42.0,
+    "gold": 42.0,
+    "reasoning_len": 5059,
+    "content_len": 709,
+    "completion_tokens": 1916,
+    "finish": "stop",
+    "latency": 180.23218321800232
+   },
+   {
+    "correct": true,
+    "pred": 360.0,
+    "gold": 360.0,
+    "reasoning_len": 25106,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 772.9366750717163
+   },
+   {
+    "correct": true,
+    "pred": 4.0,
+    "gold": 4.0,
+    "reasoning_len": 3187,
+    "content_len": 782,
+    "completion_tokens": 1133,
+    "finish": "stop",
+    "latency": 106.76362705230713
+   },
+   {
+    "correct": false,
+    "pred": 40.0,
+    "gold": 95200.0,
+    "reasoning_len": 22599,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 772.9758005142212
+   },
+   {
+    "correct": true,
+    "pred": 240.0,
+    "gold": 240.0,
+    "reasoning_len": 4457,
+    "content_len": 273,
+    "completion_tokens": 1409,
+    "finish": "stop",
+    "latency": 132.35871291160583
+   },
+   {
+    "correct": true,
+    "pred": 27.0,
+    "gold": 27.0,
+    "reasoning_len": 2377,
+    "content_len": 489,
+    "completion_tokens": 1018,
+    "finish": "stop",
+    "latency": 95.56361961364746
+   },
+   {
+    "correct": true,
+    "pred": 48.0,
+    "gold": 48.0,
+    "reasoning_len": 4354,
+    "content_len": 469,
+    "completion_tokens": 1585,
+    "finish": "stop",
+    "latency": 148.9652819633484
+   },
+   {
+    "correct": true,
+    "pred": 50.0,
+    "gold": 50.0,
+    "reasoning_len": 2434,
+    "content_len": 776,
+    "completion_tokens": 1052,
+    "finish": "stop",
+    "latency": 98.95867824554443
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 3458,
+    "content_len": 626,
+    "completion_tokens": 1236,
+    "finish": "stop",
+    "latency": 116.31599378585815
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 8659,
+    "content_len": 700,
+    "completion_tokens": 3028,
+    "finish": "stop",
+    "latency": 285.2623689174652
+   },
+   {
+    "correct": true,
+    "pred": 82.0,
+    "gold": 82.0,
+    "reasoning_len": 2721,
+    "content_len": 244,
+    "completion_tokens": 963,
+    "finish": "stop",
+    "latency": 90.6619815826416
+   },
+   {
+    "correct": true,
+    "pred": 120.0,
+    "gold": 120.0,
+    "reasoning_len": 2626,
+    "content_len": 196,
+    "completion_tokens": 898,
+    "finish": "stop",
+    "latency": 84.55105519294739
+   },
+   {
+    "correct": true,
+    "pred": 880.0,
+    "gold": 880.0,
+    "reasoning_len": 2904,
+    "content_len": 737,
+    "completion_tokens": 1325,
+    "finish": "stop",
+    "latency": 124.70694732666016
+   },
+   {
+    "correct": true,
+    "pred": 10000.0,
+    "gold": 10000.0,
+    "reasoning_len": 24339,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.9981722831726
+   },
+   {
+    "correct": true,
+    "pred": 30.0,
+    "gold": 30.0,
+    "reasoning_len": 2413,
+    "content_len": 172,
+    "completion_tokens": 902,
+    "finish": "stop",
+    "latency": 85.14618682861328
+   },
+   {
+    "correct": true,
+    "pred": 940.0,
+    "gold": 940.0,
+    "reasoning_len": 3446,
+    "content_len": 232,
+    "completion_tokens": 1167,
+    "finish": "stop",
+    "latency": 110.16112041473389
+   },
+   {
+    "correct": true,
+    "pred": 60.0,
+    "gold": 60.0,
+    "reasoning_len": 6795,
+    "content_len": 627,
+    "completion_tokens": 2419,
+    "finish": "stop",
+    "latency": 228.98932933807373
+   },
+   {
+    "correct": true,
+    "pred": 13.0,
+    "gold": 13.0,
+    "reasoning_len": 3192,
+    "content_len": 353,
+    "completion_tokens": 1123,
+    "finish": "stop",
+    "latency": 106.3097779750824
+   },
+   {
+    "correct": true,
+    "pred": 720.0,
+    "gold": 720.0,
+    "reasoning_len": 3596,
+    "content_len": 238,
+    "completion_tokens": 1184,
+    "finish": "stop",
+    "latency": 112.17615532875061
+   },
+   {
+    "correct": true,
+    "pred": 40.0,
+    "gold": 40.0,
+    "reasoning_len": 3567,
+    "content_len": 519,
+    "completion_tokens": 1286,
+    "finish": "stop",
+    "latency": 122.00663447380066
+   },
+   {
+    "correct": true,
+    "pred": 6.0,
+    "gold": 6.0,
+    "reasoning_len": 1226,
+    "content_len": 214,
+    "completion_tokens": 507,
+    "finish": "stop",
+    "latency": 48.24016761779785
+   },
+   {
+    "correct": true,
+    "pred": 29.0,
+    "gold": 29.0,
+    "reasoning_len": 3222,
+    "content_len": 561,
+    "completion_tokens": 1490,
+    "finish": "stop",
+    "latency": 141.6899597644806
+   },
+   {
+    "correct": true,
+    "pred": 105.0,
+    "gold": 105.0,
+    "reasoning_len": 2916,
+    "content_len": 664,
+    "completion_tokens": 1184,
+    "finish": "stop",
+    "latency": 112.63087439537048
+   },
+   {
+    "correct": true,
+    "pred": 70.0,
+    "gold": 70.0,
+    "reasoning_len": 2142,
+    "content_len": 576,
+    "completion_tokens": 939,
+    "finish": "stop",
+    "latency": 89.40247917175293
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 3809,
+    "content_len": 428,
+    "completion_tokens": 1406,
+    "finish": "stop",
+    "latency": 133.58597779273987
+   },
+   {
+    "correct": true,
+    "pred": 400.0,
+    "gold": 400.0,
+    "reasoning_len": 2979,
+    "content_len": 932,
+    "completion_tokens": 1436,
+    "finish": "stop",
+    "latency": 135.8694770336151
+   },
+   {
+    "correct": true,
+    "pred": 140.0,
+    "gold": 140.0,
+    "reasoning_len": 5832,
+    "content_len": 583,
+    "completion_tokens": 1908,
+    "finish": "stop",
+    "latency": 180.16601538658142
+   },
+   {
+    "correct": true,
+    "pred": 16.0,
+    "gold": 16.0,
+    "reasoning_len": 12611,
+    "content_len": 615,
+    "completion_tokens": 4342,
+    "finish": "stop",
+    "latency": 409.89792370796204
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 5141,
+    "content_len": 525,
+    "completion_tokens": 1738,
+    "finish": "stop",
+    "latency": 164.0478630065918
+   },
+   {
+    "correct": true,
+    "pred": 4000.0,
+    "gold": 4000.0,
+    "reasoning_len": 24552,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.7643549442291
+   },
+   {
+    "correct": true,
+    "pred": 2125.0,
+    "gold": 2125.0,
+    "reasoning_len": 23493,
+    "content_len": 621,
+    "completion_tokens": 8064,
+    "finish": "stop",
+    "latency": 762.6973729133606
+   },
+   {
+    "correct": true,
+    "pred": 75.0,
+    "gold": 75.0,
+    "reasoning_len": 12677,
+    "content_len": 878,
+    "completion_tokens": 4211,
+    "finish": "stop",
+    "latency": 397.17103147506714
+   },
+   {
+    "correct": true,
+    "pred": 30.0,
+    "gold": 30.0,
+    "reasoning_len": 3592,
+    "content_len": 246,
+    "completion_tokens": 1271,
+    "finish": "stop",
+    "latency": 119.65708208084106
+   },
+   {
+    "correct": true,
+    "pred": 16.0,
+    "gold": 16.0,
+    "reasoning_len": 3090,
+    "content_len": 421,
+    "completion_tokens": 1142,
+    "finish": "stop",
+    "latency": 107.68761348724365
+   },
+   {
+    "correct": true,
+    "pred": 4.0,
+    "gold": 4.0,
+    "reasoning_len": 24798,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 775.524270772934
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 4611,
+    "content_len": 314,
+    "completion_tokens": 1674,
+    "finish": "stop",
+    "latency": 158.47225260734558
+   },
+   {
+    "correct": true,
+    "pred": 4.0,
+    "gold": 4.0,
+    "reasoning_len": 4326,
+    "content_len": 268,
+    "completion_tokens": 1563,
+    "finish": "stop",
+    "latency": 148.0103726387024
+   },
+   {
+    "correct": true,
+    "pred": 48.0,
+    "gold": 48.0,
+    "reasoning_len": 18045,
+    "content_len": 1351,
+    "completion_tokens": 6591,
+    "finish": "stop",
+    "latency": 624.4893343448639
+   },
+   {
+    "correct": true,
+    "pred": 272.0,
+    "gold": 272.0,
+    "reasoning_len": 7323,
+    "content_len": 1277,
+    "completion_tokens": 2952,
+    "finish": "stop",
+    "latency": 279.35915970802307
+   },
+   {
+    "correct": true,
+    "pred": 280.0,
+    "gold": 280.0,
+    "reasoning_len": 6490,
+    "content_len": 985,
+    "completion_tokens": 2788,
+    "finish": "stop",
+    "latency": 263.7481691837311
+   },
+   {
+    "correct": true,
+    "pred": 1400.0,
+    "gold": 1400.0,
+    "reasoning_len": 1993,
+    "content_len": 562,
+    "completion_tokens": 847,
+    "finish": "stop",
+    "latency": 80.04995632171631
+   },
+   {
+    "correct": true,
+    "pred": 80.0,
+    "gold": 80.0,
+    "reasoning_len": 13790,
+    "content_len": 1278,
+    "completion_tokens": 5265,
+    "finish": "stop",
+    "latency": 499.4303755760193
+   },
+   {
+    "correct": true,
+    "pred": 34.0,
+    "gold": 34.0,
+    "reasoning_len": 6059,
+    "content_len": 338,
+    "completion_tokens": 2186,
+    "finish": "stop",
+    "latency": 207.35086107254028
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 11026,
+    "content_len": 251,
+    "completion_tokens": 3234,
+    "finish": "stop",
+    "latency": 307.1631500720978
+   },
+   {
+    "correct": true,
+    "pred": 16.0,
+    "gold": 16.0,
+    "reasoning_len": 3381,
+    "content_len": 282,
+    "completion_tokens": 1124,
+    "finish": "stop",
+    "latency": 107.06048083305359
+   },
+   {
+    "correct": false,
+    "pred": 5.0,
+    "gold": 32.0,
+    "reasoning_len": 26787,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.5462656021118
+   },
+   {
+    "correct": true,
+    "pred": 92.0,
+    "gold": 92.0,
+    "reasoning_len": 17236,
+    "content_len": 1029,
+    "completion_tokens": 5841,
+    "finish": "stop",
+    "latency": 551.6767506599426
+   },
+   {
+    "correct": true,
+    "pred": 50.0,
+    "gold": 50.0,
+    "reasoning_len": 2233,
+    "content_len": 661,
+    "completion_tokens": 992,
+    "finish": "stop",
+    "latency": 94.07016730308533
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 25983,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 773.807731628418
+   },
+   {
+    "correct": true,
+    "pred": 77.0,
+    "gold": 77.0,
+    "reasoning_len": 2780,
+    "content_len": 561,
+    "completion_tokens": 1252,
+    "finish": "stop",
+    "latency": 118.40275883674622
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 5174,
+    "content_len": 721,
+    "completion_tokens": 1758,
+    "finish": "stop",
+    "latency": 165.5487232208252
+   },
+   {
+    "correct": true,
+    "pred": 16.0,
+    "gold": 16.0,
+    "reasoning_len": 3815,
+    "content_len": 577,
+    "completion_tokens": 1568,
+    "finish": "stop",
+    "latency": 147.54669332504272
+   },
+   {
+    "correct": true,
+    "pred": 18.0,
+    "gold": 18.0,
+    "reasoning_len": 2640,
+    "content_len": 395,
+    "completion_tokens": 988,
+    "finish": "stop",
+    "latency": 92.88831090927124
+   },
+   {
+    "correct": true,
+    "pred": 120.0,
+    "gold": 120.0,
+    "reasoning_len": 2182,
+    "content_len": 468,
+    "completion_tokens": 888,
+    "finish": "stop",
+    "latency": 83.49581456184387
+   },
+   {
+    "correct": true,
+    "pred": 150.0,
+    "gold": 150.0,
+    "reasoning_len": 3297,
+    "content_len": 363,
+    "completion_tokens": 1273,
+    "finish": "stop",
+    "latency": 119.83929705619812
+   },
+   {
+    "correct": true,
+    "pred": 1210.0,
+    "gold": 1210.0,
+    "reasoning_len": 2971,
+    "content_len": 393,
+    "completion_tokens": 1207,
+    "finish": "stop",
+    "latency": 113.80714225769043
+   },
+   {
+    "correct": true,
+    "pred": 51.0,
+    "gold": 51.0,
+    "reasoning_len": 2105,
+    "content_len": 500,
+    "completion_tokens": 952,
+    "finish": "stop",
+    "latency": 89.76341152191162
+   },
+   {
+    "correct": true,
+    "pred": 18000.0,
+    "gold": 18000.0,
+    "reasoning_len": 4171,
+    "content_len": 395,
+    "completion_tokens": 1630,
+    "finish": "stop",
+    "latency": 153.81294322013855
+   },
+   {
+    "correct": true,
+    "pred": 95.0,
+    "gold": 95.0,
+    "reasoning_len": 17115,
+    "content_len": 1035,
+    "completion_tokens": 5677,
+    "finish": "stop",
+    "latency": 536.6671946048737
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 6726,
+    "content_len": 880,
+    "completion_tokens": 2513,
+    "finish": "stop",
+    "latency": 237.56207656860352
+   },
+   {
+    "correct": true,
+    "pred": 100.0,
+    "gold": 100.0,
+    "reasoning_len": 2886,
+    "content_len": 441,
+    "completion_tokens": 1011,
+    "finish": "stop",
+    "latency": 95.60132384300232
+   },
+   {
+    "correct": true,
+    "pred": 350.0,
+    "gold": 350.0,
+    "reasoning_len": 16266,
+    "content_len": 1048,
+    "completion_tokens": 5975,
+    "finish": "stop",
+    "latency": 564.815089225769
+   },
+   {
+    "correct": true,
+    "pred": 122.0,
+    "gold": 122.0,
+    "reasoning_len": 2460,
+    "content_len": 426,
+    "completion_tokens": 1079,
+    "finish": "stop",
+    "latency": 102.24105453491211
+   },
+   {
+    "correct": true,
+    "pred": 130.0,
+    "gold": 130.0,
+    "reasoning_len": 3101,
+    "content_len": 266,
+    "completion_tokens": 1040,
+    "finish": "stop",
+    "latency": 98.5920763015747
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 1635,
+    "content_len": 604,
+    "completion_tokens": 758,
+    "finish": "stop",
+    "latency": 71.89721608161926
+   },
+   {
+    "correct": true,
+    "pred": 160.0,
+    "gold": 160.0,
+    "reasoning_len": 28812,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.3040473461151
+   },
+   {
+    "correct": true,
+    "pred": 23.0,
+    "gold": 23.0,
+    "reasoning_len": 8106,
+    "content_len": 407,
+    "completion_tokens": 2865,
+    "finish": "stop",
+    "latency": 271.17625093460083
+   },
+   {
+    "correct": true,
+    "pred": 2.0,
+    "gold": 2.0,
+    "reasoning_len": 2911,
+    "content_len": 882,
+    "completion_tokens": 1439,
+    "finish": "stop",
+    "latency": 136.29500198364258
+   },
+   {
+    "correct": false,
+    "pred": 0.0,
+    "gold": 25.0,
+    "reasoning_len": 25102,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.210794210434
+   },
+   {
+    "correct": true,
+    "pred": 30.0,
+    "gold": 30.0,
+    "reasoning_len": 1717,
+    "content_len": 403,
+    "completion_tokens": 685,
+    "finish": "stop",
+    "latency": 64.93458366394043
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 4060,
+    "content_len": 925,
+    "completion_tokens": 1696,
+    "finish": "stop",
+    "latency": 160.46117162704468
+   },
+   {
+    "correct": true,
+    "pred": 106.0,
+    "gold": 106.0,
+    "reasoning_len": 14186,
+    "content_len": 951,
+    "completion_tokens": 4549,
+    "finish": "stop",
+    "latency": 429.4655954837799
+   },
+   {
+    "correct": true,
+    "pred": 50.0,
+    "gold": 50.0,
+    "reasoning_len": 2225,
+    "content_len": 523,
+    "completion_tokens": 948,
+    "finish": "stop",
+    "latency": 89.57487463951111
+   },
+   {
+    "correct": true,
+    "pred": 34.0,
+    "gold": 34.0,
+    "reasoning_len": 15480,
+    "content_len": 760,
+    "completion_tokens": 5700,
+    "finish": "stop",
+    "latency": 538.4721586704254
+   },
+   {
+    "correct": true,
+    "pred": 360.0,
+    "gold": 360.0,
+    "reasoning_len": 3332,
+    "content_len": 459,
+    "completion_tokens": 1203,
+    "finish": "stop",
+    "latency": 113.512934923172
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 2068,
+    "content_len": 402,
+    "completion_tokens": 776,
+    "finish": "stop",
+    "latency": 73.27377676963806
+   },
+   {
+    "correct": true,
+    "pred": 91.0,
+    "gold": 91.0,
+    "reasoning_len": 2866,
+    "content_len": 694,
+    "completion_tokens": 1254,
+    "finish": "stop",
+    "latency": 118.28993701934814
+   },
+   {
+    "correct": true,
+    "pred": 24.0,
+    "gold": 24.0,
+    "reasoning_len": 3030,
+    "content_len": 848,
+    "completion_tokens": 1191,
+    "finish": "stop",
+    "latency": 112.40534114837646
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 2981,
+    "content_len": 435,
+    "completion_tokens": 1088,
+    "finish": "stop",
+    "latency": 102.60932159423828
+   },
+   {
+    "correct": true,
+    "pred": 12.0,
+    "gold": 12.0,
+    "reasoning_len": 3576,
+    "content_len": 206,
+    "completion_tokens": 1360,
+    "finish": "stop",
+    "latency": 128.37305450439453
+   },
+   {
+    "correct": true,
+    "pred": 120.0,
+    "gold": 120.0,
+    "reasoning_len": 2386,
+    "content_len": 335,
+    "completion_tokens": 751,
+    "finish": "stop",
+    "latency": 71.01660537719727
+   },
+   {
+    "correct": true,
+    "pred": 6277.0,
+    "gold": 6277.0,
+    "reasoning_len": 4046,
+    "content_len": 424,
+    "completion_tokens": 1712,
+    "finish": "stop",
+    "latency": 162.11045098304749
+   },
+   {
+    "correct": true,
+    "pred": 320.0,
+    "gold": 320.0,
+    "reasoning_len": 2664,
+    "content_len": 885,
+    "completion_tokens": 1283,
+    "finish": "stop",
+    "latency": 121.50307154655457
+   },
+   {
+    "correct": true,
+    "pred": 7500.0,
+    "gold": 7500.0,
+    "reasoning_len": 2842,
+    "content_len": 867,
+    "completion_tokens": 1325,
+    "finish": "stop",
+    "latency": 125.50951075553894
+   },
+   {
+    "correct": true,
+    "pred": 55.0,
+    "gold": 55.0,
+    "reasoning_len": 2350,
+    "content_len": 371,
+    "completion_tokens": 872,
+    "finish": "stop",
+    "latency": 82.65335488319397
+   },
+   {
+    "correct": false,
+    "pred": 5.0,
+    "gold": 114200.0,
+    "reasoning_len": 23534,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.5590591430664
+   },
+   {
+    "correct": true,
+    "pred": 100.0,
+    "gold": 100.0,
+    "reasoning_len": 2412,
+    "content_len": 483,
+    "completion_tokens": 861,
+    "finish": "stop",
+    "latency": 81.64769697189331
+   },
+   {
+    "correct": true,
+    "pred": 31.0,
+    "gold": 31.0,
+    "reasoning_len": 2540,
+    "content_len": 730,
+    "completion_tokens": 1103,
+    "finish": "stop",
+    "latency": 104.55216598510742
+   },
+   {
+    "correct": true,
+    "pred": 98.0,
+    "gold": 98.0,
+    "reasoning_len": 2815,
+    "content_len": 626,
+    "completion_tokens": 1256,
+    "finish": "stop",
+    "latency": 119.080486536026
+   },
+   {
+    "correct": true,
+    "pred": 98.0,
+    "gold": 98.0,
+    "reasoning_len": 13297,
+    "content_len": 1706,
+    "completion_tokens": 5884,
+    "finish": "stop",
+    "latency": 555.559205532074
+   },
+   {
+    "correct": true,
+    "pred": 860.0,
+    "gold": 860.0,
+    "reasoning_len": 24458,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 774.4561989307404
+   },
+   {
+    "correct": true,
+    "pred": 2600.0,
+    "gold": 2600.0,
+    "reasoning_len": 2658,
+    "content_len": 733,
+    "completion_tokens": 1195,
+    "finish": "stop",
+    "latency": 113.04316735267639
+   },
+   {
+    "correct": true,
+    "pred": 76.0,
+    "gold": 76.0,
+    "reasoning_len": 2944,
+    "content_len": 257,
+    "completion_tokens": 1030,
+    "finish": "stop",
+    "latency": 97.2059338092804
+   },
+   {
+    "correct": true,
+    "pred": 145.0,
+    "gold": 145.0,
+    "reasoning_len": 21174,
+    "content_len": 983,
+    "completion_tokens": 7276,
+    "finish": "stop",
+    "latency": 687.7079341411591
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 2319,
+    "content_len": 663,
+    "completion_tokens": 1030,
+    "finish": "stop",
+    "latency": 96.77871942520142
+   },
+   {
+    "correct": true,
+    "pred": 4.0,
+    "gold": 4.0,
+    "reasoning_len": 2490,
+    "content_len": 803,
+    "completion_tokens": 1147,
+    "finish": "stop",
+    "latency": 107.73348379135132
+   },
+   {
+    "correct": true,
+    "pred": 5.0,
+    "gold": 5.0,
+    "reasoning_len": 3525,
+    "content_len": 415,
+    "completion_tokens": 1189,
+    "finish": "stop",
+    "latency": 111.7804799079895
+   },
+   {
+    "correct": true,
+    "pred": 250.0,
+    "gold": 250.0,
+    "reasoning_len": 2696,
+    "content_len": 591,
+    "completion_tokens": 1261,
+    "finish": "stop",
+    "latency": 118.62769746780396
+   },
+   {
+    "correct": true,
+    "pred": 8.0,
+    "gold": 8.0,
+    "reasoning_len": 3876,
+    "content_len": 1436,
+    "completion_tokens": 1878,
+    "finish": "stop",
+    "latency": 177.11397171020508
+   },
+   {
+    "correct": true,
+    "pred": 44.0,
+    "gold": 44.0,
+    "reasoning_len": 1737,
+    "content_len": 371,
+    "completion_tokens": 749,
+    "finish": "stop",
+    "latency": 70.6493353843689
+   },
+   {
+    "correct": true,
+    "pred": 220.0,
+    "gold": 220.0,
+    "reasoning_len": 14110,
+    "content_len": 684,
+    "completion_tokens": 4734,
+    "finish": "stop",
+    "latency": 448.4872488975525
+   },
+   {
+    "correct": true,
+    "pred": 15.0,
+    "gold": 15.0,
+    "reasoning_len": 1000,
+    "content_len": 191,
+    "completion_tokens": 401,
+    "finish": "stop",
+    "latency": 37.95568895339966
+   },
+   {
+    "correct": true,
+    "pred": 45.0,
+    "gold": 45.0,
+    "reasoning_len": 3485,
+    "content_len": 452,
+    "completion_tokens": 1519,
+    "finish": "stop",
+    "latency": 143.67085433006287
+   },
+   {
+    "correct": true,
+    "pred": 54.0,
+    "gold": 54.0,
+    "reasoning_len": 4435,
+    "content_len": 424,
+    "completion_tokens": 1819,
+    "finish": "stop",
+    "latency": 172.25442051887512
+   },
+   {
+    "correct": true,
+    "pred": 70.0,
+    "gold": 70.0,
+    "reasoning_len": 4327,
+    "content_len": 295,
+    "completion_tokens": 1352,
+    "finish": "stop",
+    "latency": 128.39279985427856
+   },
+   {
+    "correct": true,
+    "pred": 90.0,
+    "gold": 90.0,
+    "reasoning_len": 2284,
+    "content_len": 599,
+    "completion_tokens": 919,
+    "finish": "stop",
+    "latency": 87.42050313949585
+   },
+   {
+    "correct": true,
+    "pred": 140.0,
+    "gold": 140.0,
+    "reasoning_len": 2204,
+    "content_len": 360,
+    "completion_tokens": 879,
+    "finish": "stop",
+    "latency": 83.54860973358154
+   },
+   {
+    "correct": true,
+    "pred": 20000.0,
+    "gold": 20000.0,
+    "reasoning_len": 3287,
+    "content_len": 191,
+    "completion_tokens": 1218,
+    "finish": "stop",
+    "latency": 115.7359299659729
+   },
+   {
+    "correct": true,
+    "pred": 180.0,
+    "gold": 180.0,
+    "reasoning_len": 2304,
+    "content_len": 255,
+    "completion_tokens": 905,
+    "finish": "stop",
+    "latency": 85.94355273246765
+   },
+   {
+    "correct": true,
+    "pred": 9.0,
+    "gold": 9.0,
+    "reasoning_len": 2593,
+    "content_len": 467,
+    "completion_tokens": 895,
+    "finish": "stop",
+    "latency": 85.05755043029785
+   },
+   {
+    "correct": true,
+    "pred": 33.0,
+    "gold": 33.0,
+    "reasoning_len": 4012,
+    "content_len": 481,
+    "completion_tokens": 1537,
+    "finish": "stop",
+    "latency": 146.13243317604065
+   },
+   {
+    "correct": true,
+    "pred": 9.0,
+    "gold": 9.0,
+    "reasoning_len": 3652,
+    "content_len": 428,
+    "completion_tokens": 1724,
+    "finish": "stop",
+    "latency": 163.70662760734558
+   },
+   {
+    "correct": true,
+    "pred": 1.0,
+    "gold": 1.0,
+    "reasoning_len": 3763,
+    "content_len": 419,
+    "completion_tokens": 1316,
+    "finish": "stop",
+    "latency": 125.04004001617432
+   },
+   {
+    "correct": true,
+    "pred": 21.0,
+    "gold": 21.0,
+    "reasoning_len": 2858,
+    "content_len": 789,
+    "completion_tokens": 1190,
+    "finish": "stop",
+    "latency": 113.05309629440308
+   },
+   {
+    "correct": true,
+    "pred": 276000.0,
+    "gold": 276000.0,
+    "reasoning_len": 4773,
+    "content_len": 297,
+    "completion_tokens": 1976,
+    "finish": "stop",
+    "latency": 185.80684351921082
+   },
+   {
+    "correct": true,
+    "pred": 50.0,
+    "gold": 50.0,
+    "reasoning_len": 4187,
+    "content_len": 243,
+    "completion_tokens": 1313,
+    "finish": "stop",
+    "latency": 123.58778285980225
+   },
+   {
+    "correct": true,
+    "pred": 75.0,
+    "gold": 75.0,
+    "reasoning_len": 1923,
+    "content_len": 403,
+    "completion_tokens": 748,
+    "finish": "stop",
+    "latency": 70.67256307601929
+   },
+   {
+    "correct": true,
+    "pred": 12.0,
+    "gold": 12.0,
+    "reasoning_len": 3028,
+    "content_len": 327,
+    "completion_tokens": 1163,
+    "finish": "stop",
+    "latency": 109.20781350135803
+   },
+   {
+    "correct": true,
+    "pred": 21.0,
+    "gold": 21.0,
+    "reasoning_len": 6642,
+    "content_len": 408,
+    "completion_tokens": 2050,
+    "finish": "stop",
+    "latency": 192.05946898460388
+   },
+   {
+    "correct": true,
+    "pred": 10.0,
+    "gold": 10.0,
+    "reasoning_len": 4029,
+    "content_len": 552,
+    "completion_tokens": 1326,
+    "finish": "stop",
+    "latency": 124.18556833267212
+   },
+   {
+    "correct": true,
+    "pred": 31.0,
+    "gold": 31.0,
+    "reasoning_len": 3920,
+    "content_len": 944,
+    "completion_tokens": 1593,
+    "finish": "stop",
+    "latency": 149.1123766899109
+   },
+   {
+    "correct": true,
+    "pred": 90.0,
+    "gold": 90.0,
+    "reasoning_len": 1863,
+    "content_len": 265,
+    "completion_tokens": 687,
+    "finish": "stop",
+    "latency": 64.32913064956665
+   },
+   {
+    "correct": true,
+    "pred": 68.0,
+    "gold": 68.0,
+    "reasoning_len": 3040,
+    "content_len": 258,
+    "completion_tokens": 1131,
+    "finish": "stop",
+    "latency": 105.89827871322632
+   },
+   {
+    "correct": true,
+    "pred": 280.0,
+    "gold": 280.0,
+    "reasoning_len": 3868,
+    "content_len": 1107,
+    "completion_tokens": 1698,
+    "finish": "stop",
+    "latency": 158.9679672718048
+   },
+   {
+    "correct": true,
+    "pred": 21.0,
+    "gold": 21.0,
+    "reasoning_len": 3078,
+    "content_len": 337,
+    "completion_tokens": 1163,
+    "finish": "stop",
+    "latency": 108.94964551925659
+   },
+   {
+    "correct": false,
+    "pred": 10.0,
+    "gold": 6.0,
+    "reasoning_len": 28686,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 728.4476509094238
+   },
+   {
+    "correct": true,
+    "pred": 3.0,
+    "gold": 3.0,
+    "reasoning_len": 13065,
+    "content_len": 1022,
+    "completion_tokens": 4280,
+    "finish": "stop",
+    "latency": 388.54972195625305
+   },
+   {
+    "correct": true,
+    "pred": 250.0,
+    "gold": 250.0,
+    "reasoning_len": 2749,
+    "content_len": 649,
+    "completion_tokens": 1128,
+    "finish": "stop",
+    "latency": 105.66422486305237
+   },
+   {
+    "correct": true,
+    "pred": 20.0,
+    "gold": 20.0,
+    "reasoning_len": 6719,
+    "content_len": 1070,
+    "completion_tokens": 2650,
+    "finish": "stop",
+    "latency": 244.47201299667358
+   },
+   {
+    "correct": true,
+    "pred": 7.0,
+    "gold": 7.0,
+    "reasoning_len": 3584,
+    "content_len": 690,
+    "completion_tokens": 1385,
+    "finish": "stop",
+    "latency": 129.72821354866028
+   },
+   {
+    "correct": true,
+    "pred": 27000.0,
+    "gold": 27000.0,
+    "reasoning_len": 23615,
+    "content_len": 0,
+    "completion_tokens": 8192,
+    "finish": "length",
+    "latency": 723.1148161888123
+   },
+   {
+    "correct": true,
+    "pred": 32.0,
+    "gold": 32.0,
+    "reasoning_len": 2943,
+    "content_len": 561,
+    "completion_tokens": 1129,
+    "finish": "stop",
+    "latency": 105.6629548072815
+   },
+   {
+    "correct": true,
+    "pred": 300.0,
+    "gold": 300.0,
+    "reasoning_len": 2481,
+    "content_len": 201,
+    "completion_tokens": 894,
+    "finish": "stop",
+    "latency": 83.2872383594513
+   },
+   {
+    "correct": true,
+    "pred": 5600.0,
+    "gold": 5600.0,
+    "reasoning_len": 3832,
+    "content_len": 690,
+    "completion_tokens": 1577,
+    "finish": "stop",
+    "latency": 144.29471921920776
+   }
+  ],
+  "wall_s": 8371.8
+ },
+ "needle": {
+  "hits": 9,
+  "total": 9,
+  "cells": [
+   {
+    "ctx_words": 12000,
+    "depth": 0.1,
+    "hit": true,
+    "latency": 25.285736083984375
+   },
+   {
+    "ctx_words": 12000,
+    "depth": 0.5,
+    "hit": true,
+    "latency": 25.708837747573853
+   },
+   {
+    "ctx_words": 12000,
+    "depth": 0.9,
+    "hit": true,
+    "latency": 23.248161792755127
+   },
+   {
+    "ctx_words": 24000,
+    "depth": 0.1,
+    "hit": true,
+    "latency": 35.68774366378784
+   },
+   {
+    "ctx_words": 24000,
+    "depth": 0.5,
+    "hit": true,
+    "latency": 33.99532914161682
+   },
+   {
+    "ctx_words": 24000,
+    "depth": 0.9,
+    "hit": true,
+    "latency": 35.60816311836243
+   },
+   {
+    "ctx_words": 48000,
+    "depth": 0.1,
+    "hit": true,
+    "latency": 63.23090839385986
+   },
+   {
+    "ctx_words": 48000,
+    "depth": 0.5,
+    "hit": true,
+    "latency": 55.690147161483765
+   },
+   {
+    "ctx_words": 48000,
+    "depth": 0.9,
+    "hit": true,
+    "latency": 51.075252532958984
+   }
+  ]
+ },
+ "determinism": {
+  "stable": 5,
+  "total": 5,
+  "detail": [
+   {
+    "prompt": "Explain in exactly three sentences why t",
+    "stable": true,
+    "hashes": [
+     "746efe1a25b14980",
+     "746efe1a25b14980",
+     "746efe1a25b14980"
+    ]
+   },
+   {
+    "prompt": "Write a haiku about memory bandwidth.",
+    "stable": true,
+    "hashes": [
+     "a2a200abb549fcd3",
+     "a2a200abb549fcd3",
+     "a2a200abb549fcd3"
+    ]
+   },
+   {
+    "prompt": "List the first 8 prime numbers.",
+    "stable": true,
+    "hashes": [
+     "ecec0a2a19830090",
+     "ecec0a2a19830090",
+     "ecec0a2a19830090"
+    ]
+   },
+   {
+    "prompt": "Translate to German: 'The measurement is",
+    "stable": true,
+    "hashes": [
+     "6131beb6482004b0",
+     "6131beb6482004b0",
+     "6131beb6482004b0"
+    ]
+   },
+   {
+    "prompt": "What is 987654321 modulo 97? Show your w",
+    "stable": true,
+    "hashes": [
+     "9429239bba50ad1d",
+     "9429239bba50ad1d",
+     "9429239bba50ad1d"
+    ]
+   }
+  ]
+ },
+ "perf": {
+  "single_stream_toks": 11.5,
+  "batched8_agg_toks": 85.3,
+  "batch_wall_s": 24.0
+ }
+}
