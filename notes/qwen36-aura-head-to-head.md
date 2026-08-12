@@ -28,4 +28,4 @@ Paired battery, candidate vs. reference, served **sequentially** on the same GB1
 
 ## Why it matters
 
-Reproducing a quantization method's reference quality from source, on independent hardware, is the strongest evidence a method can get. AURA passed at screening level on the first self-produced 27B. Credit where due: the method, the reference quant, and the pipeline are Rob Tandler's work — this lab measures it.
+Reproducing a quantization method's reference quality from source, on independent hardware, is the strongest evidence a method can get. AURA passed at screening level on the first self-produced 27B. Credit where due: the method, the reference quant, and the pipeline are Rob Tandler's ([@RobTand](https://github.com/RobTand)) work — this lab measures it.
