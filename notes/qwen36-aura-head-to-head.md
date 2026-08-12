@@ -6,7 +6,7 @@
 
 First end-to-end dense 27B run of [PrismaQuant](https://github.com/RobTand/prismaquant)'s AURA pipeline (KL-Fisher bit allocation — Rob Tandler's method) produced on this lab's own hardware: mixed-format NVFP4-MLP + FP8-attention + NVFP4-KV at ~5.5 bpp, allocation NVFP4:264 / BF16:187 / FP8:163 modules. The question: does a self-produced quant reproduce the quality of the maintainer's own reference (`prismaaura55`)?
 
-Producing it required fixing two bugs in PrismaQuant's layer-streaming forward that surface on transformers >= 5.15 with hybrid linear-attention models (dense causal mask routed into `linear_attention` layers; `.layer_type` → `.block_type` rename from transformers#47630 breaking layer-type resolution). Fix submitted upstream: **[PR LINK]**. PrismaQuant's own lockfile pins transformers 5.8.0, so stock environments never see this — any environment resolving a current transformers does.
+Producing it required fixing two bugs in PrismaQuant's layer-streaming forward that surface on transformers >= 5.15 with hybrid linear-attention models (dense causal mask routed into `linear_attention` layers; `.layer_type` → `.block_type` rename from transformers#47630 breaking layer-type resolution). Fix submitted upstream: **[PR #80](https://github.com/RobTand/prismaquant/pull/80)**. PrismaQuant's own lockfile pins transformers 5.8.0, so stock environments never see this — any environment resolving a current transformers does.
 
 ## Measurements
 
