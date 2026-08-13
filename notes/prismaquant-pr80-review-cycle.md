@@ -6,9 +6,8 @@ generalizable engineering lessons it produced.
 
 **PR:** [RobTand/prismaquant#80](https://github.com/RobTand/prismaquant/pull/80)
 — "Fix hybrid linear-attention masking in layer streaming for Qwen3.5/3.6 on
-transformers >= 5.15". Status: **approved for production** (2026-08-13,
-[review](https://github.com/RobTand/prismaquant/pull/80#pullrequestreview-approved)),
-merge pending the maintainer's CI on head `b09f968`.
+transformers >= 5.15". Status: **MERGED** (2026-08-13T15:27Z, after [review](https://github.com/RobTand/prismaquant/pull/80#pullrequestreview-approved)),
+head `b09f968`); announced follow-up: a fresh PrismaQuant release.
 
 ## The underlying problem
 
