@@ -57,6 +57,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-13 | PR #80 review-cycle note added (two review rounds → merged upstream, lessons generalized); upstream-contributions extended (flashinfer#3684 validation + merge, vLLM#46329 production datapoint); two findings rows | close out the linear-attention fix story with its lessons; keep the upstream record current | [`notes/prismaquant-pr80-review-cycle.md`](notes/prismaquant-pr80-review-cycle.md) · [`notes/upstream-contributions.md`](notes/upstream-contributions.md) |
 | 2026-08-12 | Qwen3.6-27B AURA head-to-head vs. reference measured (screening battery, raw JSON in results/); upstream fix PR for hybrid linear-attention masking on transformers >= 5.15 prepared | gate for the stack-recommendation lane; the fix unblocks PrismaQuant on current transformers | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) |
 | 2026-08-12 | Findings and changelog re-sorted newest-first; changelog "Detail" column linkified to match the findings table | surface recent changes faster; consistent linking across both tables | none |
 | 2026-08-11 | Quantization runtime probe: 4B pipeline run measured on GB10, extrapolated to 27B dense (1.1–3.4 h) | kill the last runtime unknown before scheduling next-model quant windows; decides that external GPUs are off the critical path | [`notes/quant-runtime-probe.md`](notes/quant-runtime-probe.md) |
