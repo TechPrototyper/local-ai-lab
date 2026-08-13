@@ -54,3 +54,43 @@ and outcomes only — no evaluation of the projects or their maintainers.
   production decision — the gain was measured as one candidate (a 9th
   commit on top of the adopted 8-commit ch2lab stack), evaluated separately
   for production adoption.
+
+## flashinfer#3684 — sm120 validation of the NVFP4 VO-split prefill kernel
+
+- **2026-08-06** — comment posted with an independent sm120 (RTX 5090)
+  validation of the asymmetric VO-split NVFP4 paged-prefill PR, after the
+  project's internal CI lost both 5090 rows to infrastructure failures:
+  117,829 attention tests, 8,453 fp4 gemm tests, 125 fp4 moe tests — zero
+  failures — plus a `scipy` collection-time gap in `tests/attention` worth
+  flagging upstream.
+- **2026-08-12** — the run above was taken at commit `dd25a783`; the PR
+  head had meanwhile moved to `00054844`, and the author re-ran the suite
+  at the current head on a rented 5090 himself (green; two torch versions
+  now covered between the two runs). Lesson recorded for this lab's
+  process: validation posts pin the current PR head, name the hash, and
+  re-check for head movement before posting.
+- **2026-08-13** — **PR merged** (`8f9ad200`). With the kernel side
+  upstream in flashinfer main, [vLLM#46329](https://github.com/vllm-project/vllm/pull/46329)
+  remains the single outstanding piece of the consumer-Blackwell
+  (sm120/sm121) NVFP4-KV serving line — the stack this lab has been running
+  in production on both arches. Credit where due: the line is
+  [@jethac](https://github.com/jethac)'s design and persistence end to end;
+  this lab contributed validation datapoints on 5090 and GB10 along the way.
+
+## vLLM#46329 — production datapoint
+
+- **2026-08-11** — comment posted with a production datapoint in support of
+  the PR: the stack has been serving Qwen3.6-27B at 262k context with
+  `--kv-cache-dtype nvfp4` on an RTX 5090 (sm120, weeks) and a DGX Spark
+  GB10 (sm121, since early August) under sustained agentic load. GSM8K
+  94.9% (sm120, n=1319, scale 1.0) / 96.4% (sm121, n=250) — no quality
+  regression attributable to the 4-bit KV path. PR currently awaiting a
+  rebase (merge conflicts since 2026-08-07).
+
+## PrismaQuant PR #80 — hybrid linear-attention masking fix
+
+- **2026-08-12/13** — full cycle from crash to **approved for production**
+  in two review rounds; substance and the two generalized lessons (API
+  existence is not a compatibility gate; screening greenness only certifies
+  exercised paths) recorded in
+  [`prismaquant-pr80-review-cycle.md`](prismaquant-pr80-review-cycle.md).
