@@ -4,6 +4,14 @@ My personal lab notebook: making local AI **measurably** excellent on hardware
 people actually own. Spare-time research on my own machines — this repo tracks
 what I tried, what I measured, and where it led.
 
+## Three tracks
+
+| Track | What it covers | Where |
+|---|---|---|
+| **Inference** | Everything that makes local inference better: quantization, KV cache, speculation, serving configs. The bulk of this notebook — the framing, findings, and probes below. | this page |
+| **Harness engineering** | Making the agent harness work well: upstream contributions (an Azure Foundry provider, landed), a maintained carry-patch line (model routing, tool-call brake), and the bundled-skills update problem. | [`harness/`](harness/README.md) |
+| **Agent platform** | Serving many agents for many users: (specialist × user) cells as profiles, one multiplex gateway, Keycloak identity — plus cloud escalation behind a pseudonymization boundary. | [`platform/`](platform/README.md) |
+
 ## The framing
 
 Every serving system has one bottleneck that matters most, and the art is to
@@ -65,6 +73,10 @@ Newest first.
 
 ## Layout
 
+- **`harness/`** — the harness-engineering track: Hermes contributions,
+  carry patches, skill maintenance
+- **`platform/`** — the agent-platform track: multi-user cell
+  architecture, escalation, pseudonymization boundary
 - **`nodes/`** — profiles of the lab's machines: production setup, model
   selection rationale, and what each box does besides research
 - **`probes/`** — model-free kernel round-trip studies (run against an installed
@@ -92,6 +104,7 @@ per change to this repo. Newest first.
 |---|---|---|---|
 | 2026-08-20 | GPTQ-ablation + online-Hadamard probes added (scripts, raw JSONs, note); "Next up" item graduated into Findings | the two #2936 follow-up questions are now measured, not argued | [`notes/nvfp4-kv-gptq-online-hadamard.md`](notes/nvfp4-kv-gptq-online-hadamard.md) |
 | 2026-08-20 | "Next up" section added (dated working set, graduates into Findings); n=1319 verdict backfilled into the AURA head-to-head note + Findings row, raw JSONs added; Laguna NVFP4-vs-INT4 same-model note added | the repo mirrors a running process — the documented state must match reality, including what is being measured *now* | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) · [`notes/laguna-nvfp4-vs-int4.md`](notes/laguna-nvfp4-vs-int4.md) |
+| 2026-08-20 | Repo restructured into three tracks (Inference / Harness engineering / Agent platform); `harness/` and `platform/` sections added with the Hermes contribution record and the cell architecture | the notebook covered inference only; the harness and platform work deserved equal visibility | [`harness/`](harness/README.md) · [`platform/`](platform/README.md) |
 | 2026-08-20 | Home-lab topology sketch added (`nodes/homelab.md`): cluster (main node + two Talos workers), GB10, bridge Mac, switch — with the role split spelled out | the node profiles needed the map they live on | [`nodes/homelab.md`](nodes/homelab.md) |
 | 2026-08-20 | Node profiles added (`nodes/`): GB10 and RTX 5090 — production fleet, model rationale, driver history, use cases; framing table now links them | the notebook showed the measurements but not the machines they serve; the 595-driver dead end and the two-tier gateway architecture deserved a written home | [`nodes/dgx-spark-gb10.md`](nodes/dgx-spark-gb10.md) · [`nodes/rtx-5090.md`](nodes/rtx-5090.md) |
 | 2026-08-20 | GDN first-step crash documented; warmup added to every boot path | first-traffic concurrency killed the production engine; the mitigation is one request | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |
