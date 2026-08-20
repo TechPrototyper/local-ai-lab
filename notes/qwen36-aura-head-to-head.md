@@ -1,6 +1,6 @@
 # Qwen3.6-27B: self-produced AURA quant vs. the reference — screening
 
-**2026-08-12** · Status: screening passed; full-split verdict queued
+**2026-08-12** · Status: **verdict passed** (full n=1319, 2026-08-15 — see below)
 
 ## What this is
 
@@ -23,7 +23,28 @@ Paired battery, candidate vs. reference, served **sequentially** on the same GB1
 
 ## Read carefully
 
-- Per this repo's [method](../README.md#method), **n=250 is triage, not a verdict** (±2.7 pp). The screening says: no red flag, direction +1.6 pp in the candidate's favor, campaign proceeds. The full n=1319 paired run is queued (~8 h per arm on GB10); this note gets updated with the verdict.
+- Per this repo's [method](../README.md#method), **n=250 is triage, not a verdict** (±2.7 pp). The screening says: no red flag, direction +1.6 pp in the candidate's favor, campaign proceeds.
+
+## Verdict (update 2026-08-15): full n=1319 — parity confirmed
+
+Both arms, identical production serving config, sequential on the same GB10;
+2,638 requests, 0 errors:
+
+| Metric | Reference `prismaaura55` | Candidate (5.15 + fix) |
+|---|---|---|
+| GSM8K n=1319 | 94.84% | **95.00%** |
+| McNemar exact (46 discordant, +24/−22) | — | p = 0.883 |
+| Needle | 6/6 | 6/6 |
+| Tools | 5/6 | 6/6 |
+| Determinism | 4/5 | 5/5 |
+| tok/s single / batch-8 | 10.7 / 79.2 | 10.8 / 79.5 |
+
+The tools/determinism edges are single-digit samples — we read them as "no
+regression", nothing more. Raw JSONs:
+[`results/COMPARE_cand_vs_ref_1319.json`](../results/COMPARE_cand_vs_ref_1319.json),
+[`results/RESULT_cand1319-export27b.json`](../results/RESULT_cand1319-export27b.json),
+[`results/RESULT_ref1319-prismaaura55.json`](../results/RESULT_ref1319-prismaaura55.json).
+Verdict also posted on [PR #80](https://github.com/RobTand/prismaquant/pull/80).
 - The candidate serves **~7% slower**. That is an export-vs-export difference (different build, different allocation run), *not* a measured cost of the masking fix — attributing it would take a patch-on/off ablation on the same export, which hasn't been run.
 
 ## Why it matters

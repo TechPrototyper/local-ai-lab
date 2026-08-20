@@ -21,6 +21,33 @@ when it isn't running experiments. How the boxes hang together —
 cluster, switch, bridge host — is sketched in
 [`nodes/homelab.md`](nodes/homelab.md).
 
+## Next up
+
+The working set — what this lab is measuring next. Updated whenever work
+moves (last: **2026-08-20**); items graduate into Findings when the numbers
+are in.
+
+- **DFlash2 paired quality verdict** — n=250 GSM8K, DFlash2 (fp8 KV) vs.
+  non-speculative NVFP4-KV canon, full production parser config; n=1319
+  per [method](#method) if screening passes. *Goal: speed — under a hard
+  quality gate, and on the 32 GB card in tension with KV headroom (fp8 KV
+  halves context).*
+- **Two KV-cache probes** answering the open
+  [#2936](https://github.com/vllm-project/llm-compressor/issues/2936)
+  question: rotation + GPTQ, and a deliberately non-foldable online
+  Hadamard past head_dim. *Goal: quality of 4-bit KV — which is what buys
+  the memory.*
+- **Clean quality-per-bit re-run of the codebook serving path**
+  (the 08-13 number was a serving artifact, not a format verdict).
+  *Goal: memory (lower bpp → more KV) vs. speed (eager codebook decode is
+  slower) — the tradeoff is the finding.*
+- **Cross-method mixed-precision comparison**: AURA (KL-Fisher allocation)
+  vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
+  feasibility spike first (checkpoint-format gap), then a paired
+  head-to-head. *Goal: quality per bit, method-level.*
+- **Consolidated write-up** of the 3.6 → 3.8 pipeline story (full-split
+  verdict, the 3.8 pivot, speculation re-evaluation). *Goal: the record.*
+
 ## Findings so far
 
 Newest first.
@@ -29,6 +56,7 @@ Newest first.
 |---|---|---|
 | 2026-08-20 | **Concurrent prefills in the very first engine step can kill a hybrid linear-attention engine.** First traffic after a boot happened to be two parallel requests: `cudaErrorNotPermitted` in the GDN `ssm_state` write, `EngineDeadError`, container restart — and a restart policy turns that into a crash-loop hazard (boot → agents hammer → first step crashes → repeat). One single request first, and the same load is stable. Working hypothesis: a lazy capture/compile window; repro n=1 so far, controlled repro queued before an upstream report. Mitigation deployed on every boot path: wait for health, send exactly one warmup request, then open the floodgates. | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |
 | 2026-08-20 | **"Speculation breaks tool-calling" was never about speculation — and DFlash2 runs on sm121.** The block-diffusion drafter (vLLM [#52816](https://github.com/vllm-project/vllm/pull/52816)/[#52883](https://github.com/vllm-project/vllm/pull/52883), cherry-picked onto the sm12x line) reaches **23.3 tok/s vs 10.7 baseline** on the 512-token decode probe (peaks 26–31, acceptance length 5.2–7.1) with tool-calling byte-identical to the non-speculative canon in 4/5 cases — while **ngram** proposals corrupt the `qwen3_coder` tool parser (0/5 chains) and `min_p`/`logit_bias` are silently dropped under spec decode. Mechanism found, rule revised: judge each proposal/parser path separately. Limits: non-causal drafter attention is incompatible with NVFP4 KV on sm12x (fp8 KV required), and under concurrent load acceptance falls to ~2.7 and the gain inverts — **a latency tool, not an aggregate tool**. Quality verdict pending (paired n=250, then n=1319 per [method](#method)). | [`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md) · [`results/`](results/) |
+| 2026-08-15 | **Full-split verdict: the repaired pipeline reproduces production quality.** The 5.15+fix candidate vs. `prismaaura55`, GSM8K **full n=1319** paired, identical prod serving config, sequential on GB10: 95.00% vs 94.84%, McNemar exact p=0.883 (46 discordant, +24/−22), needle 6/6 both, 2,638 requests, 0 errors — the n=250 screening direction held. Tools/determinism edges are single-digit samples, read as "no regression". Verdict-level claim per [method](#method); also posted on [PR #80](https://github.com/RobTand/prismaquant/pull/80). | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) · [`results/`](results/) |
 | 2026-08-13 | **The linear-attention masking fix is approved for production upstream.** Two review rounds on [PrismaQuant PR #80](https://github.com/RobTand/prismaquant/pull/80) turned a two-bug crash fix into something better than the original: the maintainer caught that gating on *helper import* would inherit transformers 5.13/5.14's pre-fix cache-state contract — **API existence is not a compatibility gate**. Final: local shim on every version (a booby-trapped test proves the upstream helper is never consulted), lookup-only type resolution, non-attention block dispatch, four-version test matrix green (5.8/5.13/5.14.1/5.15), fresh GB10 end-to-end through the full 64-layer hybrid stack. **Merged** 2026-08-13. | [`notes/prismaquant-pr80-review-cycle.md`](notes/prismaquant-pr80-review-cycle.md) |
 | 2026-08-13 | **flashinfer#3684 merged — the kernel side of consumer-Blackwell NVFP4 KV is upstream.** The asymmetric VO-split NVFP4 paged-prefill PR ([@jethac](https://github.com/jethac)'s line end to end) landed in flashinfer main; this lab contributed sm120/sm121 validation datapoints, including a 117k-test 5090 run — taken, instructively, at a stale PR head, which the author re-ran at head himself (lesson filed: pin and re-check the head before posting). [vLLM#46329](https://github.com/vllm-project/vllm/pull/46329) is now the single outstanding piece of the sm12x NVFP4-KV serving line this lab runs in production. | [`notes/upstream-contributions.md`](notes/upstream-contributions.md) |
 | 2026-08-12 | **Self-produced 27B AURA quant reproduces the maintainer's reference — at screening level.** First end-to-end dense 27B AURA run on GB10 under transformers 5.15 (took a two-bug upstream fix for hybrid linear-attention masking — [PR #80](https://github.com/RobTand/prismaquant/pull/80)). Paired vs. `prismaaura55`: GSM8K n=250 97.2% vs 95.6% (McNemar exact p=0.34 — no detected difference), needle 9/9 both, determinism 5/5 both; candidate ~7% slower (export-level, unattributed). n=250 is triage per [method](#method) — full n=1319 verdict queued. | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) · [`results/`](results/) |
@@ -66,6 +94,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-20 | "Next up" section added (dated working set, graduates into Findings); n=1319 verdict backfilled into the AURA head-to-head note + Findings row, raw JSONs added; Laguna NVFP4-vs-INT4 same-model note added | the repo mirrors a running process — the documented state must match reality, including what is being measured *now* | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) · [`notes/laguna-nvfp4-vs-int4.md`](notes/laguna-nvfp4-vs-int4.md) |
 | 2026-08-20 | Home-lab topology sketch added (`nodes/homelab.md`): cluster (main node + two Talos workers), GB10, bridge Mac, switch — with the role split spelled out | the node profiles needed the map they live on | [`nodes/homelab.md`](nodes/homelab.md) |
 | 2026-08-20 | Node profiles added (`nodes/`): GB10 and RTX 5090 — production fleet, model rationale, driver history, use cases; framing table now links them | the notebook showed the measurements but not the machines they serve; the 595-driver dead end and the two-tier gateway architecture deserved a written home | [`nodes/dgx-spark-gb10.md`](nodes/dgx-spark-gb10.md) · [`nodes/rtx-5090.md`](nodes/rtx-5090.md) |
 | 2026-08-20 | GDN first-step crash documented; warmup added to every boot path | first-traffic concurrency killed the production engine; the mitigation is one request | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |

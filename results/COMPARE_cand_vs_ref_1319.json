@@ -1,0 +1,70 @@
+{
+ "candidate_arm": "cand1319-export27b",
+ "baseline_arm": "ref1319-prismaaura55",
+ "candidate_file": "RESULT_cand1319-export27b.json",
+ "baseline_file": "RESULT_ref1319-prismaaura55.json",
+ "gsm8k": {
+  "n": 1319,
+  "candidate_accuracy": 0.9499620924943138,
+  "baseline_accuracy": 0.9484457922668689,
+  "delta": 0.0015163002274449777,
+  "confusion": {
+   "both_correct": 1229,
+   "both_wrong": 44,
+   "improved_by_candidate": 24,
+   "regressed_by_candidate": 22
+  },
+  "mcnemar_p": 0.8829959121223965,
+  "mcnemar_method": "exact (internal binomial, math.comb)",
+  "mcnemar_discordant_n": 46
+ },
+ "needle": {
+  "candidate": {
+   "hits": 6,
+   "total": 6,
+   "rate": 1.0
+  },
+  "baseline": {
+   "hits": 6,
+   "total": 6,
+   "rate": 1.0
+  }
+ },
+ "tools": {
+  "candidate": {
+   "passed": 6,
+   "total": 6
+  },
+  "baseline": {
+   "passed": 5,
+   "total": 6
+  }
+ },
+ "determinism": {
+  "candidate": {
+   "stable": 5,
+   "total": 5
+  },
+  "baseline": {
+   "stable": 4,
+   "total": 5
+  }
+ },
+ "perf": {
+  "single_stream_toks": {
+   "candidate": 10.8,
+   "baseline": 10.7,
+   "delta_pct": 0.9
+  },
+  "batch_wall_s": {
+   "candidate": 25.7,
+   "baseline": 25.9,
+   "delta_pct": -0.8
+  },
+  "batched8_agg_toks": {
+   "candidate": 79.5,
+   "baseline": 79.2,
+   "delta_pct": 0.4
+  }
+ }
+}
