@@ -1,0 +1,22 @@
+{
+ "label": "int4",
+ "model": "poolside/Laguna-S-2.1-INT4",
+ "cases": {
+  "short_prompt": {
+   "prompt_tokens": 62,
+   "completion_tokens": 151,
+   "ttft_s": 0.244,
+   "decode_tps": 19.6,
+   "e2e_tps": 19.1,
+   "total_s": 7.9
+  },
+  "prefill_4k": {
+   "prompt_tokens": 7608,
+   "completion_tokens": 19,
+   "ttft_s": 2.798,
+   "decode_tps": 19.7,
+   "e2e_tps": 5.1,
+   "total_s": 3.71
+  }
+ }
+}

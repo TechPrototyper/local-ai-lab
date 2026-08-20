@@ -1,0 +1,536 @@
+{
+ "label": "nvfp4",
+ "model": "poolside/Laguna-S-2.1-NVFP4",
+ "endpoint": "http://10.1.0.229:8000/v1",
+ "started": "2026-08-01 09:46:29",
+ "modules": [
+  "coding",
+  "chains",
+  "think_tool",
+  "gsm8k",
+  "decode"
+ ],
+ "chains": {
+  "happy_nothink": {
+   "pass": 5,
+   "of": 5,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die Temperatur in Paris beträgt 21°C und ist sonnig. Mit 10 addiert ergibt das 31°C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Die Hauptstadt von Frankreich ist **Paris**.\n- Das aktuelle Wetter in Paris ist **21°C** und **sonnig**.\n- Durch Addieren von 10 ergibt das **31°C**.\n- Eine Notiz mit dem Titel **„W"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die Temperatur in Paris beträgt 31.0 Grad Celsius."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung: Die Hauptstadt von Frankreich ist Paris. Das aktuelle Wetter dort ist sonnig mit 21°C. Nach Addition von 10 ergibt sich eine Temperatur von 31°C. Die Notiz mit dem Titel \"Wetterplan\" "
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die berechnete Temperatur beträgt 31.0°C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung: Die Hauptstadt von Frankreich ist Paris. Das aktuelle Wetter dort beträgt 21°C bei sonnigem Himmel. Nach Addition von 10 ergibt das 31,0°C. Eine Notiz mit dem Titel 'Wetterplan' und d"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die Temperatur in Paris beträgt 21°C. Mit dem hinzugefügten Wert von 10 ergibt das 31°C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Die Hauptstadt von Frankreich ist **Paris**.\n- Das aktuelle Wetter in Paris beträgt **21°C** bei sonnigem Wetter.\n- Durch Addition von 10 ergibt sich eine Temperatur von **31°C**.\n-"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die Temperatur in Paris beträgt 31.0°C nach Addition von 10."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung: Die Hauptstadt von Frankreich ist Paris. Das aktuelle Wetter dort ist 21°C bei sonnigem Himmel. Nach Addition von 10 ergibt das eine Temperatur von 31,0°C. Diese Information wurde als"
+    }
+   ]
+  },
+  "happy_think": {
+   "pass": 2,
+   "of": 2,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die Temperatur in Paris beträgt 21°C und wird auf 31°C addiert."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Die Hauptstadt von Frankreich ist **Paris**.\n- Das aktuelle Wetter in Paris beträgt **21°C** bei sonnigem Himmel.\n- Durch Addition von 10 ergibt sich eine Temperatur von **31°C**.\n-"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Die Temperatur in Paris beträgt nach Addition von 10 Grad: 31.0°C"
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Hauptstadt von Frankreich: **Paris**\n- Aktuelle Temperatur in Paris: **21°C** (sonnig)\n- Nach Addierung von 10: **31°C**\n- Notiz 'Wetterplan' wurde gespeichert."
+    }
+   ]
+  },
+  "recovery_nothink": {
+   "pass": 5,
+   "of": 5,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24.0"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24.0"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24.0"
+    }
+   ]
+  },
+  "recovery_think": {
+   "pass": 2,
+   "of": 2,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24.0"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    }
+   ]
+  }
+ },
+ "think_tool": {
+  "valid_single": 7,
+  "empty": 0,
+  "multi": 0,
+  "other": 1,
+  "finish": [
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "stop",
+   "tool_calls"
+  ]
+ },
+ "coding": {
+  "humaneval": {
+   "n": 120,
+   "pass": 116,
+   "pass@1": 0.967
+  },
+  "overall": {
+   "n": 120,
+   "pass": 116,
+   "pass@1": 0.967
+  },
+  "fails": [
+   {
+    "kind": "humaneval",
+    "info": "s/vw9tbl5919j409mn6_3dcqv00000gn/T/tmp5xggwylg/cand.py\", line 27, in check\n    assert candidate(\"Is the sky blue?\") == 0, \"Test 2\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Test 2\n"
+   },
+   {
+    "kind": "humaneval",
+    "info": "/tmpmljvidcs/cand.py\", line 16, in check\n    assert candidate(148, 412) == 16, \"First test error: \" + str(candidate(148, 412))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: First test error: 6\n"
+   },
+   {
+    "kind": "humaneval",
+    "info": "^^^^^^^^^\n  File \"/var/folders/8s/vw9tbl5919j409mn6_3dcqv00000gn/T/tmpgop80_ff/cand.py\", line 33, in check\n    assert candidate([-1, -2, 0]) == 0\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+   },
+   {
+    "kind": "humaneval",
+    "info": "j409mn6_3dcqv00000gn/T/tmp3su6c4q6/cand.py\", line 20, in check\n    assert candidate([[1,1,1,1], [1,1,1,1]], 9) == 2, \"Error\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Error\n"
+   }
+  ]
+ },
+ "gsm8k": {
+  "n": 60,
+  "correct": 55,
+  "acc": 0.917
+ },
+ "decode": {
+  "tokens": 512,
+  "secs": 26.6,
+  "tps": 19.2
+ }
+}

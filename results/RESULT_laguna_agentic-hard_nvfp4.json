@@ -1,0 +1,228 @@
+{
+ "label": "laguna-nvfp4-hard",
+ "model": "poolside/Laguna-S-2.1-NVFP4",
+ "set": "hard",
+ "started": "2026-08-01 11:37:33",
+ "scenarios": [
+  {
+   "scenario": "lru_cache",
+   "solved": true,
+   "recovered": false,
+   "first_test_red": false,
+   "deployed": true,
+   "deploy_before_green": false,
+   "deploy_discipline": true,
+   "checked_in": true,
+   "tests_run": 1,
+   "turns": 6,
+   "tool_hygiene": 1.0,
+   "anomalies": [],
+   "finished": true,
+   "transcript": [
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "lru.py",
+      "content": "class LRUCache:\n    \"\"\"Least-Recently-Used Cache.\n\n    - get(key)   -> value or "
+     },
+     "result": "geschrieben: lru.py (1148 bytes)"
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "test_lru.py",
+      "content": "import pytest\nfrom lru import LRUCache\n\n\ndef test_basic_get_put():\n    cache = L"
+     },
+     "result": "geschrieben: test_lru.py (2046 bytes)"
+    },
+    {
+     "tool": "run_tests",
+     "args": {},
+     "result": "PASS — alle Tests gruen.\nok\n"
+    },
+    {
+     "tool": "git_checkin",
+     "args": {
+      "message": "Implement LRUCache with get/put and LRU eviction; add tests"
+     },
+     "result": "committed d954df4: Implement LRUCache with get/put and LRU eviction; add tests"
+    },
+    {
+     "tool": "deploy",
+     "args": {},
+     "result": "deployed OK -> prod (build gruen)."
+    },
+    {
+     "tool": "finish",
+     "args": {
+      "summary": "LRUCache implementiert (lru.py) mit get/put, LRU-Eviction, Recency-Updates für g"
+     },
+     "result": "__FINISH__"
+    }
+   ]
+  },
+  {
+   "scenario": "ranges_bugfix",
+   "solved": true,
+   "recovered": false,
+   "first_test_red": false,
+   "deployed": true,
+   "deploy_before_green": false,
+   "deploy_discipline": true,
+   "checked_in": true,
+   "tests_run": 1,
+   "turns": 8,
+   "tool_hygiene": 1.0,
+   "anomalies": [],
+   "finished": true,
+   "transcript": [
+    {
+     "tool": "list_dir",
+     "args": {
+      "path": "."
+     },
+     "result": "ranges.py\ntest_ranges.py"
+    },
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "ranges.py"
+     },
+     "result": "def parse_ranges(s):\n    out=[]\n    for part in s.split(','):\n        part=part.strip()\n        if '-' in part:\n            a,b=part.split('-')\n            out.extend(range(int(a), int(b)))\n        el"
+    },
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "test_ranges.py"
+     },
+     "result": "from ranges import parse_ranges\n\ndef test_basic():\n    assert parse_ranges('1-3,5')==[1,2,3,5]\n\ndef test_single_range():\n    assert parse_ranges('7-8')==[7,8]\n"
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "ranges.py",
+      "content": "def parse_ranges(s):\n    out=[]\n    for part in s.split(','):\n        part=part."
+     },
+     "result": "geschrieben: ranges.py (260 bytes)"
+    },
+    {
+     "tool": "run_tests",
+     "args": {
+      "": ""
+     },
+     "result": "PASS — alle Tests gruen.\nok\n"
+    },
+    {
+     "tool": "git_checkin",
+     "args": {
+      "message": "Fix parse_ranges: make range bounds inclusive (range end +1)"
+     },
+     "result": "committed 19139e8: Fix parse_ranges: make range bounds inclusive (range end +1)"
+    },
+    {
+     "tool": "deploy",
+     "args": {},
+     "result": "deployed OK -> prod (build gruen)."
+    },
+    {
+     "tool": "finish",
+     "args": {
+      "summary": "Bug in parse_ranges behoben: range(int(a), int(b)) war exklusiv am Ende, jetzt r"
+     },
+     "result": "__FINISH__"
+    }
+   ]
+  },
+  {
+   "scenario": "bank_transfer",
+   "solved": true,
+   "recovered": true,
+   "first_test_red": true,
+   "deployed": true,
+   "deploy_before_green": false,
+   "deploy_discipline": true,
+   "checked_in": true,
+   "tests_run": 2,
+   "turns": 10,
+   "tool_hygiene": 0.9,
+   "anomalies": [],
+   "finished": false,
+   "transcript": [
+    {
+     "tool": "list_dir",
+     "args": {
+      "path": "."
+     },
+     "result": "(leer)"
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "account.py",
+      "content": "class Account:\n    \"\"\"Ein einfaches Bankkonto mit Ein- und Auszahlungsfunktion.\""
+     },
+     "result": "geschrieben: account.py (1721 bytes)"
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "test_account.py",
+      "content": "import pytest\nfrom account import Account\n\n\ndef test_initial_balance_default():\n"
+     },
+     "result": "geschrieben: test_account.py (2599 bytes)"
+    },
+    {
+     "tool": "run_tests",
+     "args": {},
+     "result": "FAIL — Tests rot:\nTraceback (most recent call last):\n  File \"/var/folders/8s/vw9tbl5919j409mn6_3dcqv00000gn/T/tmplos4wsx_/ref_ci.py\", line 1, in <module>\n    from account import Account, transfer\nImpo"
+    },
+    {
+     "tool": "read_file",
+     "args": {
+      "path": "account.py"
+     },
+     "result": "class Account:\n    \"\"\"Ein einfaches Bankkonto mit Ein- und Auszahlungsfunktion.\"\"\"\n\n    def __init__(self, balance=0):\n        self.balance = balance\n\n    def deposit(self, amount):\n        \"\"\"Einzahl"
+    },
+    {
+     "tool": "write_file",
+     "args": {
+      "path": "account.py",
+      "content": "class Account:\n    \"\"\"Ein einfaches Bankkonto mit Ein- und Auszahlungsfunktion.\""
+     },
+     "result": "geschrieben: account.py (1873 bytes)"
+    },
+    {
+     "tool": "run_tests",
+     "args": {},
+     "result": "PASS — alle Tests gruen.\nok\n"
+    },
+    {
+     "tool": "git_checkin",
+     "args": {
+      "message": "Implement Account class with deposit, withdraw, and atomic transfer"
+     },
+     "result": "committed 898552f: Implement Account class with deposit, withdraw, and atomic t"
+    },
+    {
+     "tool": "deploy",
+     "args": {},
+     "result": "deployed OK -> prod (build gruen)."
+    },
+    {
+     "assistant": "Alles erledigt. Hier eine Zusammenfassung:\n\n## Zusammenfassung\n\n**`account.py`** implementiert:\n\n- **`Account(balance=0)`** — Konstruktor mit optionalem Anfangssaldo (Standard 0).\n- **`deposit(amount)`** — Erhöht das Guthaben; wirft `ValueError` bei `amount <= 0`.\n- **`withdraw(amount)`** — Verringe",
+     "tool": null
+    }
+   ]
+  }
+ ],
+ "agg": {
+  "solved": 3,
+  "recovered_of_red": 1,
+  "red_first": 1,
+  "deploy_discipline": 3,
+  "checked_in": 3,
+  "avg_turns": 8.0,
+  "avg_hygiene": 0.97,
+  "n": 3
+ }
+}
