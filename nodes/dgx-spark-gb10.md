@@ -45,8 +45,7 @@ uncalibrated KV — [why](../README.md#findings-so-far)).
 
 ¹ The quality embedder (Qwen3-Embedding 8B) is paused for memory
 budgeting while the LLM's KV pool and the small services share the box;
-a lighter embedding tier carries retrieval in the meantime.
-<!-- TODO: verify the light-embedder model currently in service -->
+a lighter FP8 embedding fallback carries retrieval in the meantime.
 
 Configuration is measurement-derived; the recipes are in
 [`recipes/dgx-spark-sm121.md`](../recipes/dgx-spark-sm121.md). The
