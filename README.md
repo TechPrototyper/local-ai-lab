@@ -17,7 +17,9 @@ optimize *that* — not the technology you happen to like:
 Same model, same quantization stack — opposite settings, each derived from
 measurement rather than habit. Each box name links to a node profile:
 what it runs in production, why those models, and what it is used for
-when it isn't running experiments.
+when it isn't running experiments. How the boxes hang together —
+cluster, switch, bridge host — is sketched in
+[`nodes/homelab.md`](nodes/homelab.md).
 
 ## Findings so far
 
@@ -64,6 +66,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-20 | Home-lab topology sketch added (`nodes/homelab.md`): cluster (main node + two Talos workers), GB10, bridge Mac, switch — with the role split spelled out | the node profiles needed the map they live on | [`nodes/homelab.md`](nodes/homelab.md) |
 | 2026-08-20 | Node profiles added (`nodes/`): GB10 and RTX 5090 — production fleet, model rationale, driver history, use cases; framing table now links them | the notebook showed the measurements but not the machines they serve; the 595-driver dead end and the two-tier gateway architecture deserved a written home | [`nodes/dgx-spark-gb10.md`](nodes/dgx-spark-gb10.md) · [`nodes/rtx-5090.md`](nodes/rtx-5090.md) |
 | 2026-08-20 | GDN first-step crash documented; warmup added to every boot path | first-traffic concurrency killed the production engine; the mitigation is one request | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |
 | 2026-08-20 | DFlash2-on-sm121 first-light note added (port recipe, measurements, ngram parser-corruption finding, batch caveat); night-run raw JSONs added to results/; framing table updated on both rows (speculation nuance) | document the speculation re-evaluation before the verdict-level gates run; the framing table's "speculation off" claims needed mechanism-level nuance | [`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md) |
