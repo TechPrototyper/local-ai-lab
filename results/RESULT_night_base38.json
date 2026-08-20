@@ -1,0 +1,503 @@
+{
+ "label": "night-base38-final",
+ "started": "2026-08-20 03:23:38",
+ "chains": {
+  "happy_nothink": {
+   "pass": 5,
+   "of": 5,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Hauptstadt von Frankreich: Paris. Aktuelles Wetter: 21 °C, sonnig. Temperatur + 10 = 31 °C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Hauptstadt von Frankreich: **Paris**\n- Aktuelles Wetter in Paris: **21 °C, sonnig**\n- Temperatur + 10: **31 °C**\n- Notiz „Wetterplan“ wurde gespeichert (ID 7)"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Hauptstadt von Frankreich: Paris. Aktuelles Wetter: 21 °C, sonnig. Temperatur + 10 = 31 °C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Hauptstadt von Frankreich: **Paris**\n- Aktuelles Wetter in Paris: **21 °C, sonnig**\n- Temperatur + 10: **31 °C**\n- Notiz „Wetterplan“ wurde gespeichert (ID 7)"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Hauptstadt von Frankreich: Paris. Aktuelles Wetter: 21 °C, sonnig. Temperatur + 10 = 31 °C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Hauptstadt von Frankreich: **Paris**\n- Aktuelles Wetter in Paris: **21 °C, sonnig**\n- Temperatur + 10: **31 °C**\n- Notiz „Wetterplan“ wurde gespeichert (ID 7)"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Hauptstadt von Frankreich: Paris. Aktuelles Wetter: 21 °C, sonnig. Temperatur + 10 = 31 °C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Hauptstadt von Frankreich: **Paris**\n- Aktuelles Wetter in Paris: **21 °C, sonnig**\n- Temperatur + 10: **31 °C**\n- Notiz „Wetterplan“ wurde gespeichert (ID 7)"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Hauptstadt von Frankreich: Paris. Aktuelles Wetter: 21 °C, sonnig. Temperatur + 10 = 31 °C."
+       }
+      ]
+     ],
+     "final": "Zusammenfassung:\n- Hauptstadt von Frankreich: **Paris**\n- Aktuelles Wetter in Paris: **21 °C, sonnig**\n- Temperatur + 10: **31 °C**\n- Notiz „Wetterplan“ wurde gespeichert (ID 7)"
+    }
+   ]
+  },
+  "happy_think": {
+   "pass": 2,
+   "of": 2,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Ergebnis: 31.0"
+       }
+      ]
+     ],
+     "final": "\n\n**Zusammenfassung:**\n\n1. **Hauptstadt von Frankreich:** Paris\n2. **Wetter in Paris:** 21 °C, sonnig\n3. **Temperatur + 10:** 31,0\n4. **Notiz gespeichert:** Titel „Wetterplan\" mit dem Ergebnis 31,0 (I"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "lookup_capital",
+       {
+        "country": "Frankreich"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 21,
+        "b": 10
+       }
+      ],
+      [
+       "save_note",
+       {
+        "title": "Wetterplan",
+        "body": "Ergebnis: 31.0"
+       }
+      ]
+     ],
+     "final": "\n\n**Zusammenfassung:**\n\n1. **Hauptstadt von Frankreich:** Paris\n2. **Wetter in Paris:** 21 °C, sonnig\n3. **Berechnung:** 21 + 10 = **31,0**\n4. **Notiz gespeichert:** Titel „Wetterplan\" mit dem Ergebni"
+    }
+   ]
+  },
+  "recovery_nothink": {
+   "pass": 5,
+   "of": 5,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "24"
+    }
+   ]
+  },
+  "recovery_think": {
+   "pass": 2,
+   "of": 2,
+   "detail": [
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "\n\n24"
+    },
+    {
+     "pass": true,
+     "seq_ok": true,
+     "final_ok": true,
+     "anomalies": [],
+     "calls": [
+      [
+       "get_weather",
+       {
+        "city": "Paris"
+       }
+      ],
+      [
+       "get_weather",
+       {
+        "city": "PAR"
+       }
+      ],
+      [
+       "calc_add",
+       {
+        "a": 19,
+        "b": 5
+       }
+      ]
+     ],
+     "final": "\n\n24"
+    }
+   ]
+  }
+ },
+ "think_tool": {
+  "valid_single": 8,
+  "empty": 0,
+  "multi": 0,
+  "other": 0,
+  "finish": [
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls",
+   "tool_calls"
+  ]
+ },
+ "gsm8k": {
+  "n": 100,
+  "correct": 96,
+  "acc": 0.96
+ },
+ "decode": {
+  "tokens": 512,
+  "secs": 48.0,
+  "tps": 10.7
+ },
+ "qual": {
+  "email": "Betreff: Wichtige Information zu Ihrer Bestellung [Bestellnummer]\n\nSehr geehrte Kundin, sehr geehrter Kunde,\n\nvielen Dank für Ihre Bestellung. Leider müssen wir Ihnen mitteilen, dass sich der Liefertermin aufgrund eines unvorhergesehenen Problems bei einem Zulieferer um eine Woche verschiebt. Der neue voraussichtliche Liefertermin ist der [Datum].\n\nWir bitten, diesen Umstand zu entschuldigen und bedauern die entstandenen Unannehmlichkeiten aufrichtig. Als Wiedergutmachung bieten wir Ihnen einen Nachlass von 5 % auf den Warenwert an. Dieser wird automatisch bei der nächsten Abrechnung berücksichtigt.\n\nWir danken Ihnen für Ihr Verständnis und stehen für Rückfragen gerne zur Verfügung.\n\nMit freundlichen Grüßen\n\n[Ihr Name]\n[Ihre Firma]",
+  "summary": "Write-Ahead-Logging (WAL) stellt sicher, dass Transaktionen atomar und dauerhaft sind, indem Änderungen zuerst in einem Journal protokolliert werden, bevor sie in die eigentlichen Datenblöcke geschrieben werden. Dies ermöglicht es dem System, bei einem Absturz oder Stromausfall durch das Wiederherstellen des Journals (Recovery) den konsistenten Zustand der Datenbank wiederherzustellen. Zudem verbessert WAL die Leistung, da sequenzielle Schreibvorgänge in das Log schneller sind als zufällige Schreibzugriffe auf die Datenblöcke.",
+  "code": "```python\ndef dedupe_keep_order(items):\n    \"\"\"Entfernt Duplikate aus einer Liste und erhält die ursprüngliche Reihenfolge.\n\n    Args:\n        items: Eine Liste von Elementen, aus der Duplikate entfernt werden sollen.\n\n    Returns:\n        Eine neue Liste ohne Duplikate, in der die Reihenfolge der ersten Vorkommen\n        der Elemente beibehalten wird.\n\n    Examples:\n        >>> dedupe_keep_order([1, 2, 2, 3, 1])\n        [1, 2, 3]\n        >>> dedupe_keep_order(['a', 'b', 'a', 'c', 'b'])\n        ['a', 'b', 'c']\n    \"\"\"\n    seen = set()\n    result = []\n    for item in items:\n        if item not in seen:\n            seen.add(item)\n            result.append(item)\n    return result\n\n\n# Zwei Beispiel-Asserts\nassert dedupe_keep_order([1, 2, 2, 3, 1]) == [1, 2, 3]\nassert dedupe_keep_order(['a', 'b', 'a', 'c', 'b']) == ['a', 'b', 'c']\n```",
+  "reasoning": "Die Ausfallwahrscheinlichkeit von A beträgt **2 %**.\n\n**Begründung:**\nDa A nur dann ausfällt, wenn **sowohl** B **als auch** C gleichzeitig ausfallen, und die Ausfälle unabhängig voneinander sind, multipliziert man die Einzelwahrscheinlichkeiten:\n\n$$ P(A \\text{ fällt aus}) = P(B \\text{ fällt aus}) \\times P(C \\text{ fällt aus}) $$\n$$ P(A) = 0{,}10 \\times 0{,}20 = 0{,}02 = 2\\,\\% $$"
+ }
+}
