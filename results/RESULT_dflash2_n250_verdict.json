@@ -1,0 +1,33 @@
+{
+ "experiment": "DFlash2 paired quality gate n=250 (GSM8K, greedy, deterministic)",
+ "pass": "PM pre-night2 (Session A) \u2014 executed 2026-08-20 ~16:37\u201318:00 CEST, ahead of the 01:30 night2-gate.sh window",
+ "host": "gx10-a2e4 / 10.1.0.229 (DGX Spark, GB10, sm121)",
+ "model": "qwen3.8-27b (prismaaqua55, dense 27B)",
+ "image": "vllm-sm121:f4c27c0da",
+ "vllm_branch": "dflash2-sm121 @ e24d26638 (f4c27c0da + DFlash2 cherry-picks vllm#52816/#52883 + shim)",
+ "harness": "gsm_paired.py \u2014 greedy temperature=0, max_tokens=3072, concurrency=4, GSM slice = first 250 of ~/nvfp4-work/gsm8k_test.json (1319)",
+ "parsers": "--reasoning-parser qwen3 + --enable-auto-tool-choice --tool-call-parser qwen3_coder on BOTH arms (parser-consistent, not confounded)",
+ "verdict": "PASS",
+ "mcnemar_exact_two_sided_p": 0.375,
+ "gate_rule": "PASS iff McNemar p>=0.05 AND dflash_acc >= base_acc-0.02 (greedy verified spec-decode is distribution-neutral; test guards against regression)",
+ "base_acc": 0.968,
+ "base_correct": 242,
+ "dflash_acc": 0.956,
+ "dflash_correct": 239,
+ "discordant_base_only_correct": 4,
+ "discordant_dflash_only_correct": 1,
+ "n_paired": 250,
+ "tok_s_single_stream_count200": {
+  "base_nvfp4": 10.8,
+  "dflash2_fp8": 93.6
+ },
+ "determinism_all_identical": {
+  "base": true,
+  "dflash2": true
+ },
+ "gsm_wallclock_secs_concurrency4": {
+  "base": 3015.8,
+  "dflash2": 1193.4,
+  "dflash2_speedup": 2.53
+ }
+}

@@ -35,11 +35,12 @@ The working set — what this lab is measuring next. Updated whenever work
 moves (last: **2026-08-20**); items graduate into Findings when the numbers
 are in.
 
-- **DFlash2 paired quality verdict** — n=250 GSM8K, DFlash2 (fp8 KV) vs.
-  non-speculative NVFP4-KV canon, full production parser config; n=1319
-  per [method](#method) if screening passes. *Goal: speed — under a hard
-  quality gate, and on the 32 GB card in tension with KV headroom (fp8 KV
-  halves context).*
+- **DFlash2, next gates** — the n=250 screening gate passed (see Findings);
+  still ahead: the **skip-layers hybrid** (NVFP4 target-KV + fp8 only for
+  the drafter layers — would dissolve the context penalty on the 32 GB
+  card), a clean batch sweep (c = 1/2/4/8), and the n=1319 full split per
+  [method](#method). *Goal: speed — under a hard quality gate; the hybrid
+  targets the KV tension directly.*
 - **Clean quality-per-bit re-run of the codebook serving path**
   (the 08-13 number was a serving artifact, not a format verdict).
   *Goal: memory (lower bpp → more KV) vs. speed (eager codebook decode is
@@ -57,6 +58,7 @@ Newest first.
 
 | Date | Finding | Evidence |
 |---|---|---|
+| 2026-08-20 | **DFlash2 passes its paired n=250 quality gate — equal quality, ~2.5–3× single-stream.** GSM8K n=250 paired, greedy, both arms full production parser config, sequential on GB10: baseline NVFP4-KV 96.8% vs DFlash2 (fp8 KV, spec n=15) 95.6%, McNemar exact **p=0.375** (discordant 4/1 — batch-numerics class), determinism 3×2 byte-identical both arms. Wall-clock at c=4: **1193 s vs 3016 s (2.53×)** — a surprise worth a controlled batch sweep, since first-light found the gain *inverting* under higher mixed load. Honest headline stays *latency tool*: accepted-throughput 93.6 tok/s is a count-sequence best case; general traffic ≈26–31. The n=15 first-light 94/100 was noise, as suspected. Next: skip-layers hybrid, batch sweep, n=1319. | [`notes/dflash2-n250-gate-2026-08-20.md`](notes/dflash2-n250-gate-2026-08-20.md) · [`results/`](results/) |
 | 2026-08-20 | **Neither GPTQ nor a practical larger Hadamard rescues amax calibration at 4-bit KV.** Two model-free round-trip probes on sm120 answering the open [#2936](https://github.com/vllm-project/llm-compressor/issues/2936) question: a genuine GPTQ pass leaves the baked per-tensor v_scale *identical* (sinks dominate amax; GPTQ compensates weight error, an orthogonal axis) — bulk stays 100% erased in every {rot × GPTQ} cell. A non-foldable online Hadamard past head_dim is a real but magnitude-bounded lever: B=1024 rescues a 42k sink (v_scale 437, near the ≈340 e4m3-floor; 0.9% zeros) but the ~125k layers that drove the end-to-end loss stay 100% erased (needed B ≈ 1e4, impractical). Under scale-1.0, outlier reconstruction improves monotonically with B (≈ exact at 1024). Verdict unchanged: per-tensor amax is the wrong objective for 4-bit KV; scale-1.0 stays the fallback. | [`notes/nvfp4-kv-gptq-online-hadamard.md`](notes/nvfp4-kv-gptq-online-hadamard.md) · [`probes/`](probes/) · [`results/`](results/) |
 | 2026-08-20 | **Concurrent prefills in the very first engine step can kill a hybrid linear-attention engine.** First traffic after a boot happened to be two parallel requests: `cudaErrorNotPermitted` in the GDN `ssm_state` write, `EngineDeadError`, container restart — and a restart policy turns that into a crash-loop hazard (boot → agents hammer → first step crashes → repeat). One single request first, and the same load is stable. Working hypothesis: a lazy capture/compile window; repro n=1 so far, controlled repro queued before an upstream report. Mitigation deployed on every boot path: wait for health, send exactly one warmup request, then open the floodgates. | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |
 | 2026-08-20 | **"Speculation breaks tool-calling" was never about speculation — and DFlash2 runs on sm121.** The block-diffusion drafter (vLLM [#52816](https://github.com/vllm-project/vllm/pull/52816)/[#52883](https://github.com/vllm-project/vllm/pull/52883), cherry-picked onto the sm12x line) reaches **23.3 tok/s vs 10.7 baseline** on the 512-token decode probe (peaks 26–31, acceptance length 5.2–7.1) with tool-calling byte-identical to the non-speculative canon in 4/5 cases — while **ngram** proposals corrupt the `qwen3_coder` tool parser (0/5 chains) and `min_p`/`logit_bias` are silently dropped under spec decode. Mechanism found, rule revised: judge each proposal/parser path separately. Limits: non-causal drafter attention is incompatible with NVFP4 KV on sm12x (fp8 KV required), and under concurrent load acceptance falls to ~2.7 and the gain inverts — **a latency tool, not an aggregate tool**. Quality verdict pending (paired n=250, then n=1319 per [method](#method)). | [`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md) · [`results/`](results/) |
@@ -102,6 +104,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-20 | DFlash2 n=250 gate note + raw JSONs added; Next-up item rolled forward (hybrid, batch sweep, n=1319) | the gate that first-light left open is now measured — and it passed | [`notes/dflash2-n250-gate-2026-08-20.md`](notes/dflash2-n250-gate-2026-08-20.md) |
 | 2026-08-20 | GPTQ-ablation + online-Hadamard probes added (scripts, raw JSONs, note); "Next up" item graduated into Findings | the two #2936 follow-up questions are now measured, not argued | [`notes/nvfp4-kv-gptq-online-hadamard.md`](notes/nvfp4-kv-gptq-online-hadamard.md) |
 | 2026-08-20 | "Next up" section added (dated working set, graduates into Findings); n=1319 verdict backfilled into the AURA head-to-head note + Findings row, raw JSONs added; Laguna NVFP4-vs-INT4 same-model note added | the repo mirrors a running process — the documented state must match reality, including what is being measured *now* | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) · [`notes/laguna-nvfp4-vs-int4.md`](notes/laguna-nvfp4-vs-int4.md) |
 | 2026-08-20 | Repo restructured into three tracks (Inference / Harness engineering / Agent platform); `harness/` and `platform/` sections added with the Hermes contribution record and the cell architecture | the notebook covered inference only; the harness and platform work deserved equal visibility | [`harness/`](harness/README.md) · [`platform/`](platform/README.md) |
