@@ -11,11 +11,13 @@ optimize *that* — not the technology you happen to like:
 
 | Box | Bottleneck order | Consequence |
 |---|---|---|
-| **RTX 5090** (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; speculative decoding stays *off* for now — the one drafter that proved clean (DFlash2) currently forces fp8 KV, which would halve context ([`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md)) |
-| **DGX Spark / GB10** (128 GB unified) | quality → **speed** → memory | memory is abundant, so it is spent on long context and throughput (NVFP4 KV, prefix caching, 262k); MTP speculative decoding is *off* — it broke tool-calling on sm121 ([`notes/mtp-tool-calling.md`](notes/mtp-tool-calling.md)) — while block-diffusion speculation (DFlash2, ~2–3× single-stream, tool-calling clean) is under evaluation ([`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md)) |
+| [**RTX 5090**](nodes/rtx-5090.md) (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; speculative decoding stays *off* for now — the one drafter that proved clean (DFlash2) currently forces fp8 KV, which would halve context ([`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md)) |
+| [**DGX Spark / GB10**](nodes/dgx-spark-gb10.md) (128 GB unified) | quality → **speed** → memory | memory is abundant, so it is spent on long context and throughput (NVFP4 KV, prefix caching, 262k); MTP speculative decoding is *off* — it broke tool-calling on sm121 ([`notes/mtp-tool-calling.md`](notes/mtp-tool-calling.md)) — while block-diffusion speculation (DFlash2, ~2–3× single-stream, tool-calling clean) is under evaluation ([`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md)) |
 
 Same model, same quantization stack — opposite settings, each derived from
-measurement rather than habit.
+measurement rather than habit. Each box name links to a node profile:
+what it runs in production, why those models, and what it is used for
+when it isn't running experiments.
 
 ## Findings so far
 
@@ -23,6 +25,7 @@ Newest first.
 
 | Date | Finding | Evidence |
 |---|---|---|
+| 2026-08-20 | **Concurrent prefills in the very first engine step can kill a hybrid linear-attention engine.** First traffic after a boot happened to be two parallel requests: `cudaErrorNotPermitted` in the GDN `ssm_state` write, `EngineDeadError`, container restart — and a restart policy turns that into a crash-loop hazard (boot → agents hammer → first step crashes → repeat). One single request first, and the same load is stable. Working hypothesis: a lazy capture/compile window; repro n=1 so far, controlled repro queued before an upstream report. Mitigation deployed on every boot path: wait for health, send exactly one warmup request, then open the floodgates. | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |
 | 2026-08-20 | **"Speculation breaks tool-calling" was never about speculation — and DFlash2 runs on sm121.** The block-diffusion drafter (vLLM [#52816](https://github.com/vllm-project/vllm/pull/52816)/[#52883](https://github.com/vllm-project/vllm/pull/52883), cherry-picked onto the sm12x line) reaches **23.3 tok/s vs 10.7 baseline** on the 512-token decode probe (peaks 26–31, acceptance length 5.2–7.1) with tool-calling byte-identical to the non-speculative canon in 4/5 cases — while **ngram** proposals corrupt the `qwen3_coder` tool parser (0/5 chains) and `min_p`/`logit_bias` are silently dropped under spec decode. Mechanism found, rule revised: judge each proposal/parser path separately. Limits: non-causal drafter attention is incompatible with NVFP4 KV on sm12x (fp8 KV required), and under concurrent load acceptance falls to ~2.7 and the gain inverts — **a latency tool, not an aggregate tool**. Quality verdict pending (paired n=250, then n=1319 per [method](#method)). | [`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md) · [`results/`](results/) |
 | 2026-08-13 | **The linear-attention masking fix is approved for production upstream.** Two review rounds on [PrismaQuant PR #80](https://github.com/RobTand/prismaquant/pull/80) turned a two-bug crash fix into something better than the original: the maintainer caught that gating on *helper import* would inherit transformers 5.13/5.14's pre-fix cache-state contract — **API existence is not a compatibility gate**. Final: local shim on every version (a booby-trapped test proves the upstream helper is never consulted), lookup-only type resolution, non-attention block dispatch, four-version test matrix green (5.8/5.13/5.14.1/5.15), fresh GB10 end-to-end through the full 64-layer hybrid stack. **Merged** 2026-08-13. | [`notes/prismaquant-pr80-review-cycle.md`](notes/prismaquant-pr80-review-cycle.md) |
 | 2026-08-13 | **flashinfer#3684 merged — the kernel side of consumer-Blackwell NVFP4 KV is upstream.** The asymmetric VO-split NVFP4 paged-prefill PR ([@jethac](https://github.com/jethac)'s line end to end) landed in flashinfer main; this lab contributed sm120/sm121 validation datapoints, including a 117k-test 5090 run — taken, instructively, at a stale PR head, which the author re-ran at head himself (lesson filed: pin and re-check the head before posting). [vLLM#46329](https://github.com/vllm-project/vllm/pull/46329) is now the single outstanding piece of the sm12x NVFP4-KV serving line this lab runs in production. | [`notes/upstream-contributions.md`](notes/upstream-contributions.md) |
@@ -36,6 +39,8 @@ Newest first.
 
 ## Layout
 
+- **`nodes/`** — profiles of the lab's machines: production setup, model
+  selection rationale, and what each box does besides research
 - **`probes/`** — model-free kernel round-trip studies (run against an installed
   vLLM binding in minutes; deterministic, self-contained)
 - **`results/`** — raw JSON exactly as measured, provenance included
@@ -59,6 +64,8 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-20 | Node profiles added (`nodes/`): GB10 and RTX 5090 — production fleet, model rationale, driver history, use cases; framing table now links them | the notebook showed the measurements but not the machines they serve; the 595-driver dead end and the two-tier gateway architecture deserved a written home | [`nodes/dgx-spark-gb10.md`](nodes/dgx-spark-gb10.md) · [`nodes/rtx-5090.md`](nodes/rtx-5090.md) |
+| 2026-08-20 | GDN first-step crash documented; warmup added to every boot path | first-traffic concurrency killed the production engine; the mitigation is one request | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |
 | 2026-08-20 | DFlash2-on-sm121 first-light note added (port recipe, measurements, ngram parser-corruption finding, batch caveat); night-run raw JSONs added to results/; framing table updated on both rows (speculation nuance) | document the speculation re-evaluation before the verdict-level gates run; the framing table's "speculation off" claims needed mechanism-level nuance | [`notes/dflash2-sm121-first-light.md`](notes/dflash2-sm121-first-light.md) |
 | 2026-08-13 | PR #80 review-cycle note added (two review rounds → merged upstream, lessons generalized); upstream-contributions extended (flashinfer#3684 validation + merge, vLLM#46329 production datapoint); two findings rows | close out the linear-attention fix story with its lessons; keep the upstream record current | [`notes/prismaquant-pr80-review-cycle.md`](notes/prismaquant-pr80-review-cycle.md) · [`notes/upstream-contributions.md`](notes/upstream-contributions.md) |
 | 2026-08-12 | Qwen3.6-27B AURA head-to-head vs. reference measured (screening battery, raw JSON in results/); upstream fix PR for hybrid linear-attention masking on transformers >= 5.15 prepared | gate for the stack-recommendation lane; the fix unblocks PrismaQuant on current transformers | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) |
