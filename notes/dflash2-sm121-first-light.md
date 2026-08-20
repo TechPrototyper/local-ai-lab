@@ -95,6 +95,11 @@ So the rule becomes: *judge each proposal/parser path separately;
 speculation per se is quality-neutral under greedy verification.*
 
 ### Finding 2: DFlash2 is a latency tool, not an aggregate tool
+*(Revised the same evening: the controlled batch sweep reversed this —
+DFlash2 wins at every tier up to c=8; see
+[`dflash2-batch-sweep-and-skiplayers.md`](dflash2-batch-sweep-and-skiplayers.md).
+The paragraph below stands as the original observation and as a
+c>8/mixed-load caveat.)*
 
 Under concurrent load (the battery's parallel phase) mean acceptance drops
 to ~2.7 and the DFlash2 engine finishes the same workload **slower** than

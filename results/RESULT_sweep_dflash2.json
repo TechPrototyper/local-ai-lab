@@ -1,0 +1,40 @@
+{
+ "label": "sweep-dflash2-fp8",
+ "max_tokens": 768,
+ "per": 3,
+ "offset": 500,
+ "sweep": {
+  "1": {
+   "n": 3,
+   "ok": 3,
+   "tokens": 1155,
+   "wall_s": 23.9,
+   "agg_tps": 48.3,
+   "mean_req_tps": 47.9
+  },
+  "2": {
+   "n": 6,
+   "ok": 6,
+   "tokens": 2720,
+   "wall_s": 39.7,
+   "agg_tps": 68.6,
+   "mean_req_tps": 35.3
+  },
+  "4": {
+   "n": 12,
+   "ok": 12,
+   "tokens": 5365,
+   "wall_s": 51.9,
+   "agg_tps": 103.4,
+   "mean_req_tps": 28.7
+  },
+  "8": {
+   "n": 24,
+   "ok": 24,
+   "tokens": 11270,
+   "wall_s": 83.5,
+   "agg_tps": 134.9,
+   "mean_req_tps": 19.4
+  }
+ }
+}

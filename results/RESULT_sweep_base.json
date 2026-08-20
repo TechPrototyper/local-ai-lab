@@ -1,0 +1,40 @@
+{
+ "label": "sweep-base-nvfp4",
+ "max_tokens": 768,
+ "per": 3,
+ "offset": 500,
+ "sweep": {
+  "1": {
+   "n": 3,
+   "ok": 3,
+   "tokens": 1225,
+   "wall_s": 114.3,
+   "agg_tps": 10.7,
+   "mean_req_tps": 10.7
+  },
+  "2": {
+   "n": 6,
+   "ok": 6,
+   "tokens": 2904,
+   "wall_s": 142.8,
+   "agg_tps": 20.3,
+   "mean_req_tps": 10.9
+  },
+  "4": {
+   "n": 12,
+   "ok": 12,
+   "tokens": 5419,
+   "wall_s": 142.7,
+   "agg_tps": 38.0,
+   "mean_req_tps": 10.5
+  },
+  "8": {
+   "n": 24,
+   "ok": 24,
+   "tokens": 12104,
+   "wall_s": 170.8,
+   "agg_tps": 70.9,
+   "mean_req_tps": 10.0
+  }
+ }
+}
