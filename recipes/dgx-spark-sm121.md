@@ -1,14 +1,53 @@
 # DGX Spark / GB10 (sm_121) — quality → speed → memory
 
-Same 27B-class model and NVFP4 KV cache as the RTX recipe — opposite dials
-in principle. In practice the speed lever that's currently on is chunked
-prefill + prefix caching, **not** speculative decoding: MTP is off (see
-below), corrected here 2026-08-11 after this recipe drifted from the
-on-box script.
+Same 27B and same NVFP4 KV cache as the RTX recipe — opposite dials.
+Here memory is abundant (128 GB unified), so it is spent on long context
+and many parallel sessions ([framing](../README.md#the-framing)). If you
+have a GB10, this is the path: get the stack, pull the model, serve, warm
+up, verify.
+
+## 1. What you need
+
+- **DGX Spark / GB10** (sm_121, 128 GB unified, ~273 GB/s). The bandwidth
+  is the defining constraint — dense-27B decode lives around 10 tok/s per
+  stream — so the box is configured for context and concurrency, not
+  single-stream speed.
+- **Stay on the DGX OS OTA driver path (580 series, 580.173.02).** The 595
+  series exists in Ubuntu's channels; sideloaded 590/595 have bricked
+  Sparks outright. Learned cheaply where others learned it expensively
+  ([node profile](../nodes/dgx-spark-gb10.md#the-driver-story-so-nobody-repeats-it)).
+
+## 2. Get the stack
+
+Custom sm12x vLLM build carrying the consumer-Blackwell NVFP4-KV line
+(vllm#46329 + flashinfer#3684). Image tag `vllm-sm121:f4c27c0da`, the
+8-commit stack, the sm121 FlashInfer pin (**0.6.15**), the source-mount
+contract, and the local build patch are documented in
+[`build-stack.md`](build-stack.md).
+
+> Prebuilt container images are planned — they will replace the
+> source-mount build below. Until then, build from `build-stack.md`.
+
+## 3. Get the model
 
 ```
-vllm serve <model-plain> \
-  --served-model-name qwen3.6-27b \
+rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm
+```
+
+Rob Tandler's ([@RobTand](https://github.com/RobTand)) PrismaQuant **AQUA**
+mixed-precision export of Qwen3.8-27B: NVFP4 weights + FP8 attention,
+~5.5 bpp, `compressed-tensors`, Apache-2.0. **~24 GB on disk** (5
+safetensors shards, ~22 GiB); vLLM downloads it on the first
+`vllm serve <hf-id>`, not gated. This lab reproduced the AURA line at
+full-split parity on this box (n=1319, McNemar p=0.883—
+[note](../notes/qwen36-aura-head-to-head.md)); the AQUA export is the
+current production checkpoint.
+
+## 4. Serve
+
+```
+vllm serve rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm \
+  --served-model-name qwen3.8-27b \
   --kv-cache-dtype nvfp4 \
   --enable-prefix-caching \
   --max-model-len 262144 \
@@ -21,36 +60,88 @@ vllm serve <model-plain> \
 ```
 
 Container-level cap (`docker run`): `--memory=32g --memory-swap=32g`.
-SoT: `mySpark/ops/run-vllm-aura.sh`.
 
 Key decisions, each measured:
 
-- **MTP speculative decoding OFF since 2026-08-09** (this recipe previously
-  showed it on — that was stale). `qwen3_5_mtp` combined with tool-calling
-  produced empty answers / aborting tool-call chains in agent workloads on
-  this box only; RTX/sm120 is unaffected (has run without MTP since 07-12,
-  which rules out MTP itself as inherently broken — the failure is specific
-  to this box/build). The flag is kept reversible, commented out in the
-  source script:
-  `--speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":2}'`.
-- **Plain (uncalibrated) checkpoint**, same rationale as the RTX recipe —
-  baked per-tensor amax KV scales cost accuracy at 4-bit (README finding
-  2026-08-01); vLLM defaults k/v scales to 1.0.
-- **Explicit KV pool via `--kv-cache-memory-bytes`** — on unified memory,
-  `gpu-memory-utilization` sizes the pool against every other resident
-  process, so identical values yield wildly different pools depending on
-  service start order. At 20 GiB explicit (21474836480 bytes): KV pool
-  ≈1.08M tokens ≈4× 262k-token sessions in parallel.
-- `gpu-memory-utilization 0.44` remains as a *startup check* (that fraction
-  of total memory must be free at launch or vLLM refuses to start) — size
-  it to actual need (weights + pool + activations), not to the pool.
-- **Prefix caching** (`--enable-prefix-caching`, added 2026-08-09) — avoids
-  re-prefilling the full context on every agent turn.
-- Measured: GSM8K 96.4% (n=250 — screening-level; see README methodology
-  note on n=250 vs. the full 1319-item verdict split).
-- Decode-throughput numbers (~20 tok/s per session, 135 tok/s aggregate at
-  8 concurrent sessions, TTFT 0.3–0.7 s on short prompts) were captured
-  2026-08-06 under the since-corrected MTP-on config and have not yet been
-  re-benchmarked without MTP — treat as historical, not current. Prefill
-  numbers are unaffected by MTP and still hold: ~1,200 tok/s to 32k
-  context, ~510 tok/s at 229k.
+- **Size the KV pool explicitly with `--kv-cache-memory-bytes`, not
+  `--gpu-memory-utilization`.** On unified memory, `gpu-memory-utilization`
+  sizes the pool against *every other resident process*, so identical
+  values yield wildly different pools depending on service start order
+  (README finding 2026-08-06). At 20 GiB explicit (21474836480 bytes) the
+  NVFP4 KV pool is **~966k tokens ≈ 3.7 × 262k-token sessions in parallel**
+  ([node profile](../nodes/dgx-spark-gb10.md#serving-stack)).
+- **`gpu-memory-utilization 0.44` is a startup check, not the pool** — that
+  fraction of total memory must be free at launch or vLLM refuses to start.
+  Size it to actual need (weights + pool + activations).
+- **Serve uncalibrated (k/v scale = 1.0)** — same rationale as the RTX
+  recipe: baked per-tensor amax KV scales cost accuracy at 4 bit (README
+  finding 2026-08-01). The AQUA checkpoint carries no baked KV scales.
+- **Prefix caching on** — agents re-send the full context every turn.
+- **Parsers:** `--reasoning-parser qwen3` +
+  `--enable-auto-tool-choice --tool-call-parser qwen3_coder`.
+- **Start order:** bring the small services (embedder/reranker/audio) up
+  *first* and cap their CUDA-graph capture sizes — default capture costs
+  ~5 GiB *per service* — so the LLM's explicit pool math holds
+  ([node profile](../nodes/dgx-spark-gb10.md#serving-stack)).
+- **MTP speculative decoding is OFF** (since 2026-08-09): `qwen3_5_mtp`
+  combined with tool-calling produced empty answers / aborting tool-call
+  chains on this box only. Kept reversible, commented in the source script:
+  `--speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":2}'`
+  ([note](../notes/mtp-tool-calling.md)). DFlash2 is the live spec-decode
+  candidate instead — see Known limits.
+
+## 5. First boot discipline
+
+The 27B is a hybrid linear-attention model, and **≥2 concurrent prefills in
+the very first engine step after boot** can crash the engine
+(`cudaErrorNotPermitted` in the GDN state write) — and a restart policy
+turns that into a crash-loop hazard on any reboot into live traffic
+([note](../notes/gdn-first-step-crash.md)).
+
+Every boot path therefore ends the same way: **wait for the health
+endpoint, send exactly one small completion request, then open the door.**
+Cost: one request; it closes the first-step window deterministically.
+
+## 6. Verify
+
+Smoke test once healthy and warmed:
+
+```
+curl -s localhost:8000/v1/chat/completions -H 'content-type: application/json' -d '{
+  "model": "qwen3.8-27b",
+  "messages": [{"role":"user","content":"What is 84 * 3 / 2?"}],
+  "temperature": 0
+}'
+```
+
+Expect **126**. Screening quality on this box: **GSM8K n=250 = 96.8%**
+(baseline NVFP4-KV, paired gate 2026-08-20;
+[note](../notes/dflash2-n250-gate-2026-08-20.md)); full-split parity vs the
+reference confirmed at 95.00% (n=1319).
+
+Confirm the KV pool at startup in vLLM's log: `GPU KV cache size: … tokens`
+should report on the order of **966k tokens**, and `Maximum concurrency for
+262,144 tokens per request` ≈3.7×. If it is far smaller, KV is not actually
+NVFP4 or a resident neighbor ate the pool (see the `--kv-cache-memory-bytes`
+note above).
+
+Single-stream decode is ~10 tok/s (bandwidth-bound). The historical
+aggregate figures (~20 tok/s per session, 135 tok/s at 8 concurrent
+sessions, TTFT 0.3–0.7 s) were captured 2026-08-06 under the
+since-corrected MTP-on config and have **not** been re-benchmarked without
+MTP — treat as historical. Prefill is unaffected by MTP and still holds:
+~1,200 tok/s to 32k context, ~510 tok/s at 229k.
+
+## 7. Known limits
+
+- **DFlash2 speculative decoding is an adoption candidate here, not the
+  default.** The paired n=250 quality gate **passed** (equal quality,
+  ~2.5–3× single-stream), and the controlled batch sweep has it winning at
+  **every tier through c=8** (48.3→134.9 agg tok/s vs 10.7→70.9 baseline).
+  Beyond c=8 / mixed load, measure first — first light saw the gain invert
+  there. It requires fp8 KV (affordable on this box: ~966k → ~550k tokens),
+  and the n=1319 full-split verdict is still pending before verdict-level
+  language ([gate](../notes/dflash2-n250-gate-2026-08-20.md) ·
+  [batch sweep](../notes/dflash2-batch-sweep-and-skiplayers.md)).
+- The decode-throughput aggregate numbers above are historical (MTP-on) and
+  await a re-benchmark on the current config.
