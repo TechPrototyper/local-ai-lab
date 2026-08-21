@@ -1,0 +1,48 @@
+{
+  "endpoint": "http://localhost:8000/v1",
+  "endpoint_b": null,
+  "model": "qwen3.8-27b",
+  "cases": {
+    "simple_exec": {
+      "errors": [],
+      "determinism": true,
+      "ab_identical": true,
+      "canon": "{\"calls\": [{\"arguments\": \"{\\\"command\\\": \\\"ls -la\\\"}\", \"name\": \"exec_command\"}], \"content\": null}"
+    },
+    "patch_unicode": {
+      "errors": [],
+      "determinism": true,
+      "ab_identical": true,
+      "canon": "{\"calls\": [{\"arguments\": \"{\\\"action\\\": \\\"read\\\", \\\"path\\\": \\\"notizen/übersicht.md\\\"}\", \"name\": \"workspace\"}], \"content\": null}"
+    },
+    "enum_choice": {
+      "errors": [],
+      "determinism": true,
+      "ab_identical": true,
+      "canon": "{\"calls\": [{\"arguments\": \"{\\\"action\\\": \\\"read\\\", \\\"path\\\": \\\"config/settings.yaml\\\"}\", \"name\": \"workspace\"}], \"content\": null}"
+    },
+    "no_tool_smalltalk": {
+      "errors": [
+        "Abweichung vom Referenz-Canon (sequentielles A/B)"
+      ],
+      "determinism": true,
+      "ab_identical": false,
+      "canon": "{\"calls\": [], \"content\": \"Ein Unified-Diff ist ein Textformat, das die Unterschiede zwischen zwei Dateiversionen darstellt, indem es umgebende Kontextzeilen sowie hinzugefügte und entfernte Zeilen in einem zusammengefassten Block pro Änderungsbereich anzeigt.\"}"
+    },
+    "multi_turn_continuation": {
+      "errors": [],
+      "determinism": true,
+      "ab_identical": true,
+      "canon": "{\"calls\": [], \"content\": \"Im Workspace liegen **17 Dateien**.\"}"
+    }
+  },
+  "probe": {
+    "logit_bias": {
+      "error": "HTTP Error 400: Bad Request"
+    },
+    "min_p": {
+      "a": "{\"calls\": [{\"arguments\": \"{\\\"command\\\": \\\"ls -la\\\"}\", \"name\": \"exec_command\"}], \"content\": null}"
+    }
+  },
+  "passed": false
+}

@@ -39,7 +39,12 @@ agents run concurrent far more than solo, and n=7 is the arm that never
 loses. (A per-load adaptive draft length would beat both; that's an
 upstream feature, not a config.) Quality is unaffected by draft length
 (verified-lossless speculation; the n=1319 verdict was measured at n=15
-and transfers).
+and transfers). The tool-conformance suite was re-run at n=7 to close
+the formal gap: **identical profile to n=15** — every tool case
+byte-identical to the non-speculative canon, fully deterministic; the
+only deviation is the no-tool plaintext case's wording (the same
+tie-flip the n=15 run shows —
+[`results/toolgate-n7.json`](../results/toolgate-n7.json)).
 
 ## GDN first-step crash: repro attempt negative
 
