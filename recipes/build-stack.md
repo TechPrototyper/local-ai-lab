@@ -28,7 +28,7 @@ candidate and discarded for production; see
 ## FlashInfer pins
 
 - **Spark (GB10, sm121):** FlashInfer 0.6.15
-- **RTX 5090 (sm120):** FlashInfer 0.6.14
+- **RTX 5090 (sm120):** FlashInfer 0.6.15 (branch `pr3684`, commit `2ed09bd3` — same pin as the GB10; the previously documented 0.6.14 was an error, corrected 2026-08-22 after inspecting the measured production image)
 
 ## Local patch
 

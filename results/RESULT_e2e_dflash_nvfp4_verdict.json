@@ -1,0 +1,75 @@
+{
+ "experiment": "E2E DFlash-v1 + NVFP4-KV on RTX5090/sm120 — A-Praxis verdict + memory-fit + perf",
+ "date_utc": "2026-08-21T13:00:00Z",
+ "window": "2026-08-21 ~14:00 CEST, RTX5090/neo26, kernel-nvfp4-noncausal initiative (Kanban #31 A-verdict, #30 companion)",
+ "provenance": {
+  "image": "10.1.0.243/inference/vllm-nvfp4:sm120-shim-6b86a309f",
+  "image_lineage": "vLLM e2a8197a9 (jethac spark) + shim-patch 6b86a309f via ConfigMap; torch 2.13/cu130; flashinfer 0.6.15; triton 3.7.1",
+  "vllm_branch": "kernel/nvfp4-noncausal-shim-b @ f385dca50 (guard-lifts 7c8f60bbf G2 + 756474a97 G1, env-gated)",
+  "guard_lift_env": "VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4=1 (active in spec runs)",
+  "base_model": "/cache/models/qwen3.6-27b-prismaaura55 (qwen3_5 hybrid GDN linear-attn, NVFP4 compressed-tensors, vocab 248320, 64 layers, native MTP=1)",
+  "drafter": "/cache/models/qwen3.6-27b-dflash (DFlashDraftModel v1, block_size 16, mask_token_id 248070, 5 layers, target_layer_ids [1,16,31,46,61], shares base embed+lm_head)",
+  "kv_cache": "nvfp4 via FlashInfer FA2 NVFP4 backend on SM12x + vLLM V-scale-factor deswizzle",
+  "node": "neo26, runtimeClassName nvidia, cgroup limits 40Gi/12cpu/1gpu, PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+ },
+
+ "memory_fit": {
+  "verdict": "SOLVED",
+  "hybrid_kv_floor_gotcha": "This is a hybrid GDN/mamba model: the KV floor is dominated by fixed mamba-state pages + a forced 3056-token attention block granularity (+ up to 25% padding-layer waste), NOT by max_model_len. Floor 2.95 GiB @4096 vs 2.87 GiB @2560 — reducing max-model-len is nearly useless here. Fix = set kv-cache-memory-bytes ABOVE the floor.",
+  "attempts": [
+   {"cfg": "kv=2.0GiB len=4096", "result": "ValueError: 2.95 GiB floor > 2.0 GiB (RCA fixed-KV, profiling skipped)"},
+   {"cfg": "kv=2.6GiB len=2560", "result": "ValueError: 2.87 GiB floor > 2.6 GiB (floor barely moved — hybrid)"},
+   {"cfg": "kv=3.2GiB len=4096", "result": "PASS — engine boots, FA2 NVFP4 backend active, graphs captured 0.18 GiB"},
+   {"cfg": "kv=3.2 len=4096 batched=2048", "result": "AssertionError: Mamba-align block_size 3056 must be <= max_num_batched_tokens (self-inflicted; batched must be >= 3056)"}
+  ],
+  "winning_config": "--kv-cache-dtype nvfp4 --kv-cache-memory-bytes 3435973836 (3.2 GiB) --max-model-len 4096 --max-num-batched-tokens 4096",
+  "kv_pool_with_dflash": "4437 tokens / 1.08x concurrency @ 3.2 GiB",
+  "kv_pool_base_no_spec": "33792 tokens / 8.25x concurrency @ 3.2 GiB",
+  "spec_kv_inflation": "~7.6x — DFlash drafter weights (~3.2 GiB on GPU) + drafter/aux KV layers collapse the pool; this is the recon speed<->kv-max conflict manifesting.",
+  "note_initial_free_memory": "gpu_worker logs 'Initial free memory 30.83 GiB' in all runs even though weights took 24.7 GiB on a 32 GiB card; with --kv-cache-memory-bytes set, profiling is SKIPPED so this number is not real post-weights free memory and must not be used for sizing."
+ },
+
+ "a_praxis_verdict": {
+  "verdict": "NOT A-NO-GO (non-causal NVFP4 path exonerated, but E2E-unproven — blocked upstream)",
+  "reasoning": "The task NO-GO trigger is garbage/NaN/abort INSIDE the non-causal path. That did NOT occur. Positive signals: (1) FlashInfer FA2 NVFP4 backend selected with V-scale deswizzle; (2) the non-causal DFlash drafter graph compiled (eagle_head) and CUDA-graph-captured without raise; (3) the profiling/warmup forward passed. But no drafter OUTPUT could be judged (coherence/determinism/acceptance) because token generation aborts before any accepted token — see blocker. So A is neither GO nor NO-GO from this window; it remains unproven pending the blocker fix.",
+  "acceptance_length": "UNMEASURABLE (no token generated under spec)",
+  "coherence_determinism_under_spec": "UNMEASURABLE (engine dies on first spec step)"
+ },
+
+ "e2e_blocker": {
+  "class": "DFlash x GDN spec-decode runner bug (out of scope: needs a code patch, not memory-fitting/serve-flags)",
+  "signature": "CUDA device-side assert: indexSelectSmallIndex 'srcIndex < srcSelectDimSize' (aten/native/cuda/Indexing.cu:1515) = torch index_select with an out-of-bounds index",
+  "site": "first spec-decode step (fires on the 8-token warmup request), model qwen3_next.forward -> vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py:1344 _forward_core -> causal_conv1d_update (_causal_conv1d_update_kernel JIT-compiled at inference for the 16-token spec-block shape)",
+  "localization": "CUDA_LAUNCH_BLOCKING=1 run pinned the assert to index_select at gpu_model_runner.execute_model (host-orchestrated gather), NOT a flashinfer/attention kernel",
+  "falsifications": {
+   "not_capacity": "fires on an 8-token warmup request (KV pool 4437 tok is ample for 8 tokens)",
+   "not_vocab_mask": "base vocab 248320 == drafter vocab 248320; mask_token_id 248070 in range",
+   "not_n_mismatch": "num_speculative_tokens=15 == drafter block_size(16)-1",
+   "not_seq_count": "identical failure with max_num_seqs=4 and max_num_seqs=1",
+   "not_noncausal_kernel": "no NaN/raise in the FA2 NVFP4 non-causal path; failure is an integer index_select in the GDN/spec plumbing"
+  },
+  "hypothesis": "DFlash proposer likely gathers per-layer target hidden states / GDN conv state with an index derived from raw target_layer_id (up to 62) into a small captured buffer (len ~5), or a spec-block state index, exceeding its dim on the multi-token (16) block. Fix belongs in the image's DFlash/GDN runner code (follow-up, not this window)."
+ },
+
+ "perf_base_nvfp4_no_spec": {
+  "note": "Isolation run (NVFP4-KV, NO dflash) to prove NVFP4-KV serving is E2E-sound and attribute the blocker to spec. Single-stream <100 tok/s is EXPECTED without speculation — >100 is exactly what DFlash would deliver and is what the blocker prevents.",
+  "single_stream_count200_tok_s": 67.4,
+  "single_stream_realistic_tok_s": 67.5,
+  "concurrency_c2_agg_tok_s": 125.3,
+  "concurrency_c4_agg_tok_s": 235.8,
+  "greedy_deterministic": true,
+  "coherent_text": true,
+  "meets_100_toks_single_stream": false
+ },
+
+ "artifacts": {
+  "pvc": "/cache/RESULT_e2e_base_nvfp4_noSpec.json, /cache/e2e-serve.log (last run)",
+  "local": "results/RESULT_e2e_dflash_nvfp4_base_noSpec.json, results/RESULT_e2e_dflash_nvfp4_verdict.json"
+ },
+
+ "open": [
+  "DFlash x GDN index_select OOB in qwen_gdn_linear_attn/spec runner — code fix required; then re-run E2E to get the true A-Praxis verdict (coherence/determinism/acceptance) + spec tok/s.",
+  "Once spec generates: measure single-stream + c=2/c=4 tok/s and accept-length; the DFlash KV pool at 1.08x will likely also need a fit revisit (drafter weights + aux KV inflate ~7.6x).",
+  "Native fa2-NVFP4 non-causal numeric parity vs bf16 on real vLLM pages still unproven (recon Option-A) — separate from this E2E blocker."
+ ]
+}

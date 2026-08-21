@@ -215,3 +215,56 @@ Config-Checks fielen. Build 4 (beide Fixes) läuft. Node durchweg sicher (Prod d
 
 **Nächste Schritte bei BUILD_OK:** kernel-phase2-gpu (A-Verdikt) → e2e-dflash-nvfp4 (Perf) → RESULTs,
 Board, DESIGN-NOTES. Cleanup bis 11:00 UTC PFLICHT (Jobs/ConfigMaps weg, GPU frei), Prod NICHT anfassen.
+
+---
+
+## UPDATE 3 — E2E-Fenster 2026-08-21 (~14:00 CEST, RTX5090/neo26, Image `sm120-shim-6b86a309f`)
+
+**Auftrag:** E2E `e2e-dflash-nvfp4` (DFlash-v1 + NVFP4-KV) memory-fitten + messen. Prod war GitOps-0/0,
+GPU alloc=2 frei. Board Gitea diesmal **erreichbar** (#31 comment 251, #30 comment 252 gepostet).
+
+### TL;DR
+- **A-Praxis: NICHT NO-GO, aber E2E-unbewiesen.** Non-causaler NVFP4-Pfad zeigt **kein NaN/Müll/Abbruch**:
+  FA2-NVFP4-Backend gewählt (V-scale deswizzle), non-causaler Drafter-Graph kompiliert+graph-captured ohne Raise,
+  Profiling-Forward läuft. ABER: kein Drafter-Output beurteilbar — Generation stirbt beim 1. Spec-Schritt.
+- **E2E-Blocker (orthogonal, out-of-scope):** `index_select`-OOB (device-side assert
+  `srcIndex < srcSelectDimSize`) in **GDN `causal_conv1d_update` / DFlash-Spec-Plumbing** — Runner-Code-Bug,
+  NICHT der Kernel, NICHT Memory/Kapazität. Braucht Code-Patch (nicht mein Scope „nur Memory-Fit + messen").
+- **Memory-Fit GELÖST** (s.u.). **Base NVFP4-KV Perf** (ohne Spec) als Beleg: 67 tok/s single, 235 c=4.
+
+### Fit-Arithmetik — Korrektur zur Auftragsannahme
+Der Auftrag nahm KV-Floor ~1.9 GiB @2560 an. FALSCH für dieses **Hybrid-GDN-Modell**: der Floor ist von
+**mamba-state-Pages + erzwungener 3056-Token-Attn-Page (+bis 25% Padding)** dominiert, skaliert **kaum** mit len.
+- kv=2.0 @4096 → ValueError (Floor 2.95). kv=2.6 @2560 → ValueError (Floor **2.87**, kaum gesunken).
+- **kv=3.2 GiB @4096 → PASS.** Engine bootet, FA2-NVFP4-Backend, Graphs 0.18 GiB.
+- Falle: `max-num-batched-tokens` muss **≥ 3056** (Mamba-align block_size) — 2048 → AssertionError.
+- **Winning:** `--kv-cache-dtype nvfp4 --kv-cache-memory-bytes 3435973836 (3.2GiB) --max-model-len 4096 --max-num-batched-tokens 4096`.
+- **Spec-KV-Inflation ~7.6×:** DFlash-Pool **4437 tok/1.08x** vs base **33792/8.25x** @ gleichem 3.2 GiB
+  (Drafter-Gewichte ~3.2 GiB GPU + aux-KV). Genau der recon speed↔kv-max-Konflikt, real.
+- ⚠ `gpu_worker` loggt „Initial free memory 30.83 GiB" in ALLEN Läufen trotz 24.7 GiB Weights auf 32-GiB-Karte —
+  bei gesetztem `--kv-cache-memory-bytes` ist Profiling SKIPPED, die Zahl ist **nicht** real-frei, **nicht zum Sizing nutzen**.
+
+### E2E-Blocker — Beweiskette (4 Boots)
+1. seqs=4: HEALTH OK (420s), 1. Warmup-Request (8 tok) → HTTP 500, EngineDead.
+2. seqs=4 + CUDA_LAUNCH_BLOCKING=1: assert **pinpointed** → `indexSelectSmallIndex srcIndex<srcSelectDimSize`
+   (aten Indexing.cu:1515), an `execute_model` → `index_select` (Host-Gather), **kein Attention-Kernel**.
+   Python-Frame (async) = `qwen_gdn_linear_attn.py:1344 _forward_core → causal_conv1d_update` (16-Token-Spec-Block,
+   `_causal_conv1d_update_kernel` JIT-compiled at inference für die Spec-Shape).
+3. base ohne Spec (Isolation): **Succeeded** — 67.4/67.5 tok/s single, 125.3 c=2, 235.8 c=4, greedy-deterministisch,
+   kohärent. ⇒ NVFP4-KV-Serving E2E-gesund; Blocker = spec-spezifisch.
+4. seqs=1 (Falsifikation): identischer Warmup-500. ⇒ **seq-count-unabhängig.**
+- Falsifiziert: nicht Kapazität (8 tok), nicht Vocab (base==drafter 248320, mask 248070), nicht n (15==block_size-1),
+  nicht seq-count, nicht non-causal-Kernel. **Hypothese:** DFlash gather'd hidden-states/GDN-state mit Index aus
+  rohem `target_layer_id` (bis 62) in kleinen captured-Buffer (~5) → OOB auf dem 16er-Block. Fix = Runner-Code.
+
+### Betrieb/Sicherheit
+- Prod `vllm-qwen38` **nie angefasst** (0/0 GitOps, Restore = Koordinator). Kein Co-Tenant. runtimeClassName nvidia,
+  cgroup 40Gi. Node durchweg sicher (base-Pool 8.25x zeigt reichlich Headroom bei 3.2 GiB).
+- **Cleanup:** alle e2e-Jobs + Reader/Writer-Pod entfernt, ConfigMaps (`vllm-guardlift-overlay`, `e2e-scripts`)
+  belassen (turnkey für Folge-Fenster). GPU frei. Nichts nach GitHub. DESIGN-NOTES §8 lokal committet.
+
+### Nächste Schritte (priorisiert)
+1. **DFlash×GDN `index_select`-OOB im Runner fixen** (`qwen_gdn_linear_attn` spec-gather / target-layer-index) —
+   der einzige Blocker fürs echte A-Verdikt (Acceptance/tok_s unter Spec). Code-Patch, kein Fit.
+2. Nach Fix: E2E messen (single + c2/c4 tok/s, accept-length), DFlash-Pool-Fit revisiten (1.08x zu eng).
+3. Native fa2-NVFP4 non-causal Numerik-Parität vs bf16 auf echten Pages (recon Option-A) bleibt separat offen.

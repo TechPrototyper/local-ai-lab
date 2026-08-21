@@ -1,0 +1,206 @@
+{
+ "kanban": "#31",
+ "date": "2026-08-21",
+ "node": "neo26 / RTX 5090 / sm120",
+ "image": "10.1.0.243/inference/vllm-nvfp4:sm120-shim-6b86a309f",
+ "branch": "kernel/nvfp4-noncausal-shim-b",
+ "context": "prod vllm-qwen38 GitOps 0/0, GPU free, exclusive, no co-tenant",
+ "task": "clear DFlash non-causal drafter-attention seam (dflash.py:335), then measure E2E spec",
+ "headline": "GRAPH MODE now runs E2E: DFlash-v1 + NVFP4-KV speculative decoding compiles and serves on sm120 in graph mode (torch.compile + PIECEWISE cudagraph). Single-stream BREAKS the 100 tok/s bar: count-to-200 373.8 tok/s, realistic prose 101.3 tok/s (vs no-spec graph baseline 67.4/67.5). The prior drafter AOT-compile blocker (PendingUnbackedSymbolNotFound {u0}) is root-caused + fixed (drafter now embeds outside the compiled forward). Eager-mode run kept below as history.",
+ "seam_fix": {
+  "verdict": "FIXED + verified live",
+  "blocker": "drafter non-causal attention seam: dflash.py:335 asserted getattr(attn_metadata,'causal',None) is False on every drafter attention layer, but FlashInferMetadata carried no causal attribute -> None is False failed and the first spec step aborted.",
+  "commits_branch_local": [
+   {
+    "sha": "5843ea3c7",
+    "file": "vllm/v1/attention/backends/flashinfer.py",
+    "change": "add causal:bool=True field to FlashInferMetadata; in build() compute effective_causal once from the Guard #2 gate (env VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4 AND use_fa2_nvfp4_kv AND common_attn_metadata.causal is False) and (a) record it on the metadata, (b) reuse it for prefill_wrapper.plan(causal=...) so planned and recorded modes never diverge. Default True -> byte-identical for every non-DFlash call site.",
+    "effect": "dflash.py:335 metadata assert clears; execution reaches FlashInferImpl.forward"
+   },
+   {
+    "sha": "9575ed9d7",
+    "file": "vllm/v1/attention/backends/flashinfer.py",
+    "change": "Guard #3 (execution side): replace hardcoded `assert prefill_wrapper._causal` (non-DCP BatchPrefill path) with `assert prefill_wrapper._causal == attn_metadata.causal`. Consistency-check for all causal paths (byte-identical), permits non-causal on the env-gated FA2-NVFP4 drafter path.",
+    "effect": "forward-side abort removed; drafter-verify forward executes"
+   }
+  ],
+  "pushed": false,
+  "note": "predecessor's dflash.py:335 hypothesis was the correct seam; it required TWO lifts (metadata pass-through + forward-side assert), on top of the pre-existing Guard #1 (756474a97 supports_non_causal) and Guard #2 (7c8f60bbf plan causal)."
+ },
+ "verification_method": "image sm120-shim-6b86a309f + overlays (tv-shim, vpe-fix, vllm-guardlift-overlay incl. both new commits), serve on neo26 (enforce-eager), VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4=1, expandable_segments, kv-cache-dtype nvfp4, kv-cache-memory-bytes 3.0GiB, len4096, mnbt4096, seqs4, dflash n=15, drafter /cache/models/qwen3.6-27b-dflash, base /cache/models/qwen3.6-27b-prismaaura55. Serve manifest committed: vllm-upstream-work/docs/kernel-initiative/e2e-dflash-nvfp4-serve.yaml",
+ "e2e_spec_numbers": {
+  "measured": true,
+  "mode": "enforce-eager (graph mode blocked; see remaining_blockers[0])",
+  "single_stream_count200_tok_s": 148.4,
+  "single_stream_realistic_tok_s": 42.4,
+  "concurrency_c2_agg_tok_s": 48.2,
+  "concurrency_c4_agg_tok_s": 51.4,
+  "meets_100_bar": true,
+  "meets_100_bar_note": "count-to-200 (high-acceptance predictable output) 148.4 > 100; realistic prose 42.4 is the honest general-traffic floor. Both eager; graph mode would raise these.",
+  "acceptance": {
+   "draft_tokens_total": 16500,
+   "accepted_tokens_total": 2574,
+   "accept_rate_aggregate": 0.156,
+   "mean_accept_length_est": 3.34,
+   "per_position_accepted": {
+    "0": 781,
+    "1": 543,
+    "2": 343,
+    "3": 254,
+    "4": 185,
+    "5": 134,
+    "6": 97,
+    "7": 76
+   },
+   "note": "clean geometric per-position decay -> drafter proposes coherently (not garbage). Aggregate rate dragged down by prose + c2/c4 mix + eager; predictable sequences accept far higher (hence 148 tok/s count200)."
+  },
+  "greedy_deterministic": true,
+  "coherence": "PASS - read: 'The capital of France is Paris ... the capital and most populous city of France.' and a coherent chain-of-thought prime-listing sample; no NaN/garbage/repetition-collapse.",
+  "greedy_sample": "The capital of France is Paris. That is correct. Paris is the capital and most populous city of France."
+ },
+ "kv_pool": {
+  "gpu_kv_cache_tokens": 4385,
+  "max_concurrency_4096": "1.07x",
+  "note": "3.0GiB nvfp4 pool; DFlash spec inflation ~7.6x vs base (recon speed<->kv-max conflict). c2/c4 are memory-starved (preemption) at this pool size + eager -> aggregate throughput does not scale."
+ },
+ "remaining_blockers": [
+  {
+   "id": "drafter_aot_compile_unbacked_symbol",
+   "type": "torch.compile / Dynamo (drafter forward), NOT the kernel, NOT the causal seam",
+   "detail": "with graph mode (default), drafter.dummy_run -> qwen3_dflash forward AOT-compile raises torch.fx.experimental.symbolic_shapes.PendingUnbackedSymbolNotFound: Pending unbacked symbols {u0} not in returned outputs FakeTensor(size=(s72,5120)). A data-dependent (unbacked SymInt) op in the DFlash drafter fake/meta path is not threaded through returned outputs.",
+   "workaround": "--enforce-eager (used for this measurement) -> bypasses AOT compile, spec runs. Graph-mode tok/s (the real >100 target regime) remains unmeasured until this compile bug is fixed in the drafter model (qwen3_dflash.py) / its fake impl.",
+   "status": "RESOLVED (2026-08-21, verified live graph mode) \u2014 see graph_mode section",
+   "resolution": "Root cause: BACKED dynamic shapes (token dim s72 backed), so u0 is a genuine data-dependent unbacked SymInt. Minted by F.embedding -> local_scalar_dense (vocab_parallel_embedding.py:78, torch _subclasses/fake_impls.py:828) because the DFlash drafter embedded input_ids INSIDE its @support_torch_compile forward (qwen3_dflash.py:445), where fake tracing can't prove ids in-range (vpe-fix tp==1 masking under scalar_asserts). u0 (=(s72,5120) output has no u0) -> PendingUnbackedSymbolNotFound. The target avoids this by receiving inputs_embeds (embed outside compile). Fix: DFlashProposer now embeds outside into the cudagraph-stable self.inputs_embeds buffer at both self.model() call sites (dummy_run, build_model_inputs_first_pass), passing inputs_embeds/input_ids=None, mirroring SpecDecodeBaseProposer. Numerically identical; graph mode compiles (drafter 4.9s)."
+  }
+ ],
+ "image_env_note": {
+  "torch": "2.11.0",
+  "torchvision": "0.28.0 (built for torch 2.13 -> torchvision::nms register_fake fails at import); tv-shim .pth wraps the import (text inference uses no vision op)"
+ },
+ "turnkey_configmaps_ns_inference": [
+  "tv-shim",
+  "vpe-fix",
+  "vllm-guardlift-overlay",
+  "e2e-scripts"
+ ],
+ "ops": {
+  "prod_touched": false,
+  "co_tenant": false,
+  "cleanup": "gm-repro (graph-mode diagnostic) + e2e-dflash-nvfp4-gm (graph-mode serve) pods removed after measurement; ConfigMaps retained (vllm-guardlift-overlay updated to 4 keys incl. dflash.py). GPU freed.",
+  "github_push": false,
+  "gitea_comment": "#31"
+ },
+ "history_prior_run": {
+  "note": "predecessor 2026-08-21 earlier: embedding OOB root cause + fix (be990b350), then two downstream blockers. Superseded by this run.",
+  "embedding_fix_commit": "be990b350",
+  "downstream_blockers_then": [
+   {
+    "id": "drafter_workspace_oom",
+    "status": "mitigated (expandable_segments + kv 3.0GiB)"
+   },
+   {
+    "id": "drafter_non_causal_attn",
+    "status": "NOW FIXED (this run: 5843ea3c7 + 9575ed9d7)"
+   }
+  ],
+  "base_nvfp4_kv_no_spec_graph_mode": {
+   "single_stream_tok_s": 67.4,
+   "c2_tok_s": 125.3,
+   "c4_tok_s": 235.8,
+   "note": "graph-mode baseline (no spec) from RESULT_e2e_dflash_nvfp4_base_noSpec.json; not eager, not directly comparable to this run's eager spec numbers"
+  }
+ },
+ "graph_mode": {
+  "verdict": "RUNS E2E in graph mode; single-stream > 100 tok/s bar cleared",
+  "date": "2026-08-21",
+  "enforce_eager": false,
+  "dynamo_root_cause": {
+   "error": "torch.fx.experimental.symbolic_shapes.PendingUnbackedSymbolNotFound: Pending unbacked symbols {u0} not in returned outputs FakeTensor(size=(s72, 5120), bf16)",
+   "ds_type": "BACKED (token dim = backed s72); u0 is a genuine data-dependent unbacked SymInt, NOT input marking",
+   "create_site": "vllm/model_executor/layers/vocab_parallel_embedding.py:78 (F.embedding) -> torch/_subclasses/fake_impls.py:828 local_scalar_dense",
+   "user_stack": "qwen3_dflash.py:445 forward -> :287 embed_input_ids -> VocabParallelEmbedding.forward:501 -> embedding:78",
+   "entry": "gpu_model_runner.profile_run -> _dummy_run -> dflash.py:293 dummy_run -> qwen3_dflash.py:539 forward (compile frame [1/0])",
+   "mechanism": "drafter embeds input_ids INSIDE @support_torch_compile forward; fake F.embedding on not-provably-in-range ids (vpe-fix tp==1 masking, scalar_asserts) emits local_scalar_dense -> orphan u0 absent from output shape -> compute_unbacked_bindings raises. Target avoids it by receiving inputs_embeds (embed outside compile).",
+   "diagnostic": "TORCHDYNAMO_EXTENDED_DEBUG_CREATE_SYMBOL=u0 + TORCH_LOGS=+dynamic on a graph-mode repro pod"
+  },
+  "fix": {
+   "path": "Weg 1 (echter Fix im Drafter-Code), not a compile bypass",
+   "file": "vllm/v1/spec_decode/dflash.py",
+   "commit_branch_local": "962069e51",
+   "change": "In dummy_run and build_model_inputs_first_pass, embed draft ids OUTSIDE the compiled forward into the persistent cudagraph-stable self.inputs_embeds buffer and pass inputs_embeds (input_ids=None), mirroring SpecDecodeBaseProposer (llm_base_proposer.py:859/1526). Numerically identical (same embed_input_ids weights); only moves where embedding runs.",
+   "diff_kernel": "- self.model(input_ids=self.input_ids[:n], positions=..., inputs_embeds=None)\n+ self.inputs_embeds[:n] = self.model.embed_input_ids(self.input_ids[:n])\n+ self.model(input_ids=None, positions=..., inputs_embeds=self.inputs_embeds[:n])",
+   "delivery": "branch-local commit + vllm-guardlift-overlay ConfigMap (now 4 keys: flashinfer.py, envs.py, nvfp4_dequant_shim.py, dflash.py)",
+   "eager_parity": "preserved (numerically identical); prior eager spec run remains valid"
+  },
+  "graph_capture_note": "vLLM auto-downgrades cudagraph_mode FULL_AND_PIECEWISE -> PIECEWISE for spec-decode + FlashInferBackend (AttentionCGSupport.UNIFORM_SINGLE_TOKEN_DECODE) \u2014 built-in constraint. cudagraph_capture_sizes capped to [1,2,4,8,16,24,32,48,64] (prudent per \u00a78 fit pressure); capture used only 0.09 GiB. KV pool unchanged at 3.0GiB; the u0 fix was the whole blocker (no memory tuning needed).",
+  "compile_times": {
+   "target_s": 63.74,
+   "drafter_s": 4.88
+  },
+  "perf": {
+   "single_stream_count200": {
+    "out_tokens": 512,
+    "secs": 1.37,
+    "tok_s": 373.8
+   },
+   "single_stream_realistic": {
+    "out_tokens": 600,
+    "secs": 5.92,
+    "tok_s": 101.3
+   },
+   "concurrency_c2": {
+    "total_out_tokens": 800,
+    "secs": 6.58,
+    "agg_tok_s": 121.7
+   },
+   "concurrency_c4": {
+    "total_out_tokens": 1600,
+    "secs": 13.51,
+    "agg_tok_s": 118.5
+   }
+  },
+  "acceptance": {
+   "cumulative_mixed_battery": {
+    "drafts": 1412,
+    "draft_tokens": 21180,
+    "accepted": 2786,
+    "accept_rate": 0.1315,
+    "mean_accept_length": 2.97
+   },
+   "realistic_prose_clean_delta": {
+    "draft_tokens": 3750,
+    "accepted": 350,
+    "draft_steps": 250,
+    "accept_rate": 0.0933,
+    "mean_accept_length": 2.4
+   },
+   "per_position_first5_accepted_of_1162drafts_at_snapshot": [
+    814,
+    509,
+    323,
+    220,
+    148
+   ],
+   "eager_reference": {
+    "accept_rate": 0.156,
+    "mean_accept_length": 3.34
+   },
+   "note": "acceptance is model-math and unchanged by the fix (embed-outside is numerically identical); graph-vs-eager delta is prompt-mix + minor inductor numerics, not a regression. count-heavy prompts accept much higher (373.8 tok/s) than prose."
+  },
+  "correctness": {
+   "greedy_deterministic_2runs": true,
+   "coherent": true,
+   "greedy_sample_primes": "2, 3, 5, 7, 11, 13, 17, 19, 23, 29",
+   "coherent_prose_head": "<think> ... Paged KV Cache in LLM Inference ..."
+  },
+  "comparison": {
+   "no_spec_graph_baseline": {
+    "single_count200": 67.4,
+    "single_realistic": 67.5,
+    "c2": 125.3,
+    "c4": 235.8
+   },
+   "verdict_100_bar": "CLEARED single-stream (count 373.8, prose 101.3). c2 ~= baseline; c4 regresses vs baseline (KV-pool starvation ~7.6x spec inflation -> preemption at concurrency, per kv_pool note). Single-stream is where DFlash pays off and it now exceeds 100 in graph mode."
+  }
+ }
+}
