@@ -1,0 +1,16 @@
+{
+ "label": "sweep-fp8drafter-n7",
+ "max_tokens": 768,
+ "per": 3,
+ "offset": 200,
+ "sweep": {
+  "8": {
+   "n": 24,
+   "ok": 24,
+   "tokens": 10607,
+   "wall_s": 53.9,
+   "agg_tps": 196.9,
+   "mean_req_tps": 26.6
+  }
+ }
+}
