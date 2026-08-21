@@ -1,0 +1,11 @@
+{
+ "n_paired": 1319,
+ "base_acc": 0.9515,
+ "dflash_acc": 0.9583,
+ "discordant_base_only": 9,
+ "discordant_dflash_only": 18,
+ "mcnemar_exact_p_two_sided": 0.1221,
+ "verdict": "PASS",
+ "base_secs": 16214.1,
+ "dflash_secs": 5892.6
+}
