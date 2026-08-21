@@ -1,0 +1,12 @@
+{
+ "experiment": "Phase (a) block-diffusion non-causal oracle (recon §6 Phase-0, KDEV_BLOCK_DIFFUSION=1)",
+ "host":"neo26 / RTX 5090 (RTX-5090-SHARED, sm120, 32607 MiB, 1 physical GPU time-sliced x2)","cluster":"MyCluster (Flux GitOps, single GPU node)","image":"10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213","image_note":"vLLM build f4c27c0da PREDATES the shim branch (recon HEAD e2a8197a9 / shim HEAD 6b86a309f) — version skew is the dominant finding","runtime":"torch 2.13.0+cu130, flashinfer 0.6.15, triton 3.7.1, nvcc 13.0","window":"2026-08-20/21 night, RTX5090 GPU-window (Kanban #31 A-microprobe + #30 shim)","rca28_compliance":"job resources.limits.memory=16Gi (<60Gi auflage); node MemAvailable watched via /proc/meminfo, min 41.0 GiB over run (never <15 GiB abort gate); phases a-c ran WITHOUT vLLM engine boot (green path per RCA #28 §6a); prod vllm-qwen38 scaled to 0 first (never GPU co-tenant); NOT committed",
+ "harness": "InferenceDream/kdev.py block_diffusion_oracle (self-contained torch, no custom kernel build)",
+ "gate": "dequant-vs-full cos>0.99 for seq in {256,2048,8192,32768}, hs in {128,256}",
+ "verdict": "PASS",
+ "results": {
+  "hs128": {"cos": {"256":0.996377,"2048":0.995588,"8192":0.994786,"32768":0.995788}, "min":0.994786, "gate":"PASS"},
+  "hs256": {"cos": {"256":0.995510,"2048":0.995133,"8192":0.995432,"32768":0.994807}, "min":0.994807, "gate":"PASS"}
+ },
+ "note": "non-causal!=causal(q0) True at seq 256/2048, False at seq>=8192 — benign: at long prefix q0's causal window already covers ~all keys, so causal(q0)~=non-causal(q0) within atol 1e-3 (not a mask failure). Overall BLOCK-DIFFUSION: PASS. Gates the Option-B dequant-SDPA reference math + block-diffusion mask semantics on real GPU."
+}

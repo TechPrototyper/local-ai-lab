@@ -1,0 +1,42 @@
+{
+ "experiment": "E2E DFlash + NVFP4-KV perf (RTX5090)",
+ "image": "sm120-shim-6b86a309f",
+ "model": "qwen36",
+ "config": "ISOLATION: base NVFP4-KV, NO dflash, kv3.2 len4096 (blocker attribution + base perf)",
+ "single_stream_count200": {
+  "out_tokens": 512,
+  "secs": 7.6,
+  "tok_s": 67.4
+ },
+ "single_stream_realistic": {
+  "out_tokens": 600,
+  "secs": 8.89,
+  "tok_s": 67.5
+ },
+ "metrics": {},
+ "concurrency_c2": {
+  "total_out_tokens": 800,
+  "secs": 6.39,
+  "agg_tok_s": 125.3
+ },
+ "concurrency_c4": {
+  "total_out_tokens": 1600,
+  "secs": 6.78,
+  "agg_tok_s": 235.8
+ },
+ "greedy_deterministic": true,
+ "greedy_sample": "\n\n<think>\nThinking Process:\n\n1.  **Identify the user's request:** The user wants a list of the first 10 prime numbers, s",
+ "meets_100_toks": false,
+ "provenance": {
+  "date_utc": "2026-08-21T12:42:20.396240Z",
+  "window": "2026-08-21 ~14:00 CEST, RTX5090/neo26, kernel-nvfp4-noncausal initiative (Kanban #31/#30)",
+  "image": "10.1.0.243/inference/vllm-nvfp4:sm120-shim-6b86a309f",
+  "image_lineage": "vLLM e2a8197a9 (jethac spark) + shim-patch 6b86a309f via ConfigMap; torch2.13/cu130; flashinfer 0.6.15; triton 3.6/3.7.1",
+  "base_model": "/cache/models/qwen3.6-27b-prismaaura55 (qwen3_5 hybrid GDN, NVFP4 compressed-tensors, vocab 248320, 64 layers, native MTP=1)",
+  "kv_cache": "nvfp4 (FlashInfer FA2 NVFP4 backend, SM12x, V-scale deswizzle)",
+  "serve": "--kv-cache-dtype nvfp4 --kv-cache-memory-bytes 3.2GiB --max-model-len 4096 --max-num-seqs 4, NO speculative-config (isolation run)",
+  "kv_pool": "33792 tokens / 8.25x concurrency @ 3.2GiB (vs 4437/1.08x WITH dflash \u2014 spec inflates ~7.6x)",
+  "guard_lift_env": "VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4=1 (inert without spec)",
+  "note": "This is the BASE (no-spec) isolation run \u2014 proves NVFP4-KV serving E2E-sound on sm120 and attributes the DFlash blocker to spec integration."
+ }
+}

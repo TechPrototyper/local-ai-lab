@@ -1,0 +1,12 @@
+{
+ "experiment": "Phase (c) in-tree NVFP4 dequant shim — Triton kernel GPU gate + byte-order",
+ "host":"neo26 / RTX 5090 (RTX-5090-SHARED, sm120, 32607 MiB, 1 physical GPU time-sliced x2)","cluster":"MyCluster (Flux GitOps, single GPU node)","image":"10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213","image_note":"vLLM build f4c27c0da PREDATES the shim branch (recon HEAD e2a8197a9 / shim HEAD 6b86a309f) — version skew is the dominant finding","runtime":"torch 2.13.0+cu130, flashinfer 0.6.15, triton 3.7.1, nvcc 13.0","window":"2026-08-20/21 night, RTX5090 GPU-window (Kanban #31 A-microprobe + #30 shim)","rca28_compliance":"job resources.limits.memory=16Gi (<60Gi auflage); node MemAvailable watched via /proc/meminfo, min 41.0 GiB over run (never <15 GiB abort gate); phases a-c ran WITHOUT vLLM engine boot (green path per RCA #28 §6a); prod vllm-qwen38 scaled to 0 first (never GPU co-tenant); NOT committed",
+ "triton_vs_cpu_self_consistent": {
+  "harness": "shim.dequant_nvfp4_kv_pages_to_bf16 (Triton) vs shim.dequant_nvfp4_side_reference (CPU) on one synthetic page (mirrors tests/v1/spec_decode/test_nvfp4_dequant_shim.py::test_triton_kernel_matches_cpu_reference)",
+  "result": "BLOCKED — Triton CompilationError against image triton 3.7.1 (shim kernel written for the newer branch stack; version skew, NOT a math error)",
+  "gate": "not reached (cos>0.99 could not be evaluated on GPU)"
+ },
+ "offgpu_status": "Per DESIGN-NOTES: 14/14 GPU-free unit tests already PASS (E2M1 LUT==oracle, CPU dequant exact cos=1.0, geometry, scratch shapes/stability/guard, flag routing, block-diffusion mask == SDPA). Shim math is proven off-GPU.",
+ "byte_order_real_page_check": "OPEN — Risiko #1. Requires a genuinely vLLM-quantised NVFP4 page (image op flashinfer_quant_nvfp4_8x4_sf_layout; no reshape_and_cache_nvfp4). Self-consistent packing assumes low-nibble=even (little-endian CUTLASS); this was NOT independently confirmed against vLLM's true nibble/scale byte order tonight. MANDATORY before trusting drafter KV.",
+ "verdict": "(c) OPEN — Triton GPU run blocked by triton-version skew; off-GPU math green; real-page byte-order unverified."
+}

@@ -1,0 +1,68 @@
+{
+  "spike": "NVIDIA Model-Optimizer AutoQuantize feasibility (Kanban #13, precursor to AURA head-to-head)",
+  "date": "2026-08-20",
+  "host": "neo26 / RTX 5090 (sm120, 32GB, single physical card time-sliced x2)",
+  "env": {
+    "vllm": "0.1.dev1+gf4c27c0da.d20260818 (parity build)",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "compressed_tensors_in_image": "0.17.0",
+    "modelopt_installed": "0.46.0"
+  },
+  "gpu_window": {
+    "pattern": "suspended Job -> merge-patch vllm-qwen38 replicas 1->0 -> unsuspend Job (runs alone) -> replicas 1 -> verify",
+    "pause_start": "2026-08-20T19:49:40Z",
+    "job_succeeded": "~19:52Z",
+    "vllm_ready_again": "~19:54:40Z",
+    "outage_minutes": 3.5,
+    "restore_verified": {"health": "HTTP 200", "models": "qwen3.8-27b", "chat_smoke": "ok (fingerprint gf4c27c0da)"},
+    "spec_drift": "none (gen14 = own scale, image unchanged f4c27c0da-t213)"
+  },
+  "feasibility_matrix": {
+    "Q1_serving_modelopt_under_parity_vllm": {
+      "verdict": "BLOCKED for our mixed export; uniform path not yet positively shown",
+      "evidence": "LLM(quantization='modelopt') on our AutoQuantize export FAILED at boot: RuntimeError 'start (0)+length (9728) exceeds dimension size (4864)' in vllm load_merged_column_weight/narrow -> vLLM modelopt loader cannot merge per-layer MIXED_PRECISION (FP8 + W4A16_AWQ packed) gate/up projections.",
+      "fix": "constrain auto_quantize to uniform FP8 (or NVFP4) OR test an official nvidia/*-FP8 checkpoint; ~15 min next window"
+    },
+    "Q2_production_install_and_autoquant": {
+      "verdict": "PASS",
+      "evidence": "pip install nvidia-modelopt[hf] rc=0; torch_before==torch_after==2.13.0+cu130 (NOT clobbered); modelopt_cuda_ext + modelopt_cuda_ext_fp8 compiled on sm120/cu130; mtq.auto_quantize(constraints={effective_bits:5.5}, formats=[FP8,INT4_AWQ], data_loader) ran first-try in 71.8s; real per-layer mixed allocation; export_hf_checkpoint OK.",
+      "export_files": ["config.json","hf_quant_config.json","model.safetensors","generation_config.json","tokenizer.json","tokenizer_config.json","chat_template.jinja"],
+      "env_side_effects": "install bumped transformers->5.14.1 and pulled nvidia-nccl-cu13-2.29.7, datasets-5, deepspeed, peft, diffusers into the parity image (isolate in a separate venv/layer for production)"
+    },
+    "Q3_format_bridge_to_compressed_tensors": {
+      "verdict": "NOT drop-in; converter or native-per-format serving required",
+      "modelopt_export": {
+        "container": "hf_quant_config.json (producer.name=modelopt v0.46.0)",
+        "top": "quantization.quant_algo=MIXED_PRECISION, kv_cache_quant_algo=null",
+        "per_layer": "quantized_layers{ <module>: {quant_algo: FP8 | W4A16_AWQ, group_size:128, has_zero_point:false, pre_quant_scale:true} }",
+        "tensors": "*.weight_scale, *.pre_quant_scale in safetensors"
+      },
+      "compressed_tensors": {
+        "container": "config.json -> quantization_config",
+        "grouping": "config_groups{ group: {weights:{num_bits,type,strategy,group_size}, input_activations:{...}, targets:[...]} } + format (pack-quantized|float-quantized|nvfp4-pack-quantized)",
+        "tensors": "weight_packed, weight_scale, weight_zero_point"
+      },
+      "delta": "different container + different mixed-precision encoding (per-layer algo map vs multiple config_groups with targets). vLLM reads each via its OWN quant path (--quantization modelopt vs auto-detected compressed-tensors), so SERVING does not need conversion once the checkpoint is uniform/loadable; on-disk formats are NOT interchangeable."
+    }
+  },
+  "blockers": [
+    "B1 (serving): vLLM modelopt loader rejects MIXED_PRECISION(FP8+AWQ) merged columns -> use uniform FP8/NVFP4 or official ckpt.",
+    "B2 (env): modelopt install perturbs parity image (transformers 5.14.1 etc) -> production must isolate (venv/build layer).",
+    "B3 (format): no ModelOpt<->compressed-tensors converter; for a fair H2H serve each in its native vLLM quant path and match KV + bit-accounting."
+  ],
+  "head_to_head_design": {
+    "paired": "identical prompts + seeds, temp=0, same base model, same effective 5.5-bit budget, same vLLM parity build + max_model_len + KV dtype",
+    "arms": ["A: AURA/PrismaQuant compressed-tensors 5.5-bit (existing)", "B: ModelOpt AutoQuantize (uniform FP8 baseline first, then mixed once vLLM-loadable)"],
+    "sizes": "n=250 screen -> n=1319 GSM8K confirm (reuse COMPARE_ref_1319 harness); coding.json 591 as 2nd axis",
+    "confounds": [
+      "calibration corpus/size must be identical (NSAMPLES/SEQLEN/dataset)",
+      "KV-cache quant differs (AURA NVFP4-KV vs ModelOpt kv_cache_quant_algo=null) -> match or hold both KV=fp16",
+      "effective-bit DEFINITION differs (ModelOpt counts act? AURA weight-only target_bits) -> reconcile bit accounting before claiming equal budget",
+      "kernel path differs (AWQ vs FP8 vs nvfp4) -> report tok/s separately from quality",
+      "transformers drift from modelopt install -> pin/verify",
+      "per-layer allocation policy is the variable under test -> publish both bit-maps"
+    ]
+  },
+  "artifacts_on_cluster": "quant-results PVC: /workspace/results/modelopt-spike/{RESULT_modelopt_spike.json,env.json,q1_serving.json,q2_autoquant.json,q3_format.json,export-autoquant/,run.log}"
+}

@@ -1,0 +1,20 @@
+{
+ "experiment": "Phase (b) A-microprobe #31 — does flashinfer FA2-NVFP4 paged-prefill carry non-causal over NVFP4 pages?",
+ "host":"neo26 / RTX 5090 (RTX-5090-SHARED, sm120, 32607 MiB, 1 physical GPU time-sliced x2)","cluster":"MyCluster (Flux GitOps, single GPU node)","image":"10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213","image_note":"vLLM build f4c27c0da PREDATES the shim branch (recon HEAD e2a8197a9 / shim HEAD 6b86a309f) — version skew is the dominant finding","runtime":"torch 2.13.0+cu130, flashinfer 0.6.15, triton 3.7.1, nvcc 13.0","window":"2026-08-20/21 night, RTX5090 GPU-window (Kanban #31 A-microprobe + #30 shim)","rca28_compliance":"job resources.limits.memory=16Gi (<60Gi auflage); node MemAvailable watched via /proc/meminfo, min 41.0 GiB over run (never <15 GiB abort gate); phases a-c ran WITHOUT vLLM engine boot (green path per RCA #28 §6a); prod vllm-qwen38 scaled to 0 first (never GPU co-tenant); NOT committed",
+ "kernfrage": "#31 A-GO or A-NO-GO",
+ "attempt_1_checkout_script_as_written": {
+  "call": "BatchPrefillWithPagedKVCacheWrapper(backend=fa2).plan(kv_data_type=\"nvfp4\")",
+  "result": "RED (AttributeError: module 'torch' has no attribute 'nvfp4')",
+  "interpretation": "flashinfer 0.6.15 does NOT accept the string 'nvfp4' as kv_data_type; the checkout microprobe's API assumption is wrong for this build."
+ },
+ "attempt_2_vllm_faithful_direct_kernel": {
+  "call": "kv_data_type=torch.uint8 + data/scale tuple views (nvfp4_split_data_scale) + run(kv_cache_sf=..., k/v_scale=1.0), driving fa2 wrapper directly and BYPASSING vLLM's non-causal+NVFP4 guard",
+  "split_geometry": "k_data [129,16,2,64] uint8 + k_scale [129,16,2,8] float8_e4m3fn — correct NVFP4 page geometry (full_dim 72 = hs/2+hs/16)",
+  "causal_true":  {"ran_without_raise": true, "finite": false, "output": "NaN"},
+  "causal_false": {"ran_without_raise": true, "finite": false, "output": "NaN"},
+  "interpretation": "The fa2 kernel entrypoint ACCEPTS causal=False over NVFP4 uint8 pages WITHOUT raising (ran to completion for both). BUT output is NaN for BOTH causal and non-causal — a FIXTURE artifact: create_kv_caches_with_random_flash writes random fp8 scale bytes (NaN patterns) so a randomly-initialised nvfp4 cache is not kernel-valid. Numeric correctness (the real cos/err-vs-bf16 gate) is therefore UNPROVEN; it needs a genuinely vLLM-quantised page (flashinfer_quant_nvfp4_8x4_sf_layout, image lacks reshape_and_cache_nvfp4)."
+ },
+ "vllm_wiring_guard": "Image backend flashinfer.py:1184-1187 HARD-RAISES NotImplementedError('FlashInfer non-causal attention is not supported with NVFP4 KV cache') — recon §2b Guard #2 as a concrete raise; a _noncausal_prefill_wrapper exists but is steered to non-NVFP4 KV only.",
+ "verdict": "A-NO-GO -> B (for now)",
+ "verdict_detail": "Two independent blockers: (1) kernel numeric correctness over non-causal FP4 UNPROVEN (random-fixture NaN; needs real-page numeric test); (2) vLLM backend explicitly refuses non-causal+NVFP4 (guard must be lifted = Option-A work). The kernel entrypoint does NOT hard-reject non-causal (positive signal), but that is not sufficient for A-GO. Recon default holds: stay on Option B; pursue A only after a real-page numeric parity test + guard-lift, on an image rebuilt at the shim-branch HEAD."
+}

@@ -1,0 +1,72 @@
+{
+  "task": "B1 (follow-up #24) — uniform-FP8 ModelOpt AutoQuantize export served under parity vLLM; positively close Q1 of the #13 spike",
+  "date": "2026-08-20",
+  "host": "neo26 / RTX 5090 (sm120), single physical card time-sliced",
+  "env": {
+    "image": "10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213",
+    "vllm": "0.1.dev1+gf4c27c0da.d20260818 (parity build)",
+    "torch_before": "2.13.0+cu130",
+    "torch_after": "2.13.0+cu130 (NOT clobbered by modelopt install)",
+    "modelopt": "installed via pip nvidia-modelopt[hf], rc=0",
+    "transformers_after": "5.14.1 (modelopt install bump; ephemeral job only)"
+  },
+  "gpu_window": {
+    "pattern": "suspended Job -> merge-patch vllm-qwen38 replicas 1->0 -> unsuspend Job -> (restore) replicas 1 + verify",
+    "pause_start": "2026-08-20T20:05:36Z",
+    "gpu_free": "2026-08-20T20:05:40Z",
+    "restore_patch": "2026-08-20T20:33:58Z (replicas already 1 — Flux had reconciled during the outage)",
+    "vllm_ready_again": "2026-08-20T20:36:45Z (pod rm78h 1/1)",
+    "restore_verified": {
+      "health": "reachable (HTTP 200)",
+      "models": "qwen3.8-27b (root qwen3.8-27b-prismaaqua55, max_model_len 262144)",
+      "chat_smoke": "ok — system_fingerprint vllm-0.1.dev1+gf4c27c0da.d20260818-29d5192b",
+      "spec_drift": "none (image f4c27c0da-t213 unchanged; fingerprint matches parity)"
+    }
+  },
+  "quantize_export": {
+    "verdict": "PASS",
+    "method": "mtq.auto_quantize(model, constraints={effective_bits:8.0}, quantization_formats=[FP8_DEFAULT_CFG], data_loader, forward_step, loss_func, num_calib_steps, num_score_steps)",
+    "effective_bits_note": "constraint raised from 5.5 -> 8.0 because a single 8-bit format (FP8) cannot reach a 5.5-bit budget; with only FP8 in the search space the per-layer allocation resolves to FP8 everywhere == uniform FP8. This is the documented, intended-path adaptation of the task's 'formats=[FP8]' instruction.",
+    "auto_quantize_signature": "(model, constraints=None, quantization_formats=None, data_loader=None, forward_step=None, loss_func=None, forward_backward_step=None, disabled_layers=None, num_calib_steps=512, num_score_steps=128, verbose=False, method='gradient', checkpoint=None, module_search_spaces=None, fixed_quantization_config=None)",
+    "calib": {"file": "/workspace/models/calibration/diverse-v1.jsonl", "nsamples": 32, "seqlen": 512},
+    "quant_seconds": 4.0,
+    "export_seconds": 9.5,
+    "export_dir": "/workspace/results/modelopt-spike/export-uniform-fp8 (on quant-results PVC)",
+    "export_files": ["chat_template.jinja","config.json","generation_config.json","hf_quant_config.json","model.safetensors","tokenizer.json","tokenizer_config.json"],
+    "hf_quant_config": {
+      "quant_algo": "FP8 (top-level, NOT MIXED_PRECISION)",
+      "kv_cache_quant_algo": null,
+      "quantized_layers_map": "empty (uniform export uses a single top-level algo, no per-layer override map) -> export_uniform=true"
+    }
+  },
+  "serving": {
+    "verdict": "Q1 LOAD/ACCEPT = PASS (positive close of the #13 blocker); greedy-generate NOT captured (node freeze evicted the pod pre-generation).",
+    "vllm_boot_evidence_from_log": {
+      "quantization_method_selected": "modelopt  (NOT modelopt_mixed — contrast with the #13 mixed export)",
+      "linear_method": "ModelOptFp8LinearMethod",
+      "kernel": "FlashInferFP8ScaledMMLinearKernel selected",
+      "checkpoint_detect": "modelopt.py:382 'Detected ModelOpt fp8 checkpoint (quant_algo=FP8)'",
+      "weights_loaded": "4.3 GiB in ~1.9 s (no load_merged_column_weight/narrow error)",
+      "kv_cache": "Available KV cache 11.88 GiB -> 86,512 tokens @ 2048/req (42.24x concurrency)",
+      "kernel_autotune": "fp8_gemm autotune completed (21 profiles x rounds)",
+      "reached": "engine reached serving-ready (KV cache + kernel warmup) — the merged-column MIXED_PRECISION crash that blocked the #13 mixed export DID NOT occur"
+    },
+    "generate": "NOT captured — see incident. serve.py was terminated (pod evicted on node NotReady->Ready) after fp8_gemm autotune, before llm.generate() returned/wrote results.",
+    "config_probed": {"quantization": "modelopt", "enforce_eager": true, "max_model_len": 2048, "gpu_memory_utilization": 0.55, "dtype": "bfloat16", "VLLM_ENABLE_V1_MULTIPROCESSING": "0"}
+  },
+  "operational_notes": {
+    "multiproc_spawn_guard": "First (combined) run failed only operationally: vLLM V1 EngineCore uses multiprocessing spawn, which re-imports the driver module; the unguarded top-level driver re-ran auto_quantize in the spawned child then raised the 'start a new process before bootstrapping' RuntimeError. Fix: run vLLM under `if __name__=='__main__'` + VLLM_ENABLE_V1_MULTIPROCESSING=0. quant+export had already succeeded in that run.",
+    "INCIDENT_node_freeze": {
+      "what": "neo26 hard-froze ~23 min: serve pod log advances 20:10:33 (weights loaded) -> 20:33:24 (KV cache) with a 23-min gap; the co-located Talos control plane (etcd/apiserver on 10.1.0.138:6443) was unreachable 20:12:58 -> ~20:32:30 (TCP :6443 open, TLS/request layer wedged = apiserver blocked on etcd).",
+      "correlation": "Froze exactly when vLLM entered the KV-cache memory-profiling phase (gpu_worker profiling forward pass + 11.88 GiB KV reservation). The earlier combined job, killed before this phase, did NOT freeze the node.",
+      "impact": "vllm-qwen38 was at replicas=0 (my scale-down) during the outage; could not be restored until API returned. No reboot/talosctl performed (guarded). Control plane self-recovered ~20:32; Flux had already reconciled vllm-qwen38 back to replicas=1.",
+      "risk": "A confirmatory serve re-run would re-enter the same KV-profiling phase and may re-freeze neo26 + the co-located control plane. NOT attempted unprompted.",
+      "open_question": "Root-cause the neo26 freeze during vLLM KV-cache profiling (system-RAM/IO pressure on the etcd-colocated node?) BEFORE any further RTX serve jobs; consider isolating etcd from the GPU worker."
+    }
+  },
+  "status": "Q1 POSITIVELY CLOSED for load/serve-acceptance (uniform FP8 modelopt export IS accepted by parity vLLM); greedy-generate deferred pending Tim go/no-go due to node-freeze incident.",
+  "artifacts": {
+    "cluster": "quant-results PVC: /workspace/results/modelopt-spike/{export-uniform-fp8/, q1b_uniform_fp8.json (partial, pre-generate), q1b_run.log, q1b_serve.log}",
+    "local": "results/RESULT_modelopt_uniform_fp8_serving.json"
+  }
+}

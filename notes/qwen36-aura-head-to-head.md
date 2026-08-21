@@ -4,7 +4,7 @@
 
 ## What this is
 
-First end-to-end dense 27B run of [PrismaQuant](https://github.com/RobTand/prismaquant)'s AURA pipeline (KL-Fisher bit allocation — Rob Tandler's method) produced on this lab's own hardware: mixed-format NVFP4-MLP + FP8-attention + NVFP4-KV at ~5.5 bpp, allocation NVFP4:264 / BF16:187 / FP8:163 modules. The question: does a self-produced quant reproduce the quality of the maintainer's own reference (`prismaaura55`)?
+First end-to-end dense 27B run of [PrismaQuant](https://github.com/RobTand/prismaquant)'s AURA pipeline (KL-Fisher bit allocation — Rob Tand's method) produced on this lab's own hardware: mixed-format NVFP4-MLP + FP8-attention + NVFP4-KV at ~5.5 bpp, allocation NVFP4:264 / BF16:187 / FP8:163 modules. The question: does a self-produced quant reproduce the quality of the maintainer's own reference (`prismaaura55`)?
 
 Producing it required fixing two bugs in PrismaQuant's layer-streaming forward that surface on transformers >= 5.15 with hybrid linear-attention models (dense causal mask routed into `linear_attention` layers; `.layer_type` → `.block_type` rename from transformers#47630 breaking layer-type resolution). Fix submitted upstream: **[PR #80](https://github.com/RobTand/prismaquant/pull/80)**. PrismaQuant's own lockfile pins transformers 5.8.0, so stock environments never see this — any environment resolving a current transformers does.
 
@@ -49,4 +49,4 @@ Verdict also posted on [PR #80](https://github.com/RobTand/prismaquant/pull/80).
 
 ## Why it matters
 
-Reproducing a quantization method's reference quality from source, on independent hardware, is the strongest evidence a method can get. AURA passed at screening level on the first self-produced 27B. Credit where due: the method, the reference quant, and the pipeline are Rob Tandler's ([@RobTand](https://github.com/RobTand)) work — this lab measures it.
+Reproducing a quantization method's reference quality from source, on independent hardware, is the strongest evidence a method can get. AURA passed at screening level on the first self-produced 27B. Credit where due: the method, the reference quant, and the pipeline are Rob Tand's ([@RobTand](https://github.com/RobTand)) work — this lab measures it.
