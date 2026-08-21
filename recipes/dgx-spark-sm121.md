@@ -27,8 +27,10 @@ Custom sm12x vLLM build carrying the consumer-Blackwell NVFP4-KV line
 contract, and the local build patch are documented in
 [`build-stack.md`](build-stack.md).
 
-> Prebuilt container images are planned — they will replace the
-> source-mount build below. Until then, build from `build-stack.md`.
+> Containers: see [vllm-sm12x](https://github.com/TechPrototyper/vllm-sm12x)
+> — Dockerfiles, entrypoints (first-boot warmup built in) and
+> docker/podman quickstarts are up; prebuilt images follow after the
+> first promoted build. Until then, build from `build-stack.md`.
 
 ## 3. Get the model
 
