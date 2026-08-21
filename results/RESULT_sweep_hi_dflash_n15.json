@@ -1,0 +1,40 @@
+{
+ "label": "sweep-hi-dflash-n15",
+ "max_tokens": 768,
+ "per": 2,
+ "offset": 800,
+ "sweep": {
+  "8": {
+   "n": 16,
+   "ok": 16,
+   "tokens": 8248,
+   "wall_s": 64.5,
+   "agg_tps": 128.0,
+   "mean_req_tps": 22.2
+  },
+  "12": {
+   "n": 24,
+   "ok": 24,
+   "tokens": 9993,
+   "wall_s": 76.9,
+   "agg_tps": 130.0,
+   "mean_req_tps": 16.8
+  },
+  "16": {
+   "n": 32,
+   "ok": 32,
+   "tokens": 13629,
+   "wall_s": 101.3,
+   "agg_tps": 134.5,
+   "mean_req_tps": 12.9
+  },
+  "24": {
+   "n": 48,
+   "ok": 48,
+   "tokens": 19631,
+   "wall_s": 147.8,
+   "agg_tps": 132.8,
+   "mean_req_tps": 9.9
+  }
+ }
+}

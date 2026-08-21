@@ -1,0 +1,24 @@
+{
+ "label": "sweep-nspec23",
+ "max_tokens": 768,
+ "per": 3,
+ "offset": 1100,
+ "sweep": {
+  "1": {
+   "n": 3,
+   "ok": 3,
+   "tokens": 1325,
+   "wall_s": 32.4,
+   "agg_tps": 40.8,
+   "mean_req_tps": 40.0
+  },
+  "8": {
+   "n": 24,
+   "ok": 24,
+   "tokens": 10420,
+   "wall_s": 133.2,
+   "agg_tps": 78.2,
+   "mean_req_tps": 12.1
+  }
+ }
+}

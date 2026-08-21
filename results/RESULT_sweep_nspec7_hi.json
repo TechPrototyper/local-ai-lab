@@ -1,0 +1,32 @@
+{
+ "label": "sweep-nspec7-hi",
+ "max_tokens": 768,
+ "per": 2,
+ "offset": 1300,
+ "sweep": {
+  "12": {
+   "n": 24,
+   "ok": 19,
+   "tokens": 9026,
+   "wall_s": 39.9,
+   "agg_tps": 226.3,
+   "mean_req_tps": 23.0
+  },
+  "16": {
+   "n": 32,
+   "ok": 0,
+   "tokens": 0,
+   "wall_s": 0.0,
+   "agg_tps": 0.0,
+   "mean_req_tps": 0.0
+  },
+  "24": {
+   "n": 48,
+   "ok": 0,
+   "tokens": 0,
+   "wall_s": 0.0,
+   "agg_tps": 0.0,
+   "mean_req_tps": 0.0
+  }
+ }
+}

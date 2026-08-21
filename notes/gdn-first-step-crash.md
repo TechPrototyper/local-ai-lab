@@ -54,6 +54,13 @@ then send exactly one small completion request before the service sees
 parallel traffic. Cost: one request. This closes the first-step window
 deterministically, whatever the root cause turns out to be.
 
-Open: controlled repro (boot + immediate 2-concurrent prefills, expect
-crash; boot + warmup + same load, expect stable), then upstream report
-with the trace.
+**Update 2026-08-21:** the controlled repro came back **negative** —
+restart without warmup + immediate 2-concurrent prefills did *not*
+crash; restart with warmup was stable as expected
+([`results/RESULT_gdn_repro.json`](../results/RESULT_gdn_repro.json)).
+"First step × concurrent prefills" alone is not sufficient; the
+narrowed suspect is a co-factor present at the original incident: a
+short-lived **co-resident container with GPU access** during the first
+step. Repro count stays n=1, the upstream report stays on hold, and the
+warmup stays deployed — it is free and closes the window regardless of
+the exact trigger combination.

@@ -1,0 +1,40 @@
+{
+ "label": "sweep-hi-base",
+ "max_tokens": 768,
+ "per": 2,
+ "offset": 800,
+ "sweep": {
+  "8": {
+   "n": 16,
+   "ok": 16,
+   "tokens": 8377,
+   "wall_s": 138.7,
+   "agg_tps": 60.4,
+   "mean_req_tps": 10.1
+  },
+  "12": {
+   "n": 24,
+   "ok": 24,
+   "tokens": 10076,
+   "wall_s": 121.8,
+   "agg_tps": 82.7,
+   "mean_req_tps": 9.4
+  },
+  "16": {
+   "n": 32,
+   "ok": 32,
+   "tokens": 13444,
+   "wall_s": 120.4,
+   "agg_tps": 111.7,
+   "mean_req_tps": 8.9
+  },
+  "24": {
+   "n": 48,
+   "ok": 48,
+   "tokens": 18941,
+   "wall_s": 134.6,
+   "agg_tps": 140.7,
+   "mean_req_tps": 8.1
+  }
+ }
+}
