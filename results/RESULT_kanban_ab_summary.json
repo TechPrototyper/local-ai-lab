@@ -1,0 +1,4548 @@
+{
+ "arme": {
+  "A": {
+   "label": "armA-dflash2-fp8kv",
+   "ok": 28,
+   "objektiv": 82,
+   "secs": 1617.3
+  },
+  "A2": {
+   "label": "armA2-dflash2-fp8kv-wdh",
+   "ok": 32,
+   "objektiv": 82,
+   "secs": 1474.3
+  },
+  "B": {
+   "label": "armB-nvfp4-baseline",
+   "ok": 35,
+   "objektiv": 82,
+   "secs": 3387.6
+  },
+  "C": {
+   "label": "armC-fp8kv-nospec",
+   "ok": 31,
+   "objektiv": 82,
+   "secs": 3662.7
+  },
+  "A_c1": {
+   "label": "armA-c1-seq",
+   "ok": 29,
+   "objektiv": 82,
+   "secs": 4236.4
+  },
+  "B_c1": {
+   "label": "armB-c1-seq",
+   "ok": 34,
+   "objektiv": 82,
+   "secs": 12766.7
+  }
+ },
+ "paarweise": {
+  "A:B": {
+   "nur_A": 1,
+   "nur_B": 8,
+   "pred_flips": 29,
+   "mcnemar_p": 0.0391
+  },
+  "C:B": {
+   "nur_C": 1,
+   "nur_B": 5,
+   "pred_flips": 25,
+   "mcnemar_p": 0.2188
+  },
+  "C:A": {
+   "nur_C": 4,
+   "nur_A": 1,
+   "pred_flips": 20,
+   "mcnemar_p": 0.375
+  },
+  "A:A2": {
+   "nur_A": 3,
+   "nur_A2": 7,
+   "pred_flips": 24,
+   "mcnemar_p": 0.3438
+  },
+  "B:A2": {
+   "nur_B": 5,
+   "nur_A2": 2,
+   "pred_flips": 25,
+   "mcnemar_p": 0.4531
+  },
+  "A_c1:B_c1": {
+   "nur_A_c1": 0,
+   "nur_B_c1": 5,
+   "pred_flips": 28,
+   "mcnemar_p": 0.0625
+  },
+  "A_c1:A": {
+   "nur_A_c1": 4,
+   "nur_A": 3,
+   "pred_flips": 25,
+   "mcnemar_p": 1.0
+  },
+  "A_c1:A2": {
+   "nur_A_c1": 2,
+   "nur_A2": 5,
+   "pred_flips": 21,
+   "mcnemar_p": 0.4531
+  }
+ },
+ "items_labels_only": {
+  "A": {
+   "A-goal-34": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-34": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-33": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-33": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-32": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-32": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-31": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-31": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-31": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-30": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-30": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-29": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-29": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-28": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-28": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-27": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-27": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-26": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-26": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-26": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-25": {
+    "pred": [],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-25": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-24": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-24": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "A-goal-23": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-23": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-23": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/doing"
+    ],
+    "ok": false
+   },
+   "A-goal-22": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-22": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-21": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-21": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-20": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-20": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-20": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-19": {
+    "pred": [],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-19": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-18": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-18": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-17": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-17": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-17": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-16": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-16": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-15": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-15": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-14": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-14": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-14": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-13": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-13": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-13": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-12": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-12": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-11": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-11": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-10": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max"
+    ],
+    "ok": false
+   },
+   "B-res-10": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-9": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-9": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-8": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-8": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-7": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-7": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-7": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-6": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-6": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-6": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-5": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-5": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-5": {
+    "pred": [],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-4": {
+    "pred": [
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-4": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-4": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-3": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-3": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-3": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-2": {
+    "pred": [
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-2": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-2": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-1": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-1": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-1": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   }
+  },
+  "A2": {
+   "A-goal-34": {
+    "pred": [],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-34": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-33": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-33": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-32": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-32": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-31": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-31": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-31": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-30": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-30": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-29": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-29": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-28": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-28": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "A-goal-27": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-27": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-26": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-26": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-26": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-25": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-25": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-24": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-24": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-23": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-23": {
+    "pred": [],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": false
+   },
+   "C-status-23": {
+    "pred": [],
+    "soll": [
+     "status/doing"
+    ],
+    "ok": false
+   },
+   "A-goal-22": {
+    "pred": [
+     "goal/aussen"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-22": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-21": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-21": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-20": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-20": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-20": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-19": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-19": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-18": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-18": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-17": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-17": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-17": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-16": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-16": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-15": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-15": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-14": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-14": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-14": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-13": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-13": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-13": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-12": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-12": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-11": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-11": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-10": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/kv-max"
+    ],
+    "ok": false
+   },
+   "B-res-10": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-9": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-9": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-8": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-8": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-7": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-7": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-7": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-6": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-6": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-6": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-5": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-5": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-5": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-4": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-4": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-4": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-3": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-3": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-3": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-2": {
+    "pred": [
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-2": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-2": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-1": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-1": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-1": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   }
+  },
+  "B": {
+   "A-goal-34": {
+    "pred": [],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-34": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-33": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-33": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-32": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-32": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-31": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-31": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-31": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-30": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-30": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-29": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-29": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-28": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-28": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-27": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-27": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-26": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-26": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-26": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-25": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-25": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-24": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-24": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-23": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-23": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-23": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/doing"
+    ],
+    "ok": true
+   },
+   "A-goal-22": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-22": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-21": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-21": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-20": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-20": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-20": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-19": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-19": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-18": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-18": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-17": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-17": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-17": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-16": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-16": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-15": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-15": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-14": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-14": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-14": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-13": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-13": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-13": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-12": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-12": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-11": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-11": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-10": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max"
+    ],
+    "ok": false
+   },
+   "B-res-10": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-9": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-9": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-8": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-8": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-7": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-7": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-7": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-6": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-6": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-6": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-5": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-5": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-5": {
+    "pred": [
+     "status/done"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-4": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-4": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-4": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-3": {
+    "pred": [],
+    "soll": [
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-3": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-3": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-2": {
+    "pred": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "ok": true
+   },
+   "B-res-2": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-2": {
+    "pred": [],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-1": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-1": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-1": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   }
+  },
+  "C": {
+   "A-goal-34": {
+    "pred": [],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-34": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-33": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-33": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-32": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-32": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-31": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-31": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-31": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-30": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-30": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-29": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-29": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-28": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-28": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-27": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-27": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-26": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-26": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-26": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-25": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-25": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-24": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-24": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-23": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-23": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-23": {
+    "pred": [],
+    "soll": [
+     "status/doing"
+    ],
+    "ok": false
+   },
+   "A-goal-22": {
+    "pred": [],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-22": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-21": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-21": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-20": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-20": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-20": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-19": {
+    "pred": [],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-19": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-18": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-18": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-17": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-17": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-17": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-16": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-16": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-15": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-15": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-14": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-14": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-14": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-13": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-13": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-13": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-12": {
+    "pred": [],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-12": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-11": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-11": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-10": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/kv-max"
+    ],
+    "ok": false
+   },
+   "B-res-10": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-9": {
+    "pred": [
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-9": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-8": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-8": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-7": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-7": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-7": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-6": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-6": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-6": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-5": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-5": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-5": {
+    "pred": [
+     "status/done"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-4": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-4": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-4": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-3": {
+    "pred": [],
+    "soll": [
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-3": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-3": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-2": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-2": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-2": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-1": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-1": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-1": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   }
+  },
+  "A_c1": {
+   "A-goal-34": {
+    "pred": [],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-34": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-33": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-33": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-32": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-32": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-31": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-31": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-31": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-30": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-30": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-29": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-29": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-28": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-28": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-27": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-27": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-26": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-26": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-26": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-25": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-25": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-24": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-24": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-23": {
+    "pred": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-23": {
+    "pred": [],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": false
+   },
+   "C-status-23": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/doing"
+    ],
+    "ok": false
+   },
+   "A-goal-22": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-22": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-21": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-21": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-20": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-20": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-20": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-19": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-19": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-18": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-18": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-17": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-17": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-17": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-16": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-16": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-15": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-15": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-14": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-14": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-14": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-13": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-13": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-13": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-12": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-12": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-11": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-11": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-10": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/kv-max"
+    ],
+    "ok": false
+   },
+   "B-res-10": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-9": {
+    "pred": [
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-9": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-8": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-8": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-7": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-7": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-7": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-6": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-6": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-6": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-5": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-5": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-5": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-4": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-4": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-4": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-3": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-3": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-3": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-2": {
+    "pred": [
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-2": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-2": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-1": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-1": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-1": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   }
+  },
+  "B_c1": {
+   "A-goal-34": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-34": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-33": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-33": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-32": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-32": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-31": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-31": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-31": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-30": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-30": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-29": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-29": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-28": {
+    "pred": [
+     "goal/betrieb",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-28": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-27": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-27": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-26": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-26": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-26": {
+    "pred": [],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-25": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-25": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-24": {
+    "pred": [
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-24": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "A-goal-23": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-23": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-23": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/doing"
+    ],
+    "ok": false
+   },
+   "A-goal-22": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "ok": true
+   },
+   "B-res-22": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-21": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-21": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-20": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-20": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-20": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-19": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-19": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-18": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-18": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-17": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-17": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-17": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-16": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-16": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-15": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-15": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-14": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb",
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "soll": [
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-14": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-14": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-13": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-13": {
+    "pred": [],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "C-status-13": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-12": {
+    "pred": [
+     "goal/aussen",
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-12": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-11": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-11": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-10": {
+    "pred": [
+     "goal/aussen",
+     "goal/kv-max"
+    ],
+    "soll": [
+     "goal/kv-max"
+    ],
+    "ok": false
+   },
+   "B-res-10": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": false
+   },
+   "A-goal-9": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-9": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "A-goal-8": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": true
+   },
+   "B-res-8": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "A-goal-7": {
+    "pred": [],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-7": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-7": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-6": {
+    "pred": [
+     "goal/aussen",
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/aussen"
+    ],
+    "ok": false
+   },
+   "B-res-6": {
+    "pred": [
+     "keine"
+    ],
+    "soll": [
+     "keine"
+    ],
+    "ok": true
+   },
+   "C-status-6": {
+    "pred": [
+     "status/blocked"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": true
+   },
+   "A-goal-5": {
+    "pred": [],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-5": {
+    "pred": [],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": false
+   },
+   "C-status-5": {
+    "pred": [
+     "status/done"
+    ],
+    "soll": [
+     "status/backlog",
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-4": {
+    "pred": [
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/kv-max",
+     "goal/qualitaet"
+    ],
+    "ok": false
+   },
+   "B-res-4": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-4": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-3": {
+    "pred": [
+     "goal/betrieb"
+    ],
+    "soll": [
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-3": {
+    "pred": [
+     "res/rtx5090"
+    ],
+    "soll": [
+     "res/rtx5090"
+    ],
+    "ok": true
+   },
+   "C-status-3": {
+    "pred": [
+     "status/ready"
+    ],
+    "soll": [
+     "status/blocked"
+    ],
+    "ok": false
+   },
+   "A-goal-2": {
+    "pred": [],
+    "soll": [
+     "goal/qualitaet",
+     "goal/speed"
+    ],
+    "ok": false
+   },
+   "B-res-2": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-2": {
+    "pred": [
+     "status/backlog"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   },
+   "A-goal-1": {
+    "pred": [
+     "goal/qualitaet"
+    ],
+    "soll": [
+     "goal/betrieb"
+    ],
+    "ok": false
+   },
+   "B-res-1": {
+    "pred": [
+     "res/gb10-spark"
+    ],
+    "soll": [
+     "res/gb10-spark"
+    ],
+    "ok": true
+   },
+   "C-status-1": {
+    "pred": [
+     "status/doing"
+    ],
+    "soll": [
+     "status/done"
+    ],
+    "ok": false
+   }
+  }
+ }
+}
