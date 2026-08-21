@@ -1,0 +1,73 @@
+{
+ "head_size": 128,
+ "kv_heads": 4,
+ "tokens": 512,
+ "arms": {
+  "gaussian": {
+   "nvfp4_scale1": {
+    "bulk_rel_l2": 0.09513,
+    "outlier_rel_l2": null
+   },
+   "turboquant_k8v4": {
+    "bulk_rel_l2": 0.09965,
+    "outlier_rel_l2": null,
+    "slot_bytes_aligned": 196
+   },
+   "turboquant_4bit_nc": {
+    "bulk_rel_l2": 0.09965,
+    "outlier_rel_l2": null,
+    "slot_bytes_aligned": 134
+   },
+   "turboquant_3bit_nc": {
+    "bulk_rel_l2": 0.21382,
+    "outlier_rel_l2": null,
+    "slot_bytes_aligned": 102
+   }
+  },
+  "sink_amax42k": {
+   "nvfp4_scale1": {
+    "bulk_rel_l2": 0.10406,
+    "outlier_rel_l2": 0.93598
+   },
+   "turboquant_k8v4": {
+    "bulk_rel_l2": 244.89349,
+    "outlier_rel_l2": 0.0,
+    "slot_bytes_aligned": 196
+   },
+   "turboquant_4bit_nc": {
+    "bulk_rel_l2": 244.89349,
+    "outlier_rel_l2": 0.0,
+    "slot_bytes_aligned": 134
+   },
+   "turboquant_3bit_nc": {
+    "bulk_rel_l2": 524.79462,
+    "outlier_rel_l2": 0.0,
+    "slot_bytes_aligned": 102
+   }
+  },
+  "sink_amax125k": {
+   "nvfp4_scale1": {
+    "bulk_rel_l2": 0.10406,
+    "outlier_rel_l2": 0.97848
+   },
+   "turboquant_k8v4": {
+    "bulk_rel_l2": Infinity,
+    "outlier_rel_l2": Infinity,
+    "slot_bytes_aligned": 196
+   },
+   "turboquant_4bit_nc": {
+    "bulk_rel_l2": Infinity,
+    "outlier_rel_l2": Infinity,
+    "slot_bytes_aligned": 134
+   },
+   "turboquant_3bit_nc": {
+    "bulk_rel_l2": Infinity,
+    "outlier_rel_l2": Infinity,
+    "slot_bytes_aligned": 102
+   }
+  }
+ },
+ "bytes_per_token_head": {
+  "nvfp4_v_only": 72
+ }
+}
