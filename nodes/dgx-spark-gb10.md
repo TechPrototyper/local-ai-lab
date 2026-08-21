@@ -37,7 +37,7 @@ uncalibrated KV — [why](../README.md#findings-so-far)).
 
 | Service | Model | Precision | Why this one |
 |---|---|---|---|
-| Chat/agent LLM | Qwen3.8-27B (AQUA quant) | NVFP4 weights + NVFP4 KV | Best dense quality that fits with room to spare; 4-bit KV stretches the 20 GiB KV pool to ~966k tokens ≈ 3.7 × 262k-token sessions; prefix caching on (agents re-send huge contexts) |
+| Chat/agent LLM | Qwen3.8-27B (AQUA quant) | NVFP4 weights + fp8 KV + **DFlash2 speculation** (draft length 7) | Best dense quality that fits; since 2026-08-21 with block-diffusion speculation in production — ~4× single-stream on reasoning traffic, up to ~227 tok/s aggregate, quality verdict-equal. fp8 KV is DFlash2's price: 20 GiB pool = ~443k tokens ≈ 1.7 × 262k sessions (was ~966k at NVFP4); prefix caching on |
 | Embedder | Qwen3-Embedding 8B | FP8 | Big-model retrieval quality at half the bytes; embedding is prefill-only, so the bandwidth ceiling barely hurts. **Currently paused** — see note ¹ |
 | Reranker | Qwen3-Reranker | FP8 | Served as a **real rerank API** (`POST /rerank`, server-side score template) — clients send query + documents, get scores, no prompt assembly on the client |
 | Reranker (light) | bge-reranker-v2-m3 | — | Cheap multilingual second stage when the big reranker is overkill |

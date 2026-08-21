@@ -1,6 +1,8 @@
 # DGX Spark / GB10 (sm_121) — quality → speed → memory
 
-Same 27B and same NVFP4 KV cache as the RTX recipe — opposite dials.
+Same 27B as the RTX recipe — opposite dials, and since 2026-08-21 a
+different KV dtype: fp8, the price of DFlash2 speculation (the RTX keeps
+NVFP4 KV and no speculation — memory-bound boxes trade the other way).
 Here memory is abundant (128 GB unified), so it is spent on long context
 and many parallel sessions ([framing](../README.md#the-framing)). If you
 have a GB10, this is the path: get the stack, pull the model, serve, warm
@@ -48,7 +50,8 @@ current production checkpoint.
 ```
 vllm serve rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm \
   --served-model-name qwen3.8-27b \
-  --kv-cache-dtype nvfp4 \
+  --kv-cache-dtype fp8 \
+  --speculative-config '{"method":"dflash","model":"<dflash2-drafter-path>","num_speculative_tokens":7}' \
   --enable-prefix-caching \
   --max-model-len 262144 \
   --max-num-seqs 32 \
@@ -59,7 +62,12 @@ vllm serve rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm \
   --reasoning-parser qwen3
 ```
 
-Container-level cap (`docker run`): `--memory=32g --memory-swap=32g`.
+Container-level cap (`docker run`): `--memory=48g --memory-swap=48g` —
+the DFlash2 config needs more than the old 32g: spec decode widens the
+CUDA-graph capture palette (max size 64 → 512) and the transient compile
+peak (~20 GiB observed) plus drafter weights killed the engine core
+*silently* under tighter caps (a SIGKILL leaves no Python traceback —
+if the core dies with zero ERROR lines, suspect the cgroup first).
 
 Key decisions, each measured:
 
@@ -83,12 +91,28 @@ Key decisions, each measured:
   *first* and cap their CUDA-graph capture sizes — default capture costs
   ~5 GiB *per service* — so the LLM's explicit pool math holds
   ([node profile](../nodes/dgx-spark-gb10.md#serving-stack)).
-- **MTP speculative decoding is OFF** (since 2026-08-09): `qwen3_5_mtp`
-  combined with tool-calling produced empty answers / aborting tool-call
-  chains on this box only. Kept reversible, commented in the source script:
-  `--speculative-config '{"method":"qwen3_5_mtp","num_speculative_tokens":2}'`
-  ([note](../notes/mtp-tool-calling.md)). DFlash2 is the live spec-decode
-  candidate instead — see Known limits.
+- **Speculative decoding is DFlash2, draft length 7** (adopted
+  2026-08-21, replacing "MTP off" as the box's speculation stance): every
+  gate passed at verdict level — GSM8K n=1319 paired p=0.122, tool-calling
+  byte-identical to the non-speculative canon, faster at every measured
+  concurrency ≤24 with n=7 (single ~42 tok/s on reasoning-heavy prompts,
+  ~20 on free prose — acceptance is content-dependent; aggregate up to
+  ~227 tok/s) ([verdict](../notes/dflash2-full-split-verdict.md) ·
+  [draft-length map](../notes/dflash2-draft-length-map.md)). **Never raise
+  the draft length for agent traffic** — n=15 plateaus and inverts against
+  baseline around c≈20; n=7 never inverted in the measured range.
+- **The fp8 KV cache is the price of DFlash2** — the drafter's non-causal
+  attention cannot read NVFP4 KV on sm12x. Quality cost: none detected at
+  verdict level. Capacity cost: the 20 GiB pool drops from ~966k to
+  **~443k tokens ≈ 1.7 × 262k sessions** (drafter layers share the pool).
+  The old MTP config stays documented for the record
+  ([note](../notes/mtp-tool-calling.md)) — its tool-calling failure was
+  parser-path-specific, not "speculation" (README finding 2026-08-20).
+- **Requires the DFlash2 source line** until vLLM
+  [#52816](https://github.com/vllm-project/vllm/pull/52816)/[#52883](https://github.com/vllm-project/vllm/pull/52883)
+  merge: the sm12x build plus 10 cherry-picked commits — branch
+  [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121)
+  on this lab's vLLM fork.
 
 ## 5. First boot discipline
 
@@ -120,8 +144,10 @@ Expect **126**. Screening quality on this box: **GSM8K n=250 = 96.8%**
 reference confirmed at 95.00% (n=1319).
 
 Confirm the KV pool at startup in vLLM's log: `GPU KV cache size: … tokens`
-should report on the order of **966k tokens**, and `Maximum concurrency for
-262,144 tokens per request` ≈3.7×. If it is far smaller, KV is not actually
+should report on the order of **443k tokens** (fp8 + drafter; the old
+NVFP4-only config reported ~966k). Speculation health: after warm traffic,
+`grep SpecDecoding` should show mean acceptance length ≈5 on
+reasoning-heavy prompts. If the pool is far smaller, KV is not actually
 NVFP4 or a resident neighbor ate the pool (see the `--kv-cache-memory-bytes`
 note above).
 
