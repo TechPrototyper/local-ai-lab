@@ -38,7 +38,7 @@ contract, and the local build patch are documented in
 rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm
 ```
 
-Rob Tandler's ([@RobTand](https://github.com/RobTand)) PrismaQuant **AQUA**
+Rob Tand's ([@RobTand](https://github.com/RobTand)) PrismaQuant **AQUA**
 mixed-precision export of Qwen3.8-27B: NVFP4 weights + FP8 attention,
 ~5.5 bpp, `compressed-tensors`, Apache-2.0. **~24 GB on disk** (5
 safetensors shards, ~22 GiB); vLLM downloads it on the first
