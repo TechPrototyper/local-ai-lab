@@ -59,8 +59,15 @@ bare `F.linear`, bypassing the quant method
 fixes for both.** A fellow GB10 operator also reproduced the
 acceptance-neutrality independently (BF16 4.24 / INT8 4.16 / FP8 4.24
 acceptance length — with the quantized drafters slightly *faster*,
-43.8 vs 41.3 tok/s: bandwidth pays). Next here: test #53122 on this
-lab's sm121 line, then the full-fp8 drafter (−1.6 GB).
+43.8 vs 41.3 tok/s: bandwidth pays). Tested the same day: **#53122 works on this line.** Full-fp8 drafter
+(all 35 projections, per-channel weights): single-stream **42.5 tok/s**
+(bf16: 38–42), c=8 aggregate **205.2** (bf16: 179), acceptance
+5.05/57.8% (bf16: 5.11/58.7%) — acceptance-neutral, slightly faster,
+**−1.6 GB**. One wrinkle reported back to the PR: the context-KV
+dequant path requires **per-channel** scales; a per-tensor checkpoint
+(scalar-per-shard `weight_scale (3,)` on fused qkv) fails with a clear
+error. Results thread:
+[#52816 comment](https://github.com/vllm-project/vllm/pull/52816#issuecomment-5378564385).
 
 ## Where this lands
 
