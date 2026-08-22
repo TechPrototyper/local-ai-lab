@@ -64,3 +64,14 @@ short-lived **co-resident container with GPU access** during the first
 step. Repro count stays n=1, the upstream report stays on hold, and the
 warmup stays deployed — it is free and closes the window regardless of
 the exact trigger combination.
+
+**Update 2026-08-22:** the co-factor hypothesis is now also tested —
+restart without warmup + a concurrently-launched GPU container (vLLM
+device init, as at the original incident) + two concurrent prefills:
+**no crash**. The incident stays n=1 with two eliminated hypotheses; the
+warmup mitigation stays as cheap insurance. Bonus pitfall for anyone
+building crash detectors: `docker restart` makes the *stopping* server
+log an `EngineDeadError` shutdown artifact, and container logs survive
+restarts — our detector initially reported "REPRODUCED" from exactly
+that line. Filter crash greps from the container's `StartedAt`, not from
+a mark taken before the restart.
