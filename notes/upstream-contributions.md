@@ -94,3 +94,24 @@ and outcomes only — no evaluation of the projects or their maintainers.
   existence is not a compatibility gate; screening greenness only certifies
   exercised paths) recorded in
   [`prismaquant-pr80-review-cycle.md`](prismaquant-pr80-review-cycle.md).
+
+## vLLM #52816 — quantized DFlash2 drafters: fused-scale loading gap
+
+- **2026-08-22** — reported ([comment](https://github.com/vllm-project/vllm/pull/52816#issuecomment-5376688332))
+  after the drafter-quant experiment: quantized draft checkpoints load
+  only when the quantized layers are unfused; fused qkv/gate_up
+  `weight_scale` loading resolves the module instead of the parameter.
+  Includes the acceptance-neutral motivation (drafter quantization is
+  quality-risk-free by construction) and an sm121 test offer. Backing
+  measurement: [`dflash2-drafter-fp8-quant.md`](dflash2-drafter-fp8-quant.md).
+
+## vLLM #53334 — TurboQuant KV: two observations
+
+- **2026-08-22** — filed ([issue](https://github.com/vllm-project/vllm/issues/53334)):
+  (1) hybrid linear-attention models fail engine init
+  (`Unknown TurboQuant cache dtype: 'auto'`) — asked whether unsupported
+  by intent; (2) the value path's fp16 zero-point silently overflows to ∞
+  on |min| > 65504 (probe-level, deterministic repro; measured real-world
+  sinks reach ~125k). Suggested fp32 scale/zero (+4 B/vector) or a
+  clamp-with-warning. Backing probe:
+  [`turboquant-vs-nvfp4-kv-value-probe.md`](turboquant-vs-nvfp4-kv-value-probe.md).
