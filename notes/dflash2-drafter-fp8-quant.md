@@ -71,11 +71,11 @@ error. Results thread:
 
 ## Where this lands
 
-- The partial fp8 drafter (10 of 35 linears) saves 0.55 GB at zero
-  acceptance cost — deployable, but the full win (~1.6 GB, plus
-  bandwidth) waits on the fused-scale fix.
-- The fix itself is a bounded patch to the draft-model loading path (or
-  an upstream report with this note as the repro).
+- **Deployed in production 2026-08-22:** the full-fp8 drafter (with
+  #53122 cherry-picked onto the serving line) runs in prod; the freed
+  1.6 GB went into the KV pool — **21.6 GiB = 478,334 tokens**, verified
+  at 45.6 tok/s single-stream, acceptance 5.60. The partial
+  (unfused-only) variant is retired.
 - An NVFP4-weight variant (W4A16) would roughly double the savings, but
   inherits the same fused-scale gap *plus* an open kernel question on
   sm12x — fp8 first, then revisit.

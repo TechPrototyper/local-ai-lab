@@ -53,12 +53,12 @@ current production checkpoint.
 vllm serve rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm \
   --served-model-name qwen3.8-27b \
   --kv-cache-dtype fp8 \
-  --speculative-config '{"method":"dflash","model":"<dflash2-drafter-path>","num_speculative_tokens":7}' \
+  --speculative-config '{"method":"dflash","model":"<dflash2-drafter-fp8-path>","quantization":"compressed-tensors","num_speculative_tokens":7}' \
   --enable-prefix-caching \
   --max-model-len 262144 \
   --max-num-seqs 32 \
   --gpu-memory-utilization 0.44 \
-  --kv-cache-memory-bytes 21474836480 \
+  --kv-cache-memory-bytes 23192823808 \
   --enable-chunked-prefill --max-num-batched-tokens 16384 \
   --enable-auto-tool-choice --tool-call-parser qwen3_coder \
   --reasoning-parser qwen3
@@ -105,8 +105,9 @@ Key decisions, each measured:
   baseline around c≈20; n=7 never inverted in the measured range.
 - **The fp8 KV cache is the price of DFlash2** — the drafter's non-causal
   attention cannot read NVFP4 KV on sm12x. Quality cost: none detected at
-  verdict level. Capacity cost: the 20 GiB pool drops from ~966k to
-  **~443k tokens ≈ 1.7 × 262k sessions** (drafter layers share the pool).
+  verdict level. Capacity cost vs. the NVFP4-only config: ~966k → ~443k
+  tokens at 20 GiB; since 2026-08-22 the pool runs at **21.6 GiB =
+  478,334 tokens** — funded by quantizing the drafter (below).
   The old MTP config stays documented for the record
   ([note](../notes/mtp-tool-calling.md)) — its tool-calling failure was
   parser-path-specific, not "speculation" (README finding 2026-08-20).
@@ -115,6 +116,21 @@ Key decisions, each measured:
   merge: the sm12x build plus 10 cherry-picked commits — branch
   [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121)
   on this lab's vLLM fork.
+
+- **The drafter itself is fp8-quantized** (since 2026-08-22): all decoder
+  projections, **per-channel weights** + dynamic activations,
+  compressed-tensors, declared via `"quantization":
+  "compressed-tensors"` in the speculative config. Acceptance-neutral
+  (5.05–5.60 vs 5.11 bf16), slightly *faster* (bandwidth-bound drafter),
+  and −1.6 GB — which this recipe hands to the KV pool. Two hard
+  requirements: (1) the fused-scale loading fixes from
+  [vllm#53122](https://github.com/vllm-project/vllm/pull/53122) (carried
+  on the lab's [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121)
+  branch), and (2) **per-channel scales** — per-tensor checkpoints fail
+  in the context-KV dequant (scalar-per-shard scale cannot map onto the
+  K/V slices). The path here: graph-free tensor-level RTN, no
+  calibration — drafter quality can only affect speed, never output
+  ([`notes/dflash2-drafter-fp8-quant.md`](../notes/dflash2-drafter-fp8-quant.md)).
 
 ## 5. First boot discipline
 
@@ -146,8 +162,8 @@ Expect **126**. Screening quality on this box: **GSM8K n=250 = 96.8%**
 reference confirmed at 95.00% (n=1319).
 
 Confirm the KV pool at startup in vLLM's log: `GPU KV cache size: … tokens`
-should report on the order of **443k tokens** (fp8 + drafter; the old
-NVFP4-only config reported ~966k). Speculation health: after warm traffic,
+should report on the order of **478k tokens** (21.6 GiB fp8, fp8 drafter;
+the old NVFP4-only config reported ~966k at 20 GiB). Speculation health: after warm traffic,
 `grep SpecDecoding` should show mean acceptance length ≈5 on
 reasoning-heavy prompts. If the pool is far smaller, KV is not actually
 NVFP4 or a resident neighbor ate the pool (see the `--kv-cache-memory-bytes`
