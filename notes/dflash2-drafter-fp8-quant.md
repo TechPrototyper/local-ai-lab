@@ -44,11 +44,23 @@ AttributeError: 'MergedColumnParallelLinear' object has no attribute 'data'
 — the per-shard `weight_scale` loading resolves to the module instead of
 the parameter (same failure for channel and per-tensor strategies; the
 scheme matching itself works). The unfused projections (`o_proj`,
-`down_proj`) load and run cleanly, which isolates the gap precisely:
-**the DFlash2 draft-model line has never loaded a quantized checkpoint
-with fused-layer scales**. Plausibly an upstream gap in the open PR line
-([vllm#52816](https://github.com/vllm-project/vllm/pull/52816)) —
-quantized drafters are an obvious follow-on nobody has tested yet.
+`down_proj`) load and run cleanly, which isolates the gap precisely.
+
+**Update 2026-08-22 (upstream reply):** the gap was already known and
+has numbers — the draft quant config never reaches
+`packed_modules_mapping` ([vllm#53116](https://github.com/vllm-project/vllm/issues/53116);
+the misleading AttributeError is
+[#53107](https://github.com/vllm-project/vllm/issues/53107)), and a
+**second wall** sits behind it that our unfused-only arm never touched:
+DFlash's fused context-KV precompute applies `qkv_proj.weight` with a
+bare `F.linear`, bypassing the quant method
+([#51581](https://github.com/vllm-project/vllm/issues/51581)).
+**[PR #53122](https://github.com/vllm-project/vllm/pull/53122) carries
+fixes for both.** A fellow GB10 operator also reproduced the
+acceptance-neutrality independently (BF16 4.24 / INT8 4.16 / FP8 4.24
+acceptance length — with the quantized drafters slightly *faster*,
+43.8 vs 41.3 tok/s: bandwidth pays). Next here: test #53122 on this
+lab's sm121 line, then the full-fp8 drafter (−1.6 GB).
 
 ## Where this lands
 
