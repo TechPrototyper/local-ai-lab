@@ -1,0 +1,1 @@
+{"8k": {"prompt_tokens": 22054, "cached": 0, "secs": 14.92, "prefill_tps": 1479}, "24k": {"prompt_tokens": 66183, "cached": 0, "secs": 56.34, "prefill_tps": 1175}, "64k": {"prompt_tokens": 176204, "cached": 0, "secs": 223.52, "prefill_tps": 788}}

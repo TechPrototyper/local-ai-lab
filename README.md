@@ -85,6 +85,10 @@ Newest first.
   carry patches, skill maintenance
 - **`platform/`** — the agent-platform track: multi-user cell
   architecture, escalation, pseudonymization boundary
+- **`models/`** — one background page per model-and-config state: facts,
+  quantization rationale, how to start, measured KPIs and quality — the
+  page a published model card links to (the card itself links to the
+  container)
 - **`nodes/`** — profiles of the lab's machines: production setup, model
   selection rationale, and what each box does besides research
 - **`probes/`** — model-free kernel round-trip studies (run against an installed
@@ -114,6 +118,7 @@ per change to this repo. Newest first.
 | 2026-08-20 | DFlash2 n=250 gate note + raw JSONs added; Next-up item rolled forward (hybrid, batch sweep, n=1319) | the gate that first-light left open is now measured — and it passed | [`notes/dflash2-n250-gate-2026-08-20.md`](notes/dflash2-n250-gate-2026-08-20.md) |
 | 2026-08-20 | GPTQ-ablation + online-Hadamard probes added (scripts, raw JSONs, note); "Next up" item graduated into Findings | the two #2936 follow-up questions are now measured, not argued | [`notes/nvfp4-kv-gptq-online-hadamard.md`](notes/nvfp4-kv-gptq-online-hadamard.md) |
 | 2026-08-20 | "Next up" section added (dated working set, graduates into Findings); n=1319 verdict backfilled into the AURA head-to-head note + Findings row, raw JSONs added; Laguna NVFP4-vs-INT4 same-model note added | the repo mirrors a running process — the documented state must match reality, including what is being measured *now* | [`notes/qwen36-aura-head-to-head.md`](notes/qwen36-aura-head-to-head.md) · [`notes/laguna-nvfp4-vs-int4.md`](notes/laguna-nvfp4-vs-int4.md) |
+| 2026-08-22 | `models/` added — per-state background pages for model cards; first page: Qwen3.8-27B AQUA + DFlash2 on GB10 with fresh card KPIs (decode 42/73/87/111 tok/s at 1–4 sessions; prefill 1,479→788 tok/s over 22k→176k; **device-max KV verified: 1,771,995 tokens** at 80 GiB fp8 per the 112-GB rule) | model cards for media need a stable, citable companion page per state — not an evolution scavenger hunt | [`models/qwen38-27b-aqua-dflash2-gb10-2026-08.md`](models/qwen38-27b-aqua-dflash2-gb10-2026-08.md) |
 | 2026-08-22 | Full-fp8 drafter deployed in production (with [#53122](https://github.com/vllm-project/vllm/pull/53122) cherry-picked); its −1.6 GB moved into the KV pool: **21.6 GiB = 478k tokens**, 45.6 tok/s single-stream verified; recipe + node profile updated; results reported upstream ([thread](https://github.com/vllm-project/vllm/pull/52816#issuecomment-5378564385)) | the upstream reply arrived with the fix in hand — validated same day, adopted on operator go | [`recipes/dgx-spark-sm121.md`](recipes/dgx-spark-sm121.md) |
 | 2026-08-22 | Two upstream reports filed and recorded: the DFlash2 fused-scale gap ([#52816 comment](https://github.com/vllm-project/vllm/pull/52816#issuecomment-5376688332)) and the TurboQuant observations ([vllm#53334](https://github.com/vllm-project/vllm/issues/53334)) | findings that affect upstream get reported once verified — with repros and test offers | [`notes/upstream-contributions.md`](notes/upstream-contributions.md) |
 | 2026-08-22 | GDN note updated: co-factor repro also negative (incident stays n=1, two hypotheses eliminated); crash-detector pitfall recorded (`docker restart` logs a shutdown `EngineDeadError` that survives into the new container life — filter from `StartedAt`) | a false "REPRODUCED" from our own detector is worth documenting as much as the result | [`notes/gdn-first-step-crash.md`](notes/gdn-first-step-crash.md) |

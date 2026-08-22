@@ -1,0 +1,24 @@
+{
+ "label": "card-kpi-redo",
+ "max_tokens": 768,
+ "per": 3,
+ "offset": 700,
+ "sweep": {
+  "2": {
+   "n": 6,
+   "ok": 6,
+   "tokens": 2380,
+   "wall_s": 32.6,
+   "agg_tps": 73.0,
+   "mean_req_tps": 39.7
+  },
+  "3": {
+   "n": 9,
+   "ok": 9,
+   "tokens": 3948,
+   "wall_s": 45.4,
+   "agg_tps": 87.0,
+   "mean_req_tps": 34.6
+  }
+ }
+}
