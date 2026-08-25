@@ -53,21 +53,27 @@ so it persists.
 ## Quickstart (DGX Spark / GB10, arm64)
 
 ```bash
+# Pin the image by digest (immutable — not the mutable tag):
+docker pull ghcr.io/techprototyper/vllm-sm12x@sha256:3d8c7273a22ca1451de7dc1a8ec32fba29ec9a8da70a7dd857a00d3df6d0785a
+
 docker run -d --name vllm-spark --restart unless-stopped \
   --gpus all --ipc=host --memory=64g --memory-swap=64g -p 8000:8000 \
   -v ~/hf-cache:/root/.cache/huggingface \
   -e FLASHINFER_DISABLE_VERSION_CHECK=1 \
   -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   --entrypoint python3 \
-  ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-f4c27c0da \
+  ghcr.io/techprototyper/vllm-sm12x@sha256:3d8c7273a22ca1451de7dc1a8ec32fba29ec9a8da70a7dd857a00d3df6d0785a \
   -m vllm.entrypoints.openai.api_server \
-  --model rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm --served-model-name qwen3.8-27b \
-  --trust-remote-code --reasoning-parser qwen3 \
+  --model rdtand/Qwen3.8-27B-PrismaAQUA-5.5bit-vllm \
+  --revision 6dc090346f4f32acc320e48d9c413ea96a98d4c6 \
+  --tokenizer-revision 6dc090346f4f32acc320e48d9c413ea96a98d4c6 \
+  --served-model-name qwen3.8-27b \
+  --reasoning-parser qwen3 \
   --enable-auto-tool-choice --tool-call-parser qwen3_coder \
   --generation-config vllm \
   --override-generation-config '{"temperature":1.0,"top_p":0.95,"top_k":20}' \
   --kv-cache-dtype fp8 \
-  --speculative-config '{"method":"dflash","model":"TechPrototyper/Qwen3.8-27B-DFlash2-fp8-vllm","quantization":"compressed-tensors","num_speculative_tokens":7}' \
+  --speculative-config '{"method":"dflash","model":"TechPrototyper/Qwen3.8-27B-DFlash2-fp8-vllm","revision":"a59c3ad40eab93501e7704dfe154e7c33e6633ff","quantization":"compressed-tensors","num_speculative_tokens":7}' \
   --enable-prefix-caching --max-model-len 262144 --max-num-seqs 32 \
   --gpu-memory-utilization 0.6 --enable-chunked-prefill --max-num-batched-tokens 16384 \
   --host 0.0.0.0 --port 8000
@@ -94,12 +100,22 @@ curl -s http://localhost:8000/v1/chat/completions -H 'Content-Type: application/
 | Single-stream | ~39–47 tok/s |
 | Prefix caching | enabled, but **does not hit under speculation** on this hybrid-GDN model (Mamba `align` mode) — a known engine limit, not a correctness issue |
 
+## Supply chain
+
+The quickstart pins the image by `@sha256` digest and the model / tokenizer /
+drafter by **commit revision** — exactly the bytes verified above, not whatever
+`main` holds later. `--trust-remote-code` is intentionally **absent**: neither
+repo ships `.py` or an `auto_map`, so there is no remote code to trust — the
+architectures (`Qwen3_5ForConditionalGeneration`, `DFlash2DraftModel`) are native
+to the image's vLLM. If you swap in a checkpoint that *does* carry custom code,
+add the flag deliberately and pin `--code-revision` too.
+
 ## Notes
 
-- The tag `ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-f4c27c0da` is a
-  **temporary convenience** and will be retired; the reproducible truth is this
-  recipe plus the two public models. It sits under the `vllm-sm12x` package,
-  which is otherwise the **NVFP4-KV mount-contract** line — this baked
-  full-stand image is deliberately a different thing.
+- The tag `ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-f4c27c0da` (same image
+  as the digest above) is a **temporary convenience** and will be retired; the
+  reproducible truth is this recipe plus the two public models. It sits under the
+  `vllm-sm12x` package, which is otherwise the **NVFP4-KV mount-contract** line —
+  this baked full-stand image is deliberately a different thing.
 - `VLLM_ATTENTION_BACKEND` is a no-op in this image (FlashInfer is the default) —
   omit it.
