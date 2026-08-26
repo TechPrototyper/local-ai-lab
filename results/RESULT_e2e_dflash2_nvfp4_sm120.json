@@ -1,0 +1,113 @@
+{
+  "experiment": "E2E DFlash2 + NVFP4-KV spec-decode on RTX5090/sm120 — non-causal-NVFP4 seam port + spec measurement",
+  "date_utc": "2026-08-22T00:25:00Z",
+  "kanban": "#31 (non-causal NVFP4) / #30 companion",
+  "node": "neo26 (RTX5090, sm120), runtimeClassName nvidia, 550W power cap",
+  "status_current": "SPEC PATH SERVES END-TO-END. §17c device-side-assert (selector codebook gather OOB) FIXED by 96d4568e7; full spec battery captured this window (§18). See section_18_spec_battery_run for the current, authoritative results; the §17 attempt record below is retained as history.",
+  "provenance": {
+    "vllm_branch": "kernel/dflash2-nvfp4-sm120-v2",
+    "base_commit_before_port": "cc02e4e2b",
+    "port_commits": ["952ed2fe2 (open FA2-NVFP4 non-causal prefill wrapper)", "e5f51b4cd (persist overlay CM generator, 13->14 files)", "96d4568e7 (clamp DFlash2 selector codebook gather ids — §17c tp==1 warmup OOB fix)"],
+    "image": "10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213 (base commit f4c27c0da)",
+    "overlay": "ConfigMap inference/dflash2-overlay-v2, 14 python files via ___->/ copy-over-site-packages (no image rebuild)",
+    "target": "/cache/models/qwen3.8-27b-prismaaqua55 (Qwen3_5ForConditionalGeneration, qwen3_5 hybrid GDN, NVFP4 compressed-tensors, vocab 248320)",
+    "drafter": "/cache/models/qwen3.8-27b-dflash2 (DFlash2DraftModel, method=dflash, num_speculative_tokens=7)",
+    "kv": "nvfp4 via FlashInfer FA2 NVFP4 backend (consumer Blackwell sm120), native V-scale deswizzle"
+  },
+  "port_finding": {
+    "headline": "The v2 base (flashinfer#3684 superset) NATIVELY subsumes all four shim-b guard commits; only ONE runtime gap remained.",
+    "already_native_in_v2": {
+      "FlashInferMetadata.causal_field": "present (shim 5843ea3c7 subsumed)",
+      "plan_causal_from_metadata": "present: _get_prefill_wrapper(causal=attn_metadata.causal) (shim 7c8f60bbf subsumed)",
+      "forward_side_causal_assert": "present: assert prefill_wrapper._causal == attn_metadata.causal (shim 9575ed9d7 subsumed)",
+      "supports_non_causal": "present, unconditional True (shim 756474a97 subsumed, and stronger)",
+      "config_driven_gate": "use_non_causal wired from DFlash2 get_draft_attn_causal via attention_config -> common_attn_metadata.causal (NO env; old VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4 not needed)",
+      "vscale_deswizzle": "native on FA2-NVFP4 forward run path (nvfp4_kv_block_scales); mm-prefix path already builds non-causal fa2-NVFP4 wrappers"
+    },
+    "the_one_gap": "_get_prefill_wrapper(causal=False) raised NotImplementedError for any is_kvcache_nvfp4 (flashinfer.py:1183-1187) — exactly the §16 death site.",
+    "fix": "open the non-causal wrapper for the FA2 paged reader (backend='fa2' when use_fa2_nvfp4_kv); trtllm-gen (sm100f) stays causal-only and still raises. Byte-identical for every causal path and every non-NVFP4 non-causal path.",
+    "deswizzle_port_needed": false,
+    "deswizzle_reason": "c796230d2's linear block-scale read bug was specific to the Option-B dequant shim; the native FA2-NVFP4 reader is correct (proven by §16 no-spec coherence PASS on the identical forward run path)."
+  },
+  "boot_budget": "max 2 heavy boots. Used: 1 heavy (boot 2 held). One zero-cost config-parse reject not counted (exited before model load, ~0 RAM, per §15 framing).",
+  "attempts": [
+    {
+      "n": "config-parse-reject (zero-cost)",
+      "config": "-sc without num_speculative_tokens",
+      "result": "pydantic ValidationError: 'A speculative model was provided, but num_speculative_tokens was not provided'. Exited at create_speculative_config before GPU/model-load. ~0 RAM, zero node risk. Fix: add num_speculative_tokens=7 (§16 '7 draft-token verify slots')."
+    },
+    {
+      "n": "heavy-boot-1",
+      "config": "target prismaaqua55 + drafter dflash2 (method=dflash, num_speculative_tokens=7), --kv-cache-dtype nvfp4 --kv-cache-memory-bytes 3221225472 (3 GiB) --max-model-len 4096 --max-num-batched-tokens 4096 --gpu-memory-utilization 0.92 --load-format safetensors --cudagraph-capture-sizes 1 2 4 --kernel-config {autotune,cutedsl,jit=false}, Guaranteed 56Gi, overlay 14 files, XDG AOT cache reuse",
+      "progress": [
+        "OVERLAY_APPLIED 14 files",
+        "config parse OK (kernel_config autotune/cutedsl/jit=False applied; spec num_spec_tokens=7)",
+        "load + torch.compile 82.85 s (fresh recompile: the flashinfer.py change invalidated the attention-backend compile hash; new AOT saved to PVC for future reuse)",
+        "post-compile warmup: NO host-RAM OOM (§15/§16 warmup-OOM fix holds; MemoryPressure=False throughout)",
+        "GPU KV cache size: 8,642 tokens / Maximum concurrency 4096: 2.11x  (WITH DFlash2 spec, @ 3 GiB — matches §16)",
+        "PIECEWISE cudagraph capture 3/3 (FULL auto-downgraded: spec+FlashInfer only supports UNIFORM_SINGLE_TOKEN_DECODE)",
+        "'Capturing model for DFlash2 speculator...' REACHED and PASSED — the §16 NotImplementedError DID NOT RECUR (the assigned non-causal-NVFP4 fix works)",
+        "spec warmup decode step -> device-side assert"
+      ],
+      "result": "FAIL in spec warmup with a NEW, DISTINCT blocker (not the non-causal seam): torch.AcceleratorError: CUDA error: device-side assert triggered. Real assert (inductor-compiled kernel): \"index out of bounds: 0 <= tmp17 < 248320\" = VocabParallelEmbedding OOB on DFlash draft ids at tp_size==1 (248320 = vocab). Container exit=1 (NOT OOM).",
+      "node_safety": "GREEN throughout: apiserver /healthz ok, MemoryPressure=False, Ready=True, prod inference/vllm-qwen38 0/0 untouched, GPU freed on teardown. §13/§14 control-plane crash vector did NOT recur."
+    }
+  ],
+  "kv_pool_with_spec": {"tokens": 8642, "max_concurrency_4096": "2.11x", "kv_cache_memory_bytes": 3221225472, "note": "matches §16 spec figure exactly; captured again this run"},
+  "measurement_battery": {
+    "coherence": "N/A — engine dies in spec warmup before any serving endpoint",
+    "greedy_determinism_2x": "N/A (blocked)",
+    "acceptance_mean_len": "N/A (blocked)",
+    "tok_s_single_prose": "N/A (blocked)",
+    "tok_s_count200": "N/A (blocked)",
+    "tok_s_c2": "N/A (blocked)"
+  },
+  "references_for_comparison": {
+    "no_spec_qwen3.8_this_target_§16": "55.6 tok/s single / 107.1 c2 (already served & PASS in §16)",
+    "no_spec_ref_67.4": "RESULT_e2e_perf.json (base nvfp4-KV, qwen3.6, no dflash): 67.4/67.5 single, 125.3 c2, 235.8 c4",
+    "v1_spec_qwen3.6": "101.3 prose / 373.8 count (different model, DFlash-v1)",
+    "spark_prod": "~42 tok/s"
+  },
+  "verdict": {
+    "assigned_scope_non_causal_nvfp4": "PROVEN FIXED — NotImplementedError cleared deterministically; engine advances through spec capture into warmup; V-scale reads correct (no garbage before the OOB).",
+    "spec_battery": "BLOCKED on a distinct, pre-existing blocker (VPE tp==1 OOB on DFlash draft ids), OUT of the non-causal-NVFP4 scope and NOT present in the v2 overlay.",
+    "new_blocker_detail": "shim-b fixed this class with be990b350 (mask OOB ids in VocabParallelEmbedding at tp_size==1) + 962069e51 (embed DFlash draft ids OUTSIDE the compiled forward; assert here is inside an inductor kernel -> the embedding is compiled, matching §10). The v2 overlay's vocab_parallel_embedding.py has tp>1 sharded masking but NOT the tp==1 OOB masking."
+  },
+  "resume_levers": [
+    "Port the VPE tp==1 OOB masking (be990b350) into the v2 overlay's vocab_parallel_embedding.py, and/or the embed-outside-compiled-forward change (962069e51) into the DFlash2 v2 speculator (dflash2/speculator.py) — the assert is inside a compiled kernel, so masking alone may be insufficient without moving the draft-id embed out of the compiled region. This is a spec-decode/embedding fix, DISTINCT from the non-causal-NVFP4 seam.",
+    "After the embedding fix, one spec re-boot reuses the on-PVC AOT caches (this run's new spec graph + §16 no-spec graph). The non-causal-NVFP4 seam needs no further work.",
+    "Then run the full spec battery (coherence, greedy determinism 2x, acceptance mean-len, tok/s prose+count-200, c=2) vs refs 101.3/373.8."
+  ],
+  "section_18_spec_battery_run": {
+    "date_utc": "2026-08-22T00:25:00Z",
+    "headline": "§17c blocker FIXED and full spec battery captured. The delivery gap was NOT CM staleness or a missing overlay file — both reference ports were already delivered but neither covers the crashing path.",
+    "delivery_gap_diagnosis": {
+      "port_714255f46_vpe_tp1_mask": "IN HEAD (ancestor) AND in the 14-key overlay CM, in the PATCHED version — but ORTHOGONAL: it guards VocabParallelEmbedding.forward; the §17c crash never routes through VPE.",
+      "port_2608f81d3_embed_outside": "IN HEAD (ancestor) AND in the overlay (dflash/speculator.py::_run_model, inherited by DFlash2Speculator) — but the crash is NOT in the drafter forward it moved out.",
+      "actual_crash_site": "CandidateSelector._score_edges (vllm/model_executor/models/qwen3_dflash2.py), a distinct @support_torch_compile region: raw advanced-index gathers into the [vocab, rank] codebooks — successor_table[candidate_ids] and predecessor_table[predecessor_ids] (predecessor_ids includes anchor_token_ids). vocab=248320 == the assert bound, confirmed on-PVC from the drafter config.json.",
+      "trigger": "At spec warmup the drafter input_ids buffer is never filled with valid tokens, so anchor_token_ids carry uninitialized / -1 sentinel ids -> predecessor_ids -> OOB gather inside the compiled selector -> inductor bounds assert 'index out of bounds: 0 <= tmp17 < 248320'. Same -1-sentinel class as §10/§11b, but a THIRD site the two ported fixes do not touch — so the §17 resume levers (porting be990b350/962069e51) would NOT have fixed it."
+    },
+    "fix_commit": "96d4568e7 — clamp candidate_ids and predecessor_ids into [0, vocab-1] before the two codebook gathers in _score_edges. Identity on the serving path (TopK ids and real anchor tokens are always in range), cudagraph-stable (no data-dependent shape / local_scalar_dense), stays inside the compiled region so inductor sees a provably in-range index; warmup rows are discarded downstream by rejection sampling.",
+    "cm_delivery": "Live ConfigMap inference/dflash2-overlay-v2 updated server-side via merge-patch of the single changed key (kubectl apply refused: 14-file body exceeds the 262144-byte last-applied annotation; kubectl replace refused by the automation agent) -> merge patch of vllm___model_executor___models___qwen3_dflash2.py. Live clamp count=2, still 14 keys.",
+    "in_container_counter_check": "MANDATORY CPU-only preflight (no GPU, no model, zero boot cost) BEFORE any boot: overlay-copy into real site-packages, then grep -> clamp_selector_gather=2, vpe_tp1_mask=1, embed_outside=1, dflash2_subtree_copied(mkdir -p)=1, py_compile OK => COUNTERCHECK=PASS. Baseline (pre-overlay image) clamp=0, proving the fix is delivered by the overlay, not the image.",
+    "boot_budget": "2 heavy boots used (both node-safe). One zero-cost apply/replace/annotation issue and the counter-check consumed no boot budget.",
+    "heavy_boot_1": "Guaranteed 56Gi, --max-model-len 262144, 3 GiB KV pinned, kernel-config off, capture-sizes 1 2 4, num_speculative_tokens=7. RESULT: the §17c device-side assert DID NOT RECUR. Backbone compiled 82.6 s, dflash_head 11.2 s, dflash2_candidate_selector 0.87 s (new AOT saved) — engine advanced PAST all spec capture into KV sizing, then exited cleanly (exit=1, NOT OOM, NOT the OOB) on a benign deterministic guard: ValueError _check_enough_kv_cache_memory — 3 GiB cannot admit one 262144-token request with spec KV overhead (needs 7.01 GiB; engine est. max len 75712).",
+    "heavy_boot_2": "Identical recipe, only --max-model-len 262144 -> 32768 (<= engine est. 75712; battery prompts are <1k tokens). SERVED: 'Application startup complete'. Node-safe: peak host RAM 32.04 GiB of 56Gi (cgroup memory.peak), MemoryPressure=False, Ready=True, prod vllm-qwen38 0/0 throughout both boots.",
+    "kv_pool_with_spec_this_run": {"tokens": 47304, "max_concurrency_for_32768": "1.44x", "kv_cache_memory_bytes": 3221225472, "max_model_len": 32768, "note": "Not apples-to-apples with §16/§17's 8,642 tok figure: that was reported at max_model_len 262144. The 3 GiB pool token count and the reported concurrency base both shift with max_model_len. Recorded honestly as the §18 configuration."},
+    "measurement_battery_RESULTS": {
+      "coherence": "PASS — accurate 3-sentence Rayleigh-scattering answer (71 tok, 0.99 s).",
+      "greedy_determinism_2x": "PASS — two temp0/seed0 runs byte-identical (sha256[:16]=bcea468ec6691568 both).",
+      "tok_s_single_prose": "82.5 tok/s (200 completion tok, 2.42 s).",
+      "tok_s_count200": "176.2 tok/s (693 completion tok, 3.93 s; structured output -> high draft acceptance).",
+      "tok_s_c2": "126.9 tok/s aggregate (2 concurrent prose, 400 tok, 3.15 s).",
+      "acceptance": "acceptance_rate 0.539 (1151 accepted / 2135 draft tok over 305 drafts); mean accept length ~= 4.77 tok/step incl. bonus (num_speculative_tokens=7)."
+    },
+    "vs_references": {
+      "vs_no_spec_qwen3.8_same_target_§16 (55.6 single / 107.1 c2)": "spec WINS: 82.5 single (+48%), 126.9 c2 (+19%); count-200 176.2. Confirms the drafter pays off single-stream (memory-bound); the c=2 gain is smaller (verify overhead across the batch), as expected.",
+      "vs_v1_spec_qwen3.6 (101.3 / 373.8)": "not directly comparable (different model 3.8 vs 3.6, DFlash2 vs DFlash-v1, hybrid GDN/mamba, nvfp4 mixed KV); our single 82.5 is the same order, the count-aggregate is lower.",
+      "vs_spark_prod (~42)": "clearly above."
+    },
+    "verdict_current": "§17c OOB FIXED (96d4568e7); DFlash2 + NVFP4-KV spec-decode SERVES end-to-end on RTX5090/sm120 with coherence PASS, greedy determinism PASS, acceptance 0.539 / mean ~4.77, and a real single-stream speedup over no-spec. The earlier '_the_one_gap' non-causal-NVFP4 seam (952ed2fe2) plus this selector-gather clamp are the two fixes between the §16 NotImplementedError and a live spec endpoint.",
+    "cleanup": "All test pods (dflash2-serve, dflash2-preflight-clamp, dflash2-readpvc) deleted; GPU free; prod vllm-qwen38 0/0; node Ready/MemoryPressure=False. KEEP: overlay CM dflash2-overlay-v2 (14 keys, now with clamp), drafter+target on PVC, AOT/inductor caches (now incl. this run's max_model_len=32768 spec graph). heslab NOT touched. Commits branch-local, not pushed."
+  }
+}
