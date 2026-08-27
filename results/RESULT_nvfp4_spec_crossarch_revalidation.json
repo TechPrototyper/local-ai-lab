@@ -1,0 +1,106 @@
+{
+  "run": "nvfp4_noncausal_spec_crossarch_revalidation",
+  "date": "2026-08-27",
+  "purpose": "Revalidate the DFlash2+NVFP4-KV non-causal stack for the upstream PR package: sm120 on the fresh v4 integration (main + vllm#46329@7a5cf1431 + PR1/PR2/PR3), sm121 as cross-arch datapoint on the production lineage (f4c27c0da fullstand base + the same four fixes as git patches).",
+  "pr_stack": {
+    "PR1": "fix/vpe-tp1-oob-mask \u2014 VocabParallelEmbedding tp==1 OOB mask + regression test",
+    "PR2": "fix/dflash2-warmup-oob \u2014 embed draft ids outside compile; clamp selector codebook gathers",
+    "PR3": "feat/nvfp4-noncausal-dflash \u2014 open FA2-NVFP4 non-causal prefill wrapper (stacked on #46329)",
+    "v4_integration": "integrate/dflash2-nvfp4-v4 @ 2cf8b8ae0 = origin/main + jethac/nvfp4-fa2-consumer-blackwell@7a5cf1431 + PR1 + PR2 + PR3"
+  },
+  "sm121_gb10": {
+    "date_utc": "2026-08-27T00:17-00:45Z",
+    "node": "gx10-a2e4 (GB10, sm121, 128GB unified, ~273 GB/s)",
+    "stack": "image vllm-sm121:f4c27c0da (source-mount contract), tree vllm-dflash2-v2exp = prod dflash2 lineage (incl. fp8-drafter fixes) + the four fixes via git am (branch exp/nvfp4-spec-v2), flashinfer prod mount, fresh fi/compile caches",
+    "config": {
+      "target": "/models/qwen3.8-27b-prismaaqua55",
+      "drafter": "/models/qwen3.8-27b-dflash2-fp8 (quantization compressed-tensors)",
+      "kv_cache_dtype": "nvfp4",
+      "kv_cache_memory_bytes": 3221225472,
+      "max_model_len": 32768,
+      "max_num_seqs": 4,
+      "num_speculative_tokens": 7,
+      "prefix_caching": false,
+      "note": "battery parity with the sm120 \u00a718 run"
+    },
+    "boot": "FIRST DFlash2+NVFP4-KV spec serve on sm121. No NotImplementedError (non-causal seam), no device-side assert (three OOB fixes); DFlash2 speculator capture completed; Application startup complete.",
+    "kv_pool_with_spec": {
+      "tokens": 47304,
+      "note": "identical to the sm120 \u00a718 figure at the same 3GiB/32k config \u2014 KV accounting is deterministic cross-arch"
+    },
+    "spec_battery": {
+      "coherence": "PASS (accurate Rayleigh 3-sentence answer, 73 tok)",
+      "greedy_determinism_2x": "PASS byte-identical (sha256[:16]=4cf7a0f02b7a8990 both)",
+      "tok_s_single_prose_200tok": 18.6,
+      "tok_s_count200": 64.4,
+      "tok_s_c2_aggregate": 37.5,
+      "acceptance_rate": 0.394,
+      "acceptance_detail": "1204 accepted / 3052 draft tok over 436 drafts; mean accept \u22483.76/step incl. bonus; battery mix is prose-heavy (structured output accepts far better, cf. count-200 vs prose ratio)",
+      "reference": "dense 27B no-spec on this bandwidth-bound box \u224810 tok/s single-stream (node page); no-spec same-config baseline measured below"
+    },
+    "no_spec_baseline_same_config": {
+      "status": "DONE",
+      "coherence": "PASS (Rayleigh)",
+      "greedy_determinism_2x": "PASS byte-identical (4e570f57d2dcb7bf)",
+      "tok_s_single_prose_200tok": 10.8,
+      "tok_s_count200": 10.9,
+      "tok_s_c2_aggregate": 22.0
+    },
+    "spec_vs_nospec": {
+      "prose": "18.6 vs 10.8 = +72%",
+      "count200": "64.4 vs 10.9 = 5.9x",
+      "c2_aggregate": "37.5 vs 22.0 = +70%",
+      "note": "spec pays even more, relatively, on the bandwidth-bound GB10 than on the RTX (+48% prose there)"
+    }
+  },
+  "sm120_rtx5090": {
+    "date_utc": "2026-08-27T02:12-02:25Z",
+    "status": "SPEC BATTERY DONE",
+    "stack": "image sm120-v4-2cf8b8a-t2 (Kaniko, 61 min): vLLM integrate/dflash2-nvfp4-v4 @ 2cf8b8ae0 (= main d1e5e66ee + jethac nvfp4-fa2-consumer-blackwell @ 7a5cf1431 + PR1 + PR2 + PR3), flashinfer main @ 09da2e708 (prod-build-date pin), torch 2.13.0/cu130. No source overlay - everything baked.",
+    "build_note": "first attempt failed on FLASHINFER_REF=v0.6.18 (tag absent; only rc1-rc9); repinned to flashinfer main @ 2026-08-23 (prod image build date)",
+    "config": "identical to sm121 arm (3GiB nvfp4 KV, 32k, seqs 4, draft len 7, no prefix caching) plus kernel-config warmup off, capture sizes 1/2/4, Guaranteed 56Gi",
+    "boot": "STARTUP COMPLETE - no NotImplementedError, no device-side assert; torch.compile 48.5s+11.4s+1.5s; DFlash2 speculator captured",
+    "kv_pool_with_spec": {
+      "tokens": 43996,
+      "max_concurrency_32768": 1.34,
+      "note": "v2 stack measured 47,304/1.44x at the same budget - upstream main's KV accounting appears to allocate slightly differently; worth one sentence in PR3, not a blocker"
+    },
+    "spec_battery": {
+      "coherence": "PASS (Rayleigh, 67 tok)",
+      "greedy_determinism_2x": "PASS byte-identical (sha256[:16]=ef80e9fbc67f009c)",
+      "tok_s_single_prose_200tok_thinking_off": 55.8,
+      "tok_s_count200": 190.9,
+      "tok_s_c2_aggregate": 111.9,
+      "acceptance_cumulative_battery": "0.366 (1192/3255)"
+    },
+    "content_spectrum_probes": {
+      "essay_default_thinking": "65.2 tok/s, accept 0.234 (187/798)",
+      "essay_thinking_off": "59.1 tok/s, accept 0.196 (173/882)",
+      "stepwise_math_thinking": "135.0 tok/s, accept 0.653 (247/378)",
+      "word_problem_reasoning": "accept 0.791 (227/287), ~1.9s for 400-tok budget",
+      "count200": "190.9 tok/s",
+      "reading": "acceptance is strongly content-dependent on this drafter: ~0.20 on essay prose, 0.65-0.79 on step-by-step reasoning, near-ceiling on structured counting. The Section-18 v2 record (82.5 tok/s prose, accept 0.539) most plausibly reflects a more acceptance-friendly prose/thinking mix rather than a stack difference - the count-200 pair (v4 190.9 vs v2 176.2) suggests the v4 stack is, if anything, slightly faster per accepted token."
+    },
+    "no_spec_baseline_same_config": {
+      "status": "DONE",
+      "greedy_determinism_2x": "PASS byte-identical (5dcfb39c12869ab6)",
+      "tok_s_single_prose_200tok": 54.9,
+      "tok_s_count200": 55.9,
+      "tok_s_c2_aggregate": 108.0
+    },
+    "spec_vs_nospec": {
+      "essay_prose_thinking_off": "55.8 vs 54.9 = +2% (accept ~0.20: spec is ~neutral at worst-case content - no regression when drafts miss)",
+      "count200": "190.9 vs 55.9 = 3.4x",
+      "stepwise_reasoning": "135.0 tok/s at accept 0.653 (baseline ~55-56) = ~2.4x",
+      "c2_essay": "111.9 vs 108.0 = +4%"
+    }
+  },
+  "ops_log": [
+    "02:05 Tim-Freigabe GPUs; prod vllm-qwen38 replicas 0 via git (flux branch test/nvfp4-bugfix-neo26)",
+    "heslab shutdown in Tim's order vanw02 -> sql -> dc01 (VMs Halted via runStrategy patch), master-boot 0, wg-gateway left up",
+    "Spark fleet stopped (vllm-aura38, qwen3-embedder, harrier-embedder, qwen3-reranker, bge-reranker); restore = docker start reverse order + warmup request",
+    "01:46-01:50 premature shutdown + full restore (documented mistake; fleet and prod were restored and re-freed at 02:05 by Tim)"
+  ],
+  "drafter_note": "sm120 arm ran the bf16 drafter (/cache/models/qwen3.8-27b-dflash2); sm121 arm ran the fp8 drafter (acceptance-neutral per lab verdict 2026-08-21).",
+  "verdict": "Both arms GREEN. The non-causal seam + three OOB fixes carry the DFlash2+NVFP4-KV combination on BOTH consumer-Blackwell arches, on jethac's current #46329 head (sm120, fully baked image) and on the production lineage (sm121). Quality-neutral under greedy (byte-identical determinism on every arm). Speed tracks acceptance: parity at worst-case essay content, 2.4-5.9x on reasoning/structured content."
+}

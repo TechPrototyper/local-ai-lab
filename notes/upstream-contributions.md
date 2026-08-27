@@ -115,3 +115,22 @@ and outcomes only — no evaluation of the projects or their maintainers.
   sinks reach ~125k). Suggested fp32 scale/zero (+4 B/vector) or a
   clamp-with-warning. Backing probe:
   [`turboquant-vs-nvfp4-kv-value-probe.md`](turboquant-vs-nvfp4-kv-value-probe.md).
+
+## vLLM #53977 / #53978 / #53979 — the non-causal-NVFP4 spec-decode package
+
+- **2026-08-27** — filed as three reviewable PRs after a paired cross-arch
+  revalidation on both boxes (fresh sm120 image = main ∪ #46329@`7a5cf14` ∪
+  the fixes; sm121 on the production lineage):
+  [#53977](https://github.com/vllm-project/vllm/pull/53977)
+  (`VocabParallelEmbedding` tp==1 OOB mask + regression test — hits every
+  single-GPU spec config, independent of KV dtype),
+  [#53978](https://github.com/vllm-project/vllm/pull/53978) (DFlash2 warmup
+  OOBs: embed-outside-compile + candidate-selector gather clamp, against the
+  merged #52816 line),
+  [#53979](https://github.com/vllm-project/vllm/pull/53979) (the non-causal
+  FA2-NVFP4 prefill seam, **stacked on #46329** with an explicit fold-in
+  offer to its author). Linking datapoint comment in
+  [#46329](https://github.com/vllm-project/vllm/pull/46329#issuecomment-5433626787).
+  Backing measurement:
+  [`../results/RESULT_nvfp4_spec_crossarch_revalidation.json`](../results/RESULT_nvfp4_spec_crossarch_revalidation.json)
+  · [`dflash2-nvfp4-sm120-spec-serves.md`](dflash2-nvfp4-sm120-spec-serves.md).

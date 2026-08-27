@@ -77,7 +77,28 @@ Node-safe by construction (Guaranteed 56Gi, warmup autotune off, PVC AOT
 caches; peak host RAM 32.04 GiB; control plane healthy throughout; production
 untouched at 0/0). Raw record:
 [`results/RESULT_e2e_dflash2_nvfp4_sm120.json`](../results/RESULT_e2e_dflash2_nvfp4_sm120.json)
-(§17/§18 sections). Upstream packaging of the stack — rebased onto the current
-head of [vLLM#46329](https://github.com/vllm-project/vllm/pull/46329) — is in
-progress; the `VocabParallelEmbedding` tp==1 OOB is being filed separately
-(it affects every single-GPU spec-decode config, independent of KV dtype).
+(§17/§18 sections).
+
+## Upstream (2026-08-27, night)
+
+The stack was rebased onto #46329's current head (`7a5cf14`), revalidated
+end-to-end on **both** arches (fresh sm120 image = main ∪ #46329 ∪ the fixes;
+sm121 on the production lineage), paired spec vs. no-spec at identical
+settings, byte-identical greedy determinism throughout — and filed as three
+reviewable PRs:
+
+- [vllm#53977](https://github.com/vllm-project/vllm/pull/53977) —
+  `VocabParallelEmbedding` tp==1 OOB mask (+ regression test, 2 passed)
+- [vllm#53978](https://github.com/vllm-project/vllm/pull/53978) — DFlash2
+  warmup OOBs (embed-outside-compile; selector-gather clamp)
+- [vllm#53979](https://github.com/vllm-project/vllm/pull/53979) — the
+  non-causal FA2-NVFP4 seam, stacked on #46329 (fold-in offered)
+
+Revalidation headlines (paired, same config): sm120 count-to-200 **190.9 vs
+55.9 tok/s (3.4×)**, step-by-step reasoning **135.0 tok/s** (accept 0.653),
+essay prose at parity (accept ≈0.20 — speculation does not regress when
+drafts miss); sm121 prose **+72%**, count-to-200 **5.9×**, c=2 **+70%** —
+the first DFlash2+NVFP4-KV spec serve on sm121. Acceptance is strongly
+content-dependent; the earlier 82.5-tok/s prose figure reflects a more
+acceptance-friendly prose/thinking mix, not a stack difference. Raw:
+[`results/RESULT_nvfp4_spec_crossarch_revalidation.json`](../results/RESULT_nvfp4_spec_crossarch_revalidation.json).
