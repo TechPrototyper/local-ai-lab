@@ -20,12 +20,15 @@ graph TB
 
     MAC["Mac<br/>bridge into the Apple ecosystem<br/>(MCP gateway)"]
 
+    JETSON["Jetson Orin Nano<br/>edge tier · embeddings, always on<br/>(nodes/jetson-orin-nano.md)"]
+
     CLIENTS --> MAIN
     MAIN <--> SW
     W1 <--> SW
     W2 <--> SW
     SW <--> SPARK
     SW <--> MAC
+    SW <--> JETSON
 ```
 
 ## How the pieces relate
@@ -45,6 +48,12 @@ graph TB
   ([mac-mcp-gateway](https://github.com/TechPrototyper/mac-mcp-gateway)),
   so cluster-side agents can act on Apple-side data without anything
   Apple running in the cluster.
+- **Jetson Orin Nano** — the edge tier: two embedders (BGE-M3 and
+  nomic-embed-text-v1.5, llama.cpp, full GPU offload) that keep retrieval
+  warm no matter what the big boxes are doing, plus a small edge LLM on
+  standby ([profile](jetson-orin-nano.md)). Also the designated home of
+  the planned out-of-band management tool — the watcher that must live
+  outside the failure domain it watches.
 - **High-speed switch** — the reason two-stage retrieval (embed on one
   box, rerank on another) and gateway overflow routing are latency-free
   in practice.
