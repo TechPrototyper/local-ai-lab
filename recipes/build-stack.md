@@ -28,7 +28,27 @@ candidate and discarded for production; see
 ## FlashInfer pins
 
 - **Spark (GB10, sm121):** FlashInfer 0.6.15
-- **RTX 5090 (sm120):** FlashInfer 0.6.15 (branch `pr3684`, commit `2ed09bd3` — same pin as the GB10; the previously documented 0.6.14 was an error, corrected 2026-08-22 after inspecting the measured production image)
+- **RTX 5090 (sm120):** since 2026-08-24 **FlashInfer main / 0.6.18**
+  (flashinfer#3684 is merged upstream, so main carries the sm12x NVFP4
+  kernels). Previous pin — 0.6.15, branch `pr3684`, commit `2ed09bd3` —
+  remains the validated fallback. Note: no plain `v0.6.18` release tag
+  exists (only `rc1`–`rc9`); for reproducible builds pin a main commit
+  (this lab's 2026-08-27 build used `09da2e70`).
+
+## Image lines (current, 2026-08-27)
+
+- **sm121 (Spark):** `vllm-sm121:f4c27c0da` + source-mount contract as
+  above — unchanged, serving production.
+- **sm120 (RTX):** fully-baked images, no source mount:
+  - `sm120-nvfp4-e2446da2-t1` — **production** since 2026-08-24
+    (vllm#46329 head `e2446da2` + flashinfer main; requires the
+    `use_trtllm_attention: false` flag, see the RTX recipe).
+  - `sm120-v4-2cf8b8a-t2` — validation build 2026-08-27: vLLM main ∪
+    #46329@`7a5cf14` ∪ the upstream package #53977/#53978/#53979
+    (branch `integrate/dflash2-nvfp4-v4` @ `2cf8b8ae0` on the lab fork),
+    flashinfer main @ `09da2e70`. Battery-validated (spec × NVFP4-KV);
+    **not** production-promoted — that waits on a verdict-tier quality
+    gate.
 
 ## Local patch
 

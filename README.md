@@ -19,7 +19,7 @@ optimize *that* — not the technology you happen to like:
 
 | Box | Bottleneck order | Consequence |
 |---|---|---|
-| [**RTX 5090**](nodes/rtx-5090.md) (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; speculative decoding stays *off* for now — the one clean drafter (DFlash2) forces fp8 KV (halves context), and the skip-layers escape is ruled out by hybrid page padding ([`notes/dflash2-batch-sweep-and-skiplayers.md`](notes/dflash2-batch-sweep-and-skiplayers.md)) |
+| [**RTX 5090**](nodes/rtx-5090.md) (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; since 2026-08-22/27 speculation **no longer forces fp8 KV** — the non-causal seam serves DFlash2 over NVFP4 pages and is filed upstream ([#53977](https://github.com/vllm-project/vllm/pull/53977)/[#53978](https://github.com/vllm-project/vllm/pull/53978)/[#53979](https://github.com/vllm-project/vllm/pull/53979)). Production still runs no-spec: prefix caching gets 0% hits under spec+hybrid-GDN ([vllm#52244](https://github.com/vllm-project/vllm/pull/52244)), and the agent tier lives on the cache ([`notes/dflash2-nvfp4-sm120-spec-serves.md`](notes/dflash2-nvfp4-sm120-spec-serves.md) · [`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md)) |
 | [**DGX Spark / GB10**](nodes/dgx-spark-gb10.md) (128 GB unified) | quality → **speed** → memory | memory is abundant, so it is spent on long context, throughput — and since 2026-08-21 on **speed via DFlash2 speculation in production** (draft length 7, fp8 KV as its price, prefix caching, 262k): every gate passed at verdict level, ~4× single-stream on reasoning traffic, up to ~227 tok/s aggregate ([`notes/dflash2-full-split-verdict.md`](notes/dflash2-full-split-verdict.md) · [recipe](recipes/dgx-spark-sm121.md)). MTP stays off for the record ([`notes/mtp-tool-calling.md`](notes/mtp-tool-calling.md)) |
 
 Same model, same quantization stack — opposite settings, each derived from
@@ -32,19 +32,29 @@ cluster, switch, bridge host — is sketched in
 ## Next up
 
 The working set — what this lab is measuring next. Updated whenever work
-moves (last: **2026-08-20**); items graduate into Findings when the numbers
+moves (last: **2026-08-27**); items graduate into Findings when the numbers
 are in.
 
-- **DFlash2, endgame** — all GB10 gates green, c-boundary mapped, draft
-  length optimized (n=7; see Findings 2026-08-21). Left: the **NVFP4
-  non-causal kernel question** — the only real path to DFlash2 on the
-  32 GB card — and the **production adoption decision** on the GB10
-  (operator call; recommended config: fp8 KV, spec n=7). *Goal: close
-  the chapter.*
-- **Clean quality-per-bit re-run of the codebook serving path**
-  (the 08-13 number was a serving artifact, not a format verdict).
-  *Goal: memory (lower bpp → more KV) vs. speed (eager codebook decode is
-  slower) — the tradeoff is the finding.*
+- **Shepherd the upstream package** —
+  [#53977](https://github.com/vllm-project/vllm/pull/53977) /
+  [#53978](https://github.com/vllm-project/vllm/pull/53978) /
+  [#53979](https://github.com/vllm-project/vllm/pull/53979) through review
+  (the seam PR is stacked on #46329 with a fold-in offer to its author).
+  *Goal: the non-causal-NVFP4 chapter lands upstream, not just here.*
+- **Prefix caching × speculation × hybrid GDN**
+  ([vllm#52244](https://github.com/vllm-project/vllm/pull/52244)) — the one
+  gap between "the triad composes" and "the triad serves the agent tier";
+  we can offer sm120/sm121 validation. *Goal: turn Entscheidung B from a
+  forced choice into an operator tradeoff.*
+- **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV now serves
+  on sm121 (paired battery green); ≈2× KV pool vs fp8 at the same budget.
+  Needs the verdict-tier quality gate (n=250 → n=1319) before touching
+  production. *Goal: the pool, without paying quality.*
+- **GridBook, remaining gates** — acceptance under the GridBook target
+  (drafter trained against BF16/AQUA; speed question, not quality),
+  a far-window pass on the 877k config, and the n=1319 quality verdict
+  ([`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md)).
+  *Goal: 13 GB weights as the production default on the 32 GB card.*
 - **Cross-method mixed-precision comparison**: AURA (KL-Fisher allocation)
   vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
   feasibility spike first (checkpoint-format gap), then a paired
@@ -58,6 +68,7 @@ Newest first.
 
 | Date | Finding | Evidence |
 |---|---|---|
+| 2026-08-24 | **The full memory-track triad ran on the 5090** — GridBook 13 GB weights + NVFP4-KV + DFlash2, with an **877k-token context config** (≈2× the AQUA-era headroom; briefly the primary route). Rolled back the same morning for a reason orthogonal to the triad: **prefix caching gets 0% hits under spec + hybrid GDN** ([vllm#52244](https://github.com/vllm-project/vllm/pull/52244)), and the agent tier lives on the cache. The composition itself booted and served; adoption is gated on #52244, plus the still-open GridBook gates (acceptance vs. this target, far-window pass, n=1319). | [`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md) |
 | 2026-08-22 | **Speculation and 4-bit KV at the same time: DFlash2 + NVFP4-KV serves end-to-end on the RTX 5090.** The combination every memory-bound card wants raised `NotImplementedError` (FlashInfer non-causal × NVFP4 KV); the full delta to a live endpoint is **two small fixes** (open the FA2-NVFP4 non-causal prefill wrapper; clamp a third `-1`-sentinel gather in DFlash2's candidate selector) on top of two spec-warmup fixes (VocabParallelEmbedding tp==1 OOB — an upstream bug hitting *every* single-GPU spec config — and embed-outside-compile). The kernel itself needed no changes. Battery: **82.5 tok/s prose (+48% vs 55.6 no-spec)**, 176.2 count-200, 126.9 c=2, acceptance 0.539 / mean ≈4.77, greedy-deterministic byte-identical. Limits: spec costs ~5.9× KV; prefix caching doesn't hit under spec+hybrid-GDN ([#52244](https://github.com/vllm-project/vllm/pull/52244)) — so prod RTX stays no-spec for now. Upstream packaging in progress. | [`notes/dflash2-nvfp4-sm120-spec-serves.md`](notes/dflash2-nvfp4-sm120-spec-serves.md) · [`results/RESULT_e2e_dflash2_nvfp4_sm120.json`](results/RESULT_e2e_dflash2_nvfp4_sm120.json) |
 | 2026-08-22 | **The workload acceptance test that almost fired a false rollback.** 88 tasks distilled from the lab's real Kanban board, paired at temp 0: the first run showed a *significant* regression for the DFlash2 prod config (McNemar p=0.039) — then the same-config repeat control flipped **24/82 of its own answers** (bistable judgment tasks × batch numerics ≈ 25–30% flip rate between *any* two batched runs), dissolving the significance (p=0.45 vs the repeat). The deterministic c=1 referee shows the real effect: 28/82 trajectories genuinely diverge, quality delta 0:5 (p=0.0625) — a watch-item trend, not a regression. **Adoption stands; the method lesson outranks the verdict: config-McNemars on bistable tasks are uninterpretable without a same-config repeat, and c=1 sequential is the referee.** | [`notes/kanban-workload-acceptance-and-flip-noise.md`](notes/kanban-workload-acceptance-and-flip-noise.md) · [`results/RESULT_kanban_ab_summary.json`](results/RESULT_kanban_ab_summary.json) |
 | 2026-08-21 | **Drafter quantization is acceptance-neutral — and exposes a fused-scale loading gap in the DFlash2 line.** Graph-free tensor-level fp8-RTN on the drafter's decoder projections (no calibration needed: drafter quality can only affect speed, never output, under verified-lossless speculation): acceptance 5.08/58.3% vs 5.11/58.7% bf16, single-stream 37 vs 38–42 tok/s, c=8 aggregate 196.9 vs 179 — neutral throughout. But only the *unfused* projections load: fused qkv/gate_up scale-loading crashes (`MergedColumnParallelLinear ... no attribute 'data'`, channel and per-tensor alike) — the DFlash2 draft-model line has evidently never loaded a quantized fused checkpoint; upstream-report candidate for [#52816](https://github.com/vllm-project/vllm/pull/52816). Partial win: −0.55 GB now; −1.6 GB waits on the fix. | [`notes/dflash2-drafter-fp8-quant.md`](notes/dflash2-drafter-fp8-quant.md) · [`results/`](results/) |
@@ -116,6 +127,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-27 | **Notebook re-baselined to the post-seam state:** framing table + Next-up rewritten (spec on the RTX is a tradeoff now, not an impossibility); node profiles, RTX recipe (XQA-off flag is load-bearing on current code) and build-stack (0.6.18/main pin, current image lines) updated; the missing 08-24 triad episode written up | the notebook's living sections still described the pre-seam world; a public notebook that contradicts its own newest findings is worse than none | [`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md) · [`recipes/`](recipes/) |
 | 2026-08-27 | **Upstream package filed:** vllm [#53977](https://github.com/vllm-project/vllm/pull/53977) / [#53978](https://github.com/vllm-project/vllm/pull/53978) / [#53979](https://github.com/vllm-project/vllm/pull/53979) (non-causal-NVFP4 seam stacked on #46329) after paired cross-arch revalidation — first DFlash2+NVFP4-KV spec serve on sm121 (prose +72%, count-200 5.9×); sm120 on the fresh main∪#46329 integration (count-200 3.4×, reasoning 135 tok/s, byte-identical greedy) | the measurements were green on both arches; the seam belongs upstream, with the NVFP4 line's author in front | [`notes/upstream-contributions.md`](notes/upstream-contributions.md) · [`results/RESULT_nvfp4_spec_crossarch_revalidation.json`](results/RESULT_nvfp4_spec_crossarch_revalidation.json) |
 | 2026-08-27 | DFlash2+NVFP4-KV sm120 breakthrough written up (note + §17/§18 result record): the non-causal seam is fixed and the spec battery is green — the repo previously recorded only the blocked §16 state; handoff addendum with the corrections | the measured state was ahead of the written record; upstream packaging starts from this note | [`notes/dflash2-nvfp4-sm120-spec-serves.md`](notes/dflash2-nvfp4-sm120-spec-serves.md) · [`results/RESULT_e2e_dflash2_nvfp4_sm120.json`](results/RESULT_e2e_dflash2_nvfp4_sm120.json) |
 | 2026-08-25 | Portable GB10 DFlash2 container note — the production stack (AQUA target + fp8 drafter + fp8 KV) baked into one self-contained image with two public models auto-pulled, one `docker run`, E2E-verified; fp8 drafter published to HF | hand the exact production config to anyone with a GB10 without the source-mount build | [`notes/dflash2-gb10-portable-container.md`](notes/dflash2-gb10-portable-container.md) |

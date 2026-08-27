@@ -38,6 +38,11 @@ exact. The 13 GB model is task-equivalent to the 24 GB production quant.
 - Measured on **GB10 / sm121**. The RTX payoff (does GridBook run on
   sm120, and does it **compose with NVFP4 KV** for the ~1M-token context
   on a 32 GB card) is a separate technical validation, not covered here.
+  *Update 2026-08-24/27:* that composition **has since run** — GridBook +
+  NVFP4-KV (+ DFlash2) served on the 5090 with an 877k-token context
+  config, then production rolled back for a reason orthogonal to the
+  triad (prefix caching × speculation, vllm#52244). Details:
+  [`gridbook-nvfp4-dflash2-rtx-triad.md`](gridbook-nvfp4-dflash2-rtx-triad.md).
 - One process note: the needle test first "failed" for GridBook — a
   harness artifact (32 max-tokens starved a reasoning model of its
   answer). With `enable_thinking:false` + 256 tokens both models recall
