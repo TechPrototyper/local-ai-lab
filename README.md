@@ -41,11 +41,15 @@ are in.
   [#53979](https://github.com/vllm-project/vllm/pull/53979) through review
   (the seam PR is stacked on #46329 with a fold-in offer to its author).
   *Goal: the non-causal-NVFP4 chapter lands upstream, not just here.*
-- **Prefix caching × speculation × hybrid GDN**
-  ([vllm#52244](https://github.com/vllm-project/vllm/pull/52244)) — the one
-  gap between "the triad composes" and "the triad serves the agent tier";
-  we can offer sm120/sm121 validation. *Goal: turn Entscheidung B from a
-  forced choice into an operator tradeoff.*
+- **Prefix caching × speculation × hybrid GDN** — the one gap between
+  "the triad composes" and "the triad serves the agent tier". Two upstream
+  candidates now: [vllm#52244](https://github.com/vllm-project/vllm/pull/52244)
+  (stalled on a rebase) and
+  [vllm#50897](https://github.com/vllm-project/vllm/pull/50897), which its
+  own thread calls the more proper fix — an independent GB10 datapoint there
+  shows it moving cases #52244 leaves untouched. We plan to port and validate
+  #50897 against our DFlash2×NVFP4 stack on sm120/sm121. *Goal: turn
+  Entscheidung B from a forced choice into an operator tradeoff.*
 - **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV now serves
   on sm121 (paired battery green); ≈2× KV pool vs fp8 at the same budget.
   Needs the verdict-tier quality gate (n=250 → n=1319) before touching
@@ -54,7 +58,17 @@ are in.
   (drafter trained against BF16/AQUA; speed question, not quality),
   a far-window pass on the 877k config, and the n=1319 quality verdict
   ([`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md)).
+  The 13 GB artifact itself is public:
+  [`rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm`](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm).
   *Goal: 13 GB weights as the production default on the 32 GB card.*
+- **PrismaScout-AQUA-20GB head-to-head** — rdtand published a
+  [20 GB AQUA export of Qwen3.8-27B](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaScout-AQUA-20GB)
+  (19.97 GB verified; stock compressed-tensors, no plugin needed) — 3.4 GiB
+  below our serving 5.5-bpp export. On a 32 GiB card that difference is KV
+  pool. Staged: serve smoke, then paired n=250 screening against the 5.5-bpp
+  arm (same image both arms), n=1319 verdict only if screening holds.
+  Failures get written up too. *Goal: the same quality bar, 3.4 GiB more
+  context.*
 - **Cross-method mixed-precision comparison**: AURA (KL-Fisher allocation)
   vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
   feasibility spike first (checkpoint-format gap), then a paired
