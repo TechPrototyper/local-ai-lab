@@ -1,8 +1,12 @@
 # DGX Spark / GB10 (sm_121) — quality → speed → memory
 
 Same 27B as the RTX recipe — opposite dials, and since 2026-08-21 a
-different KV dtype: fp8, the price of DFlash2 speculation (the RTX keeps
-NVFP4 KV and no speculation — memory-bound boxes trade the other way).
+different KV dtype: fp8, historically the price of DFlash2 speculation.
+(Since 2026-08-27 that price is optional — spec now serves over NVFP4 KV
+on this box too ([note](../notes/dflash2-nvfp4-sm120-spec-serves.md));
+this recipe stays on the verdict-validated fp8 config until the NVFP4
+variant passes its own verdict-tier gate. The RTX keeps NVFP4 KV and no
+speculation — its agent traffic lives on prefix caching, see below.)
 Here memory is abundant (128 GB unified), so it is spent on long context
 and many parallel sessions ([framing](../README.md#the-framing)). If you
 have a GB10, this is the path: get the stack, pull the model, serve, warm
@@ -86,7 +90,14 @@ Key decisions, each measured:
 - **Serve uncalibrated (k/v scale = 1.0)** — same rationale as the RTX
   recipe: baked per-tensor amax KV scales cost accuracy at 4 bit (README
   finding 2026-08-01). The AQUA checkpoint carries no baked KV scales.
-- **Prefix caching on** — agents re-send the full context every turn.
+- **Prefix caching on — with an honest caveat.** Agents re-send the full
+  context every turn, which is what the cache is for. But under
+  speculation on hybrid-GDN models, prefix-cache hits currently appear to
+  drop to zero (mechanism tracked upstream as
+  [vllm#52244](https://github.com/vllm-project/vllm/pull/52244);
+  live-confirmed on the lab's sm120 box with the same model family and
+  drafter). The flag stays on deliberately — it is harmless, and cache
+  benefits return automatically when the upstream fix lands.
 - **Parsers:** `--reasoning-parser qwen3` +
   `--enable-auto-tool-choice --tool-call-parser qwen3_coder`.
 - **Start order:** bring the small services (embedder/reranker/audio) up
@@ -103,19 +114,29 @@ Key decisions, each measured:
   [draft-length map](../notes/dflash2-draft-length-map.md)). **Never raise
   the draft length for agent traffic** — n=15 plateaus and inverts against
   baseline around c≈20; n=7 never inverted in the measured range.
-- **The fp8 KV cache is the price of DFlash2** — the drafter's non-causal
-  attention cannot read NVFP4 KV on sm12x. Quality cost: none detected at
-  verdict level. Capacity cost vs. the NVFP4-only config: ~966k → ~443k
-  tokens at 20 GiB; since 2026-08-22 the pool runs at **21.6 GiB =
-  478,334 tokens** — funded by quantizing the drafter (below).
-  The old MTP config stays documented for the record
+- **The fp8 KV cache *was* the price of DFlash2** — the drafter's
+  non-causal verify could not read NVFP4 KV on sm12x. That gap is closed:
+  since 2026-08-27 DFlash2 + NVFP4-KV serves end-to-end on this box
+  (paired battery: prose +72%, count-200 5.9× vs no-spec; filed upstream
+  as [#53977](https://github.com/vllm-project/vllm/pull/53977)/[#53978](https://github.com/vllm-project/vllm/pull/53978)/[#53979](https://github.com/vllm-project/vllm/pull/53979);
+  [note](../notes/dflash2-nvfp4-sm120-spec-serves.md)). This recipe stays
+  on fp8 until the NVFP4 variant passes a verdict-tier quality gate —
+  the prize is ≈2× pool (~966k vs ~443k tokens at 20 GiB). Current
+  production pool: **21.6 GiB fp8 = 478,334 tokens** — funded by
+  quantizing the drafter (below). Quality cost of fp8: none detected at
+  verdict level. The old MTP config stays documented for the record
   ([note](../notes/mtp-tool-calling.md)) — its tool-calling failure was
   parser-path-specific, not "speculation" (README finding 2026-08-20).
-- **Requires the DFlash2 source line** until vLLM
-  [#52816](https://github.com/vllm-project/vllm/pull/52816)/[#52883](https://github.com/vllm-project/vllm/pull/52883)
-  merge: the sm12x build plus 10 cherry-picked commits — branch
+- **Requires the DFlash2 source line, now mostly upstream:**
+  [#52816](https://github.com/vllm-project/vllm/pull/52816) (the DFlash2
+  core) **merged 2026-08-24**; still open are
+  [#52883](https://github.com/vllm-project/vllm/pull/52883) (LM-head
+  loading) and the lab's warmup fixes
+  [#53977](https://github.com/vllm-project/vllm/pull/53977)/[#53978](https://github.com/vllm-project/vllm/pull/53978).
+  Until those land, the working line is branch
   [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121)
-  on this lab's vLLM fork.
+  on this lab's vLLM fork (or the
+  [portable container](../notes/dflash2-gb10-portable-container.md)).
 
 - **The drafter itself is fp8-quantized** (since 2026-08-22): all decoder
   projections, **per-channel weights** + dynamic activations,
@@ -166,8 +187,8 @@ should report on the order of **478k tokens** (21.6 GiB fp8, fp8 drafter;
 the old NVFP4-only config reported ~966k at 20 GiB). Speculation health: after warm traffic,
 `grep SpecDecoding` should show mean acceptance length ≈5 on
 reasoning-heavy prompts. If the pool is far smaller, KV is not actually
-NVFP4 or a resident neighbor ate the pool (see the `--kv-cache-memory-bytes`
-note above).
+the dtype you set or a resident neighbor ate the pool (see the
+`--kv-cache-memory-bytes` note above).
 
 Single-stream decode is ~10 tok/s (bandwidth-bound). The historical
 aggregate figures (~20 tok/s per session, 135 tok/s at 8 concurrent
@@ -178,14 +199,15 @@ MTP — treat as historical. Prefill is unaffected by MTP and still holds:
 
 ## 7. Known limits
 
-- **DFlash2 speculative decoding is an adoption candidate here, not the
-  default.** The paired n=250 quality gate **passed** (equal quality,
-  ~2.5–3× single-stream), and the controlled batch sweep has it winning at
-  **every tier through c=8** (48.3→134.9 agg tok/s vs 10.7→70.9 baseline).
-  Beyond c=8 / mixed load, measure first — first light saw the gain invert
-  there. It requires fp8 KV (affordable on this box: ~966k → ~550k tokens),
-  and the n=1319 full-split verdict is still pending before verdict-level
-  language ([gate](../notes/dflash2-n250-gate-2026-08-20.md) ·
-  [batch sweep](../notes/dflash2-batch-sweep-and-skiplayers.md)).
+- **DFlash2 beyond the measured range: measure first.** The full-split
+  verdict passed (n=1319 paired, p=0.122 — hence adoption, see §4), and
+  draft length n=7 never inverted against baseline in the measured range
+  (≤c=24). Beyond that, and under mixed prefill-heavy load, measure before
+  trusting the gain — early n=15 runs inverted around c≈20
+  ([verdict](../notes/dflash2-full-split-verdict.md) ·
+  [draft-length map](../notes/dflash2-draft-length-map.md)).
+- **NVFP4-KV under speculation is validated but not yet promoted** —
+  the ≈2× pool upgrade waits on its own verdict-tier gate
+  ([note](../notes/dflash2-nvfp4-sm120-spec-serves.md)).
 - The decode-throughput aggregate numbers above are historical (MTP-on) and
   await a re-benchmark on the current config.

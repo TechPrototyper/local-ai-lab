@@ -1,33 +1,11 @@
-<!--
-DRAFT for Tim's review. NOT committed, NOT pushed.
-
-Target filename on publish: notes/qwen38-pipeline-story.md (drop the
--DRAFT-EN suffix). Remove this comment block and the "Draft for Tim's
-review" footer at the bottom before merging.
-
-Suggested README.md changes:
-
-1) Changelog row (top of table, newest-first):
-
-   | 2026-08-21 | Consolidated 3.6→3.8 pipeline write-up added (`notes/qwen38-pipeline-story.md`): full-split verdict, the 3.8 pivot, the speculation re-evaluation, and today's per-platform recommendation in one narrative | the "Consolidated write-up" Next-up item is done — the record exists as one document instead of six | [`notes/qwen38-pipeline-story.md`](notes/qwen38-pipeline-story.md) |
-
-2) Findings row: OPTIONAL. This note synthesizes already-published
-   measurements rather than reporting a new one — every number in it has
-   a Findings row of its own already. Suggest skipping a new row unless
-   you want the write-up itself to be discoverable from the Findings
-   table; if so:
-
-   | 2026-08-21 | **The 3.6→3.8 pipeline story, consolidated into one record.** Full-split verdict (95.00% vs 94.84%, p=0.883), the Qwen3.8 pivot (byte-identical config, fix applies 1:1), the speculation re-evaluation (DFlash2 mechanism found, quality gate passed, batch sweep reverses first light), and the closed format question (weights: NVFP4 = INT4-Marlin; KV: neither GPTQ nor a practical Hadamard rescues amax) — now cross-referenced from one place instead of six. | [`notes/qwen38-pipeline-story.md`](notes/qwen38-pipeline-story.md) |
-
-3) Once this lands, remove the "Consolidated write-up" bullet from
-   README's "Next up" section — it's the item this note completes.
--->
-
 # Qwen3.6 → Qwen3.8: the pipeline story, and today's recommendation
 
-**2026-08-15 → 2026-08-20** · Status: consolidated record — every
+**2026-08-15 → 2026-08-27** · Status: consolidated record — every
 measurement below is individually published; this note is the narrative
 through-line the [README Next-up list](../README.md) asked for.
+Sections 1–3 are the mid-August state as it unfolded; section 4 is the
+week that closed most of what section 3 left open; section 5 is the
+recommendation as of 2026-08-27.
 
 ## 1. The full proof: the repaired pipeline reproduces production quality
 
@@ -70,7 +48,8 @@ head-to-head, winner becomes production on both sm121 and sm120.
 quality re-run (the 08-13 number was confounded by a missing
 `--reasoning-parser` flag, not a CB deficit — see the
 [README Next-up list](../README.md)) and this lab's own CB re-quant (run
-overnight, no cross-box transcode available) are both still outstanding.
+overnight, no cross-box transcode available) are both still outstanding
+— resolved in section 4.
 
 **Speculation, re-evaluated with a mechanism instead of a hunch.** The MTP
 era ended with "speculation breaks tool-calling"
@@ -94,7 +73,7 @@ layers pad to the hybrid model's state-page granularity, ~41 GiB of KV for
 a 32k window regardless of settings
 ([batch-sweep + skip-layers note](dflash2-batch-sweep-and-skiplayers.md)).
 Still ahead before verdict-level language: the n=1319 full split and the
-c>8 boundary.
+c>8 boundary — both landed within days (section 4).
 
 **A boot crash with a lesson.** Concurrent prefills in the very first
 engine step after boot can kill the hybrid linear-attention engine
@@ -116,7 +95,58 @@ erased — the needed block size, ~1e4, is impractical). Per-tensor amax
 stays the wrong objective for 4-bit KV; scale-1.0 serving stays the
 fallback ([note](nvfp4-kv-gptq-online-hadamard.md)).
 
-## 4. The recommendation, per platform
+## 4. The week that closed the chapter (2026-08-21 → 08-27)
+
+**Speculation graduated from candidate to production — then got faster
+per GB.** The n=1319 full split passed (baseline 95.15% vs DFlash2
+**95.83%**, discordants 9/18 *in the drafter's favor*, p=0.122 — equal
+within paired statistics, at 2.75× wall-clock), and the draft-length map
+found the interior optimum: **n=7** peaks at ~227 tok/s aggregate and
+never inverts in the measured range, dissolving the c>8 worry that n=15
+had raised ([verdict](dflash2-full-split-verdict.md) ·
+[draft-length map](dflash2-draft-length-map.md)). Adoption on the GB10
+followed the same day. A day later the **drafter itself went fp8** —
+acceptance-neutral by measurement, −1.6 GB straight back into the KV pool
+(478k tokens at 21.6 GiB), and a fused-scale loading gap reported
+upstream along the way
+([drafter-fp8 note](dflash2-drafter-fp8-quant.md)). By 08-25 the whole
+production stack was reproducible as a **single public container** —
+one `docker run` on any GB10
+([portable container](dflash2-gb10-portable-container.md)).
+
+**The CB arm resolved.** Rob's GridBook codebook export compresses the
+same model to **13 GB**, and the task battery says quality holds against
+the 24 GB production quant: GSM8K n=250 96.0% vs 96.4% (McNemar p=1.0),
+tool-calling and needle equal — the published +4.56% intrinsic PPL gap
+does not reach task level
+([gridbook note](gridbook-13gb-quality-holds.md)). On 08-24 the full
+memory-track triad — GridBook + NVFP4-KV + DFlash2 — ran on the 5090
+with an **877k-token context config** and was rolled back the same
+morning for a reason orthogonal to the triad: prefix caching gets 0%
+hits under speculation on hybrid-GDN models
+([vllm#52244](https://github.com/vllm-project/vllm/pull/52244)), and the
+RTX is the agent tier that lives on the cache
+([triad note](gridbook-nvfp4-dflash2-rtx-triad.md)).
+
+**And the "upstream question" from section 3 answered itself — here.**
+The NVFP4 non-causal seam turned out to be one serving-layer gap plus
+three spec-warmup bugs, not a kernel problem: the FA2 kernel carries
+`causal=False` unchanged (Δcos ≤ 0.0013 against the validated causal
+path on real pages). DFlash2 + NVFP4-KV now serves end-to-end on **both**
+boxes — first on the 5090 (82.5 tok/s prose in the original run), then
+cross-arch revalidated paired against no-spec at identical settings:
+sm121 prose **+72%**, count-to-200 **5.9×**; sm120 count-to-200 **3.4×**,
+step-by-step reasoning 135 tok/s, essay prose at parity (acceptance is
+strongly content-dependent — the spectrum, 0.20 → 0.79, is the honest
+number). Filed upstream as
+[#53977](https://github.com/vllm-project/vllm/pull/53977) /
+[#53978](https://github.com/vllm-project/vllm/pull/53978) /
+[#53979](https://github.com/vllm-project/vllm/pull/53979) (the seam PR
+stacked on #46329)
+([seam note](dflash2-nvfp4-sm120-spec-serves.md) ·
+[raw](../results/RESULT_nvfp4_spec_crossarch_revalidation.json)).
+
+## 5. The recommendation, per platform (as of 2026-08-27)
 
 Same model family, same quant stack, opposite settings — each derived from
 measurement. Full commands:
@@ -126,41 +156,32 @@ measurement. Full commands:
 ### sm121 (DGX Spark / GB10, 128 GB unified — quality → speed → memory)
 
 - **Model:** Qwen3.8-27B as PrismaAQUA 5.5 (the AURA pipeline behind it is
-  verdict-validated on 3.6 at n=1319, p=0.883).
-- **KV:** NVFP4, uncalibrated (scale 1.0) — amax calibration measurably
-  hurts (n=1319, p=0.013). 262k context, prefix caching on, size the pool
-  with `--kv-cache-memory-bytes` (the unified-memory gotcha, not
-  `--gpu-memory-utilization`).
-- **Serving:** always set both the reasoning and tool parser (otherwise
-  confounded outputs); boot discipline: wait for health, one warmup
-  request (the GDN first-step window).
-- **Speculation:** MTP off. **DFlash2 is an adoption candidate:**
-  quality-neutral at n=250, and the batch sweep has it faster on every
-  measured tier through c=8 (c=1: 48.3 vs. 10.7 tok/s; c=8: 134.9 vs.
-  70.9 tok/s aggregate). "Latency tool, not an aggregate tool" is
-  withdrawn up to c=8. Before verdict language: n=1319, and the c>8
-  boundary. CB/Gridbook: functionally proven, quality-per-bit verdict
-  open — no recommendation yet.
+  verdict-validated at n=1319, p=0.883).
+- **Speculation: DFlash2, draft length 7, in production** — verdict-equal
+  quality, ~4× single-stream on reasoning traffic, drafter fp8. Never
+  raise the draft length for agent traffic.
+- **KV:** fp8 at 21.6 GiB = 478k tokens — historically DFlash2's price,
+  now a *pending decision*: the NVFP4 variant is battery-validated
+  (≈2× pool) and waits on its verdict-tier quality gate.
+- **Serving discipline unchanged:** explicit `--kv-cache-memory-bytes`,
+  both parsers set, one warmup request after boot.
 
 ### sm120 (RTX 5090, 32 GB — quality → memory → speed)
 
-- Same parity build as the Spark — one vLLM stack, two cards.
-- **KV:** NVFP4-KV is the whole lever (~4× context), also strictly
-  uncalibrated — the two probes above close the door: neither GPTQ nor a
-  practical larger Hadamard rescues the amax path.
-- **Weights:** NVFP4 throughout — no measurable accuracy cost against
-  INT4-Marlin (same-model, screening level).
-- **Speculation: stays off.** The full fp8-KV trade would halve context,
-  and the skip-layers hybrid that was meant to reconcile both is measured
-  and **ruled out**: the mechanism works, but skipped-layer pages align
-  to the hybrid model's state-page granularity — ~41 GiB of KV for 32k
-  context, prefix caching doesn't help. Remaining paths to RTX
-  speculation: NVFP4 non-causal kernel work (an upstream question) or
-  context capping with length-based routing.
+- **KV:** NVFP4-KV remains the whole lever (~4× context), strictly
+  uncalibrated. On current code lines set
+  `use_trtllm_attention: false` (see the recipe).
+- **Weights:** AQUA 24 GB in production; **GridBook 13 GB is the
+  presumptive successor** (quality holds at triage level; acceptance
+  under this target, a far-window pass, and n=1319 are the open gates).
+- **Speculation: available, deliberately off** — no longer an
+  impossibility but a tradeoff: prefix caching and speculation are
+  mutually exclusive on this model family until
+  [#52244](https://github.com/vllm-project/vllm/pull/52244) lands, and
+  the agent tier lives on the cache. For batch/single-shot workloads,
+  spec over NVFP4-KV is a live option today.
 
----
+The through-line of the whole story: every one of these settings flipped
+at least once — and each flip was bought with a paired measurement, not
+an opinion.
 
-*Draft for Tim's review before publish. Translated from the internal
-German diary entry; internal paths, hosts, PIDs, and session/kanban
-references removed per repo convention (no internal ops detail in the
-public repo).*

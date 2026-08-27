@@ -59,8 +59,6 @@ are in.
   vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
   feasibility spike first (checkpoint-format gap), then a paired
   head-to-head. *Goal: quality per bit, method-level.*
-- **Consolidated write-up** of the 3.6 → 3.8 pipeline story (full-split
-  verdict, the 3.8 pivot, speculation re-evaluation). *Goal: the record.*
 
 ## Findings so far
 
@@ -127,6 +125,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-08-27 | Consolidated 3.6→3.8 pipeline write-up published (`notes/qwen38-pipeline-story.md`): the full-split verdict, the 3.8 pivot, the speculation re-evaluation — extended through the week that closed the chapter (adoption, drafter fp8, portable container, GridBook, the triad, the non-causal seam + upstream package) and the per-platform recommendation as of today; Spark recipe detail-pass (adoption-candidate leftover removed, #52816-merge status, prefix-caching caveat under spec) | the "Consolidated write-up" Next-up item is done — the record exists as one document instead of ten | [`notes/qwen38-pipeline-story.md`](notes/qwen38-pipeline-story.md) · [`recipes/dgx-spark-sm121.md`](recipes/dgx-spark-sm121.md) |
 | 2026-08-27 | **Notebook re-baselined to the post-seam state:** framing table + Next-up rewritten (spec on the RTX is a tradeoff now, not an impossibility); node profiles, RTX recipe (XQA-off flag is load-bearing on current code) and build-stack (0.6.18/main pin, current image lines) updated; the missing 08-24 triad episode written up | the notebook's living sections still described the pre-seam world; a public notebook that contradicts its own newest findings is worse than none | [`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md) · [`recipes/`](recipes/) |
 | 2026-08-27 | **Upstream package filed:** vllm [#53977](https://github.com/vllm-project/vllm/pull/53977) / [#53978](https://github.com/vllm-project/vllm/pull/53978) / [#53979](https://github.com/vllm-project/vllm/pull/53979) (non-causal-NVFP4 seam stacked on #46329) after paired cross-arch revalidation — first DFlash2+NVFP4-KV spec serve on sm121 (prose +72%, count-200 5.9×); sm120 on the fresh main∪#46329 integration (count-200 3.4×, reasoning 135 tok/s, byte-identical greedy) | the measurements were green on both arches; the seam belongs upstream, with the NVFP4 line's author in front | [`notes/upstream-contributions.md`](notes/upstream-contributions.md) · [`results/RESULT_nvfp4_spec_crossarch_revalidation.json`](results/RESULT_nvfp4_spec_crossarch_revalidation.json) |
 | 2026-08-27 | DFlash2+NVFP4-KV sm120 breakthrough written up (note + §17/§18 result record): the non-causal seam is fixed and the spec battery is green — the repo previously recorded only the blocked §16 state; handoff addendum with the corrections | the measured state was ahead of the written record; upstream packaging starts from this note | [`notes/dflash2-nvfp4-sm120-spec-serves.md`](notes/dflash2-nvfp4-sm120-spec-serves.md) · [`results/RESULT_e2e_dflash2_nvfp4_sm120.json`](results/RESULT_e2e_dflash2_nvfp4_sm120.json) |
