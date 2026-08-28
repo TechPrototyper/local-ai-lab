@@ -32,16 +32,41 @@ contract, and the local build patch are documented in
 [`build-stack.md`](build-stack.md).
 
 > Containers: see [vllm-sm12x](https://github.com/TechPrototyper/vllm-sm12x)
-> — Dockerfiles, entrypoints (first-boot warmup built in) and
+> — Dockerfiles and entrypoints (first-boot warmup built in).
+>
 > **Prebuilt, self-contained image (2026-08-28):**
 > `ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-pc50897-dd02ed4d` —
 > DFlash2 + FlashInfer + warm caches baked, **includes the vllm#50897
 > prefix-cache-under-speculation fix** (90% replay reuse in production
-> here). Run it exactly like the production serve below, minus every
-> `-v .../vllm-src` and `-v .../fi` mount.
+> here). No source mounts needed. Complete production-shape serve:
 >
-> docker/podman quickstarts are up; prebuilt images follow after the
-> first promoted build. Until then, build from `build-stack.md`.
+> ```bash
+> docker run -d --name vllm-aura38 --gpus all --ipc=host -p 8000:8000 \
+>   --memory=48g --memory-swap=48g --restart unless-stopped \
+>   -v $HOME/models:/models \
+>   -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+>   -e VLLM_ATTENTION_BACKEND=FLASHINFER \
+>   -e FLASHINFER_DISABLE_VERSION_CHECK=1 \
+>   --entrypoint python3 \
+>   ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-pc50897-dd02ed4d \
+>   -m vllm.entrypoints.openai.api_server \
+>   --model /models/qwen3.8-27b-prismaaqua55 --served-model-name qwen3.8-27b \
+>   --trust-remote-code --reasoning-parser qwen3 \
+>   --enable-auto-tool-choice --tool-call-parser qwen3_coder \
+>   --generation-config vllm \
+>   --override-generation-config '{"temperature":1.0,"top_p":0.95,"top_k":20}' \
+>   --kv-cache-dtype fp8 \
+>   --speculative-config '{"method":"dflash","model":"/models/qwen3.8-27b-dflash2-fp8","quantization":"compressed-tensors","num_speculative_tokens":7}' \
+>   --enable-prefix-caching \
+>   --max-model-len 262144 --max-num-seqs 32 \
+>   --gpu-memory-utilization 0.44 --kv-cache-memory-bytes 23192823808 \
+>   --enable-chunked-prefill --max-num-batched-tokens 16384 \
+>   --host 0.0.0.0 --port 8000
+> ```
+>
+> Drafter checkpoint is public:
+> [`TechPrototyper/Qwen3.8-27B-DFlash2-fp8-vllm`](https://huggingface.co/TechPrototyper/Qwen3.8-27B-DFlash2-fp8-vllm).
+> To build the image yourself instead: `build-stack.md`.
 
 ## 3. Get the model
 
