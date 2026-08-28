@@ -47,9 +47,14 @@ are in.
   (stalled on a rebase) and
   [vllm#50897](https://github.com/vllm-project/vllm/pull/50897), which its
   own thread calls the more proper fix — an independent GB10 datapoint there
-  shows it moving cases #52244 leaves untouched. We plan to port and validate
-  #50897 against our DFlash2×NVFP4 stack on sm120/sm121. *Goal: turn
-  Entscheidung B from a forced choice into an operator tradeoff.*
+  shows it moving cases #52244 leaves untouched. **Ported and validated
+  (2026-08-28)**: on our DFlash2×NVFP4 line, exact-replay cache hits go
+  0 → 11,648/12,812 (90.9%) on sm120 *and* sm121 — identical to the token —
+  with cold-vs-replayed completions byte-identical on every arm
+  ([note](notes/night-2026-08-28-pc50897-scout-h2h.md) ·
+  [raw](results/RESULT_pc50897_replay_probe.json)). Remaining: the PR itself
+  needs its rebase upstream. *Goal: turn Entscheidung B from a forced choice
+  into an operator tradeoff.*
 - **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV now serves
   on sm121 (paired battery green); ≈2× KV pool vs fp8 at the same budget.
   Needs the verdict-tier quality gate (n=250 → n=1319) before touching
@@ -65,10 +70,14 @@ are in.
   [20 GB AQUA export of Qwen3.8-27B](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaScout-AQUA-20GB)
   (19.97 GB verified; stock compressed-tensors, no plugin needed) — 3.4 GiB
   below our serving 5.5-bpp export. On a 32 GiB card that difference is KV
-  pool. Staged: serve smoke, then paired n=250 screening against the 5.5-bpp
-  arm (same image both arms), n=1319 verdict only if screening holds.
-  Failures get written up too. *Goal: the same quality bar, 3.4 GiB more
-  context.*
+  pool. **Screening passed (2026-08-28)**: paired n=250 greedy, identical
+  config both arms — GSM 0.9720 vs 0.9720, discordants 2:2, McNemar p=1.0,
+  and the smaller artifact is ~10% *faster* (74.3 vs 67.4 tok/s single,
+  272.7 vs 247.5 at c=8). At prod shape (0.97/262k, NVFP4 KV) the pool goes
+  342,604 → **477,569 tokens (+39.4%)**
+  ([note](notes/night-2026-08-28-pc50897-scout-h2h.md)). Remaining gate:
+  the n=1319 verdict before any production switch. *Goal: the same quality
+  bar, 3.4 GiB more context.*
 - **Cross-method mixed-precision comparison**: AURA (KL-Fisher allocation)
   vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
   feasibility spike first (checkpoint-format gap), then a paired

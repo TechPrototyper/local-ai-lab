@@ -1,0 +1,50 @@
+{
+  "what": "vllm#50897 port validation: prefix-cache hits under DFlash2 speculative decoding, exact-replay probe (paired)",
+  "date": "2026-08-28",
+  "probe": "scratchpad pc_probe.py (12,812-token deterministic prompt, greedy temp0/seed0, exact replay + extended replay; server prefix_cache_queries/hits metric deltas; SHA-256 over completion text)",
+  "config": {
+    "target": "qwen3.8-27b-prismaaqua55",
+    "spec": "dflash (DFlash2DraftModel), num_speculative_tokens 7",
+    "kv_cache_dtype": "nvfp4",
+    "kv_cache_memory_bytes": 3221225472,
+    "max_model_len": 32768,
+    "prefix_caching": true,
+    "cudagraph_capture_sizes": [1, 2, 4],
+    "sm120_drafter": "qwen3.8-27b-dflash2 (bf16)",
+    "sm121_drafter": "qwen3.8-27b-dflash2-fp8 (compressed-tensors)"
+  },
+  "arms": {
+    "sm120_baseline_2cf8b8ae0": {
+      "code": "integrate/dflash2-nvfp4-v4 @ 2cf8b8ae0 (image sm120-v4-2cf8b8a-t2, unmodified)",
+      "replay_hits": 0, "replay_queries": 12812,
+      "extended_hits": 8736, "extended_queries": 12821,
+      "replay_byte_identical": true, "sha16": "18aa5e9a91b0c219",
+      "ts": "2026-08-27T22:42:29Z"
+    },
+    "sm120_patched_pc50897": {
+      "code": "integrate/dflash2-nvfp4-v4-pc50897 (full merge, source-override on same image; SOURCE OVERRIDE OK verified)",
+      "replay_hits": 11648, "replay_queries": 12812,
+      "extended_hits": 11648, "extended_queries": 12821,
+      "replay_byte_identical": true, "sha16": "0a53c5f364d53ada",
+      "ts": "2026-08-27T22:5xZ"
+    },
+    "sm121_patched_pc50897": {
+      "code": "v2exp exp/pc50897 @ 83a9ef7f4 (core 3-way port; image vllm-sm121:f4c27c0da, /vllm-src mount)",
+      "replay_hits": 11648, "replay_queries": 12812,
+      "extended_hits": 11648, "extended_queries": 12821,
+      "replay_byte_identical": true, "sha16": "9e591ab4a4bc4146",
+      "ts": "2026-08-27T22:5xZ"
+    }
+  },
+  "reading": [
+    "Unpatched reproduces the 0%-hit bug exactly (0/12,812 on exact replay).",
+    "Patched restores 11,648/12,812 (90.9%) on BOTH architectures — identical to the token, the remainder being boundary alignment by design.",
+    "Cold vs replayed completions byte-identical on every arm (greedy determinism gate): the reused cache does not corrupt output; the port's coordinator seam (finalized-KV x hashing) shows no corruption signal.",
+    "Cross-arch shas differ (numerics differ between sm120 bf16-drafter and sm121 fp8-drafter arms as expected); within-arm cold==replay is the gate."
+  ],
+  "caveats": [
+    "Metric parser sums *_created series into totals; only deltas are meaningful (deltas reported).",
+    "sm121 arm carries the core-only port (tests/connector-family excluded); mooncake connector resolved as HEAD on sm120 merge — NOT upstreamable as-is.",
+    "cached_tokens not present in API usage payload on this line; server metrics used instead."
+  ]
+}
