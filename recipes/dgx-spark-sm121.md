@@ -31,8 +31,7 @@ Custom sm12x vLLM build carrying the consumer-Blackwell NVFP4-KV line
 contract, and the local build patch are documented in
 [`build-stack.md`](build-stack.md).
 
-> Containers: see [vllm-sm12x](https://github.com/TechPrototyper/vllm-sm12x)
-> — Dockerfiles and entrypoints (first-boot warmup built in).
+> Image roster and build recipe: [`containers/`](../containers/README.md).
 >
 > **Prebuilt, self-contained image (2026-08-28):**
 > `ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-pc50897-dd02ed4d` —

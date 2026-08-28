@@ -14,7 +14,7 @@ Weg zur Konfiguration steckt in den verlinkten Notes und im Recipe.
 | KV-Cache | FP8, unkalibriert (Scale 1.0) |
 | Kontext | 262.144 Tokens pro Session |
 | Zielgerät | NVIDIA DGX Spark (GB10, sm121, 128 GB unified, ~273 GB/s) |
-| Serving | vLLM, sm12x-Custom-Line — Container (ARM64): [`TechPrototyper/vllm-sm12x`](https://github.com/TechPrototyper/vllm-sm12x); Source-Branch: [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121) |
+| Serving | vLLM, sm12x-Custom-Line — Container (ARM64): [`containers/`](../containers/README.md); Source-Branch: [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121) |
 
 ## Gemessene Performance (22.08.2026, Prod-Konfiguration, greedy)
 
@@ -66,7 +66,7 @@ ist inhaltsabhängig: Reasoning ≈ 5,5, freie Prosa ≈ 2,3 (→ ~20 tk/s).
 
 ## Wie starten
 
-1. Container (ARM64) + Build-Stack: [`vllm-sm12x`](https://github.com/TechPrototyper/vllm-sm12x) — bis #52816/#52883 upstream gemerged sind, braucht es den [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121)-Branch (inkl. der #53122-Fixes für quantisierte Drafter).
+1. Container (ARM64) + Build-Stack: [`containers/`](../containers/README.md) — bis #52816/#52883 upstream gemerged sind, braucht es den [`dflash2-sm121`](https://github.com/TechPrototyper/vllm/tree/dflash2-sm121)-Branch (inkl. der #53122-Fixes für quantisierte Drafter).
 2. Modell + Drafter von Hugging Face (nicht gated).
 3. Serve-Kommando, Flags und Boot-Disziplin (Warmup-Einzelrequest!):
    [`recipes/dgx-spark-sm121.md`](../recipes/dgx-spark-sm121.md).
