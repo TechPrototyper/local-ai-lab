@@ -35,10 +35,19 @@ candidate and discarded for production; see
   exists (only `rc1`–`rc9`); for reproducible builds pin a main commit
   (this lab's 2026-08-27 build used `09da2e70`).
 
-## Image lines (current, 2026-08-27)
+## Image lines (current, 2026-08-28)
 
-- **sm121 (Spark):** `vllm-sm121:f4c27c0da` + source-mount contract as
-  above — unchanged, serving production.
+- **sm121 (Spark):** since **2026-08-28** production serves the #50897
+  prefix-cache fix; the matching **self-contained** image is
+  `vllm-sm121:sm121-dflash2-pc50897-dd02ed4d-fullstand` (GHCR:
+  `ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-pc50897-dd02ed4d`) —
+  base `f4c27c0da` + the #53122 fused-KV/quant-mapping pick
+  (`58f998f84`) + the vllm#50897 core port (`dd02ed4da1`), with the
+  DFlash2 tree, FlashInfer and warm JIT/compile caches **baked in** (no
+  source mounts needed; built via `Dockerfile.fullstand`,
+  `--build-arg VLLM_TREE=vllm-dflash2-pc50897`). The older
+  `vllm-sm121:f4c27c0da` + source-mount contract remains the validated
+  fallback.
 - **sm120 (RTX):** fully-baked images, no source mount:
   - `sm120-nvfp4-e2446da2-t1` — **production** since 2026-08-24
     (vllm#46329 head `e2446da2` + flashinfer main; requires the

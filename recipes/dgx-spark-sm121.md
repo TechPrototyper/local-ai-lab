@@ -33,6 +33,13 @@ contract, and the local build patch are documented in
 
 > Containers: see [vllm-sm12x](https://github.com/TechPrototyper/vllm-sm12x)
 > — Dockerfiles, entrypoints (first-boot warmup built in) and
+> **Prebuilt, self-contained image (2026-08-28):**
+> `ghcr.io/techprototyper/vllm-sm12x:sm121-dflash2-pc50897-dd02ed4d` —
+> DFlash2 + FlashInfer + warm caches baked, **includes the vllm#50897
+> prefix-cache-under-speculation fix** (90% replay reuse in production
+> here). Run it exactly like the production serve below, minus every
+> `-v .../vllm-src` and `-v .../fi` mount.
+>
 > docker/podman quickstarts are up; prebuilt images follow after the
 > first promoted build. Until then, build from `build-stack.md`.
 
