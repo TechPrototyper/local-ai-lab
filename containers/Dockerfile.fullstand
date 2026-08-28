@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+# =============================================================================
+# vllm-sm121 FULL-STAND: DFlash2 vLLM + FlashInfer BAKED (no runtime mounts).
+# Reproduces the aura38 source-mount contract by copying the already-public
+# dflash2-sm121 trees to their editable-install paths (/vllm-src, /fi) and
+# priming the warm compile caches so the first boot does not recompile.
+# Boundary: ONLY vllm-dflash2 + flashinfer (+ their dflash2 caches). No gridbook.
+# =============================================================================
+ARG BASE_IMAGE=vllm-sm121:f4c27c0da
+FROM ${BASE_IMAGE}
+ARG VLLM_TREE=vllm-dflash2
+
+# Editable-install target paths (PEP660 finder MAPPING: vllm->/vllm-src/vllm,
+# flashinfer->/fi/flashinfer). Baking the trees here makes the mounts optional.
+COPY ${VLLM_TREE} /vllm-src
+COPY flashinfer   /fi
+
+# Warm caches (mount targets in the run recipe): FlashInfer JIT + torch.compile.
+COPY fi-cache-dflash2            /root/.cache/flashinfer
+COPY vllm-compile-cache-dflash2  /root/.cache/vllm
+
+LABEL dev.local-ai-lab.variant="fullstand-dflash2-baked" \
+      dev.local-ai-lab.vllm-src="/vllm-src (${VLLM_TREE})" \
+      dev.local-ai-lab.note="DFlash2 + FlashInfer baked; run without -v vllm/fi mounts"
