@@ -134,3 +134,49 @@ and outcomes only — no evaluation of the projects or their maintainers.
   Backing measurement:
   [`../results/RESULT_nvfp4_spec_crossarch_revalidation.json`](../results/RESULT_nvfp4_spec_crossarch_revalidation.json)
   · [`dflash2-nvfp4-sm120-spec-serves.md`](dflash2-nvfp4-sm120-spec-serves.md).
+
+## vLLM #53122 — quantized-drafter fixes: production datapoint + test artifact
+
+- **2026-08-27** — [datapoint posted](https://github.com/vllm-project/vllm/pull/53122#issuecomment-5442968584):
+  both walls the PR addresses were hit independently here while quantizing a
+  DFlash2 drafter to fp8; with the PR (cherry-picked 2026-08-22) the fully
+  quantized drafter serves in production on a GB10 — acceptance-neutral,
+  −1.6 GB into the KV pool. Adds fp8 e4m3 per-channel to the thread's
+  verified-format matrix.
+  [Addendum](https://github.com/vllm-project/vllm/pull/53122#issuecomment-5442978186):
+  the checkpoint behind the datapoint is public
+  ([`TechPrototyper/Qwen3.8-27B-DFlash2-fp8-vllm`](https://huggingface.co/TechPrototyper/Qwen3.8-27B-DFlash2-fp8-vllm))
+  as a test artifact for the format class.
+
+## vLLM #53334 (follow-up) — contributor onboarding
+
+- **2026-08-27** — a first-time contributor claimed the issue;
+  [pointers posted](https://github.com/vllm-project/vllm/issues/53334#issuecomment-5439861335):
+  the two findings are separable, code entry points for each, both
+  reproducible without special hardware, plus an sm120/sm121 validation
+  offer once a branch exists.
+
+## vLLM #52883 — the fix is needed one file over
+
+- **2026-08-28** — [analysis posted](https://github.com/vllm-project/vllm/pull/52883#issuecomment-5446093771):
+  the guard this PR fixes was removed by the merged #52816 refactor (the
+  PR's crash scenario passes on current `main` — verified), but the same
+  `UnquantizedEmbeddingMethod`-vs-`UnquantizedLinearMethod` confusion
+  survives in `LogitsProcessor._apply_head`'s `head_dtype` branch, which
+  falsely rejects the same scenario. Retarget recommendation with a
+  runnable four-scenario probe
+  ([`../probes/lmhead_quant_method_guard_probe.py`](../probes/lmhead_quant_method_guard_probe.py))
+  and a re-validation offer.
+
+## vLLM #50897 — cross-arch validation of the prefix-cache×spec fix
+
+- **2026-08-28** — [validation posted](https://github.com/vllm-project/vllm/pull/50897#issuecomment-5448682111):
+  the PR ported onto this lab's DFlash2×NVFP4 line (main-derived base:
+  ~15 conflicts, 13 mechanical, one semantic seam — resolution described
+  in the comment for whoever rebases); exact-replay cache hits
+  0 → 11,648/12,812 (90.9%) on sm120 *and* sm121, byte-identical
+  completions on every arm, clean n=250 screens. Notably outside the
+  MTP/EAGLE family the PR targets (block-diffusion drafter, fp8-quantized
+  on sm121). Port branch shared
+  (`TechPrototyper/vllm@integrate/dflash2-nvfp4-v4-pc50897`); raw:
+  [`../results/RESULT_pc50897_replay_probe.json`](../results/RESULT_pc50897_replay_probe.json).
