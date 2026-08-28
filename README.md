@@ -52,8 +52,9 @@ are in.
   0 → 11,648/12,812 (90.9%) on sm120 *and* sm121 — identical to the token —
   with cold-vs-replayed completions byte-identical on every arm
   ([note](notes/night-2026-08-28-pc50897-scout-h2h.md) ·
-  [raw](results/RESULT_pc50897_replay_probe.json)). Remaining: the PR itself
-  needs its rebase upstream. *Goal: turn Entscheidung B from a forced choice
+  [raw](results/RESULT_pc50897_replay_probe.json)). The full validation is
+  [posted in the PR thread](https://github.com/vllm-project/vllm/pull/50897#issuecomment-5448682111);
+  remaining: the PR itself needs its rebase upstream. *Goal: turn Entscheidung B from a forced choice
   into an operator tradeoff.*
 - **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV now serves
   on sm121 (paired battery green); ≈2× KV pool vs fp8 at the same budget.
