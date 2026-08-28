@@ -30,13 +30,14 @@ cluster, switch, bridge host — is sketched in
 [`nodes/homelab.md`](nodes/homelab.md).
 
 **Run this stack yourself:** the sm121 (GB10) serving container is public —
-[`ghcr.io/techprototyper/vllm-sm12x`](https://github.com/TechPrototyper/vllm-sm12x/pkgs/container/vllm-sm12x),
+[`ghcr.io/techprototyper/vllm-sm12x`](https://github.com/users/TechPrototyper/packages/container/package/vllm-sm12x),
 tag `sm121-dflash2-pc50897-dd02ed4d` is the current production state
 (DFlash2 + FlashInfer + warm caches baked, **including the #50897
 prefix-cache fix**; no source mounts). Build recipes and image provenance:
 [`recipes/build-stack.md`](recipes/build-stack.md); per-box quickstarts:
-[`recipes/`](recipes/). The sm120 (RTX) image line is still
-internal-registry-only — publishing it is in progress.
+[`recipes/`](recipes/). The sm120 (RTX) images are public too:
+`sm120-nvfp4-e2446da2-prod` (production) and `sm120-v4-2cf8b8a-validation`
+(the exact reproduction image for the upstream PRs #53977/#53978/#53979).
 
 ## Next up
 

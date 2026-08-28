@@ -49,13 +49,15 @@ candidate and discarded for production; see
   `vllm-sm121:f4c27c0da` + source-mount contract remains the validated
   fallback.
 - **sm120 (RTX):** fully-baked images, no source mount:
-  - `sm120-nvfp4-e2446da2-t1` — **production** since 2026-08-24
+  - `sm120-nvfp4-e2446da2-t1` (GHCR: `ghcr.io/techprototyper/vllm-sm12x:sm120-nvfp4-e2446da2-prod`) — **production** since 2026-08-24
     (vllm#46329 head `e2446da2` + flashinfer main; requires the
     `use_trtllm_attention: false` flag, see the RTX recipe).
   - `sm120-v4-2cf8b8a-t2` — validation build 2026-08-27: vLLM main ∪
     #46329@`7a5cf14` ∪ the upstream package #53977/#53978/#53979
     (branch `integrate/dflash2-nvfp4-v4` @ `2cf8b8ae0` on the lab fork),
-    flashinfer main @ `09da2e70`. Battery-validated (spec × NVFP4-KV);
+    flashinfer main @ `09da2e70`. GHCR:
+    `ghcr.io/techprototyper/vllm-sm12x:sm120-v4-2cf8b8a-validation`.
+    Battery-validated (spec × NVFP4-KV);
     **not** production-promoted — that waits on a verdict-tier quality
     gate.
 
