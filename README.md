@@ -80,16 +80,22 @@ are in.
   cutover would appear safe; the operational rollout (an image carrying both
   the KV path and the spec seam) is its own step. *The pool, without paying
   quality — the quality side reads clear.*
-- **GridBook, remaining gates** — two of three closed on 2026-08-29
-  (see Findings): the **n=1319 quality verdict** (0.9757, identical to
-  both larger artifacts) and the **acceptance question** (measured:
-  roughly halves on prose vs the AQUA target — a GridBook-tuned drafter
-  is the open speed item). Still open: a far-window quality pass on the
-  ~900k config, and the NVFP4-KV × spec kernel-parity test (#53979 guard).
-  The 13 GB artifact itself is public:
+- **Completing the 13 GB serving picture on the 32 GB card** — the quality
+  case closed on 2026-08-29 (n=1319: 0.9757, identical to both larger
+  artifacts; see Findings), and the serving map is measured. What separates
+  that state from the configuration this lab is actually after — verdict-tier
+  weights, the ~900k-token KV pool, a working prefix cache, *and* speculation
+  that pays on every workload — is now in active work: **a DFlash2 drafter
+  tuned on the GridBook distribution** (prose acceptance measured at 24% vs
+  ~54% on the drafter's original target — the one piece where speed is still
+  left on the table), the **kernel-parity test** for non-causal + sliding-window
+  attention on the FA2-NVFP4 path (what keeps NVFP4-KV and speculation apart
+  today, per the #53979 review), and a **far-window quality pass** on the
+  ~900k config. Every step keeps the same bar: no measurable quality loss,
+  paired statistics, raw data published. The 13 GB artifact itself is public:
   [`rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm`](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm).
-  *Goal: 13 GB weights as the production default on the 32 GB card — the
-  quality case now reads complete.*
+  *Goal: the complete measured configuration for Qwen3.8-27B on a consumer
+  32 GB card — weights, cache, context, and speed, with nothing traded away.*
 - **PrismaScout-AQUA-20GB head-to-head** — rdtand published a
   [20 GB AQUA export of Qwen3.8-27B](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaScout-AQUA-20GB)
   (19.97 GB verified; stock compressed-tensors, no plugin needed) — 3.4 GiB
