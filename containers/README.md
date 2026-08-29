@@ -17,8 +17,11 @@ All images are public on GHCR:
 | `sm121-dflash2-f4c27c0da` | sm121 (arm64) | GB10 DFlash2 line, self-contained (tree + FlashInfer + warm caches baked) | base `f4c27c0da` |
 | `sm121-dflash2-pc50897-dd02ed4d` | sm121 (arm64) | **GB10 production** — the above + #53122 fused-KV pick (`58f998f84`) + the vllm#50897 prefix-cache fix (`dd02ed4da1`) | see [`../notes/night-2026-08-28-pc50897-scout-h2h.md`](../notes/night-2026-08-28-pc50897-scout-h2h.md) |
 
-All four are fully baked — **no source mounts needed** (the older
-source-mount contract is retired). Full copy-paste serve commands, with every
+All four are fully baked — **no source mounts needed**. One honest caveat:
+GB10 production has since moved to NVFP4-KV, which the baked sm121 image
+does not yet carry (it also surfaced a FlashInfer-autotune cache issue under
+some serve shapes) — the current production state serves via the validated
+source-tree path while a refreshed image is queued. Full copy-paste serve commands, with every
 flag and the model/drafter checkpoints, live in the recipes:
 
 - **sm120 (RTX):** [`../recipes/rtx5090-sm120.md`](../recipes/rtx5090-sm120.md)
