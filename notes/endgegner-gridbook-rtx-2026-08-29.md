@@ -52,6 +52,7 @@ verdict-tier quality. That is the number the memory track existed for.
 | …retrieval-style completions | 54.3% / mean 4.80 |
 | …the AQUA-target prose reference (08-22) | 53.9% / 4.77 |
 | Single-stream, prose (warm) | 56.5 tok/s — vs 60.0 no-spec: **spec does not pay on prose here** |
+| Single-stream, **structured** (count-200 / JSON, warm, 2× each) | **149–156 tok/s** — acceptance 72.3% / mean 6.06: **the turbo is intact off-prose** |
 | Per-session decode, c=5–7 | **~37 tok/s** (no-spec drops to ~24 at c≥5) — the regime where spec wins |
 | Sessions c=7 | 258.8 tok/s aggregate (c=8 collapses to 176.7 — KV pressure) |
 | KV pool at this shape | 213,071 tokens (fp8 + spec) |
@@ -66,9 +67,11 @@ workload-dependent and roughly halves on prose** (24% vs the ~54% the same
 drafter reaches on the AQUA target). The drafter was trained against the
 AQUA/BF16 distribution; GridBook's codebook reconstruction appears to
 shift next-token distributions enough on open prose to cost acceptance,
-while short retrieval-style completions keep ~54%. Net: on this target,
-speculation is currently a **mid-concurrency throughput win (c≈5–7)** and
-roughly neutral-to-slightly-negative single-stream on prose. The fix
+while constrained output keeps acceptance high — measured directly:
+count-200 and JSON generation run at **149–156 tok/s** (2.5× the no-spec
+baseline) on this same GridBook target. Net: on this target, speculation
+is a **large win on structured/predictable output and at mid concurrency
+(c≈5–7)**, and roughly neutral single-stream on open prose. The fix
 directions are known: a drafter tuned on the GridBook distribution (speed
 question only — spec stays lossless by construction), or accepting the
 spec win only where acceptance carries it.
