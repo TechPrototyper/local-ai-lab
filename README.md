@@ -42,7 +42,7 @@ prefix-cache fix**; no source mounts). Image roster, provenance and build recipe
 ## Next up
 
 The working set — what this lab is measuring next. Updated whenever work
-moves (last: **2026-08-27**); items graduate into Findings when the numbers
+moves (last: **2026-08-29**); items graduate into Findings when the numbers
 are in.
 
 - **Shepherd the upstream package** —
@@ -66,10 +66,11 @@ are in.
   [posted in the PR thread](https://github.com/vllm-project/vllm/pull/50897#issuecomment-5448682111);
   remaining: the PR itself needs its rebase upstream. *Goal: turn Entscheidung B from a forced choice
   into an operator tradeoff.*
-- **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV now serves
-  on sm121 (paired battery green); ≈2× KV pool vs fp8 at the same budget.
-  Needs the verdict-tier quality gate (n=250 → n=1319) before touching
-  production. *Goal: the pool, without paying quality.*
+- **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV serves on
+  sm121; ≈2× KV pool vs fp8 at the same budget. **Verdict-tier gate cleared
+  (2026-08-29)**: NVFP4-KV ≡ fp8-KV at n=1319 (p=0.77) *and* at perf-harness
+  speed parity, at half the KV memory — see Findings. *The pool, without
+  paying quality: settled.*
 - **GridBook, remaining gates** — acceptance under the GridBook target
   (drafter trained against BF16/AQUA; speed question, not quality),
   a far-window pass on the 877k config, and the n=1319 quality verdict
@@ -86,9 +87,10 @@ are in.
   and the smaller artifact is ~10% *faster* (74.3 vs 67.4 tok/s single,
   272.7 vs 247.5 at c=8). At prod shape (0.97/262k, NVFP4 KV) the pool goes
   342,604 → **477,569 tokens (+39.4%)**
-  ([note](notes/night-2026-08-28-pc50897-scout-h2h.md)). Remaining gate:
-  the n=1319 verdict before any production switch. *Goal: the same quality
-  bar, 3.4 GiB more context.*
+  ([note](notes/night-2026-08-28-pc50897-scout-h2h.md)). **Verdict cleared
+  (2026-08-29)**: n=1319 gives 0.9757 vs 0.9757, McNemar p=1.0 — equivalence
+  confirmed at verdict tier (see Findings). *The same quality bar, 3.4 GiB
+  more context: cleared for a production switch.*
 - **Cross-method mixed-precision comparison**: AURA (KL-Fisher allocation)
   vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
   feasibility spike first (checkpoint-format gap), then a paired
@@ -100,6 +102,7 @@ Newest first.
 
 | Date | Finding | Evidence |
 |---|---|---|
+| 2026-08-29 | **Three n=1319 verdicts land as equivalence — with a noise-floor control that reads them.** The two open verdict-tier gates close: **Scout-20GB ≡ AQUA-5.5** on the 5090 (GSM8K 0.9757 vs 0.9757, McNemar exact p=1.0, discordants 7:7) and **NVFP4-KV ≡ fp8-KV** on the GB10 (0.9742 vs 0.9727, p=0.77, discordants 7:5) — the latter also at **perf-harness speed parity** (single-stream 23.1 vs 23.0 tok/s) and **half the KV-cache memory**. A fresh same-config repeat of the deployed prod-50897 config (0.9704; needle 6/6, determinism 5/5 with identical hashes) doubles as the **noise floor**: two byte-identical runs disagree on **15 items (10:5, p=0.30)** — *more* apparent divergence than either real comparison produced — so both equivalences sit provably inside run-to-run greedy flip-noise. (tools 0/6 on every arm is a `400 Bad Request` harness artifact, identical across arms, not a quality signal.) | [`scout·aqua`](notes/verdict-scout20gb-vs-aqua55-n1319-2026-08-29.md) · [`nvfp4·fp8`](notes/verdict-nvfp4kv-vs-fp8kv-cutover-n1319-2026-08-29.md) · [`nachlauf·noise`](notes/verdict-prod50897-nachlauf-noisefloor-n1319-2026-08-29.md) · [`results/`](results/) |
 | 2026-08-28 | **Prefix caching under speculation works — validated cross-arch, then taken to production the same morning.** [vllm#50897](https://github.com/vllm-project/vllm/pull/50897) ported onto both serving lineages: exact-replay cache hits go **0 → 11,648/12,812 (90.9%)** on sm120 *and* sm121 — identical to the token — with cold-vs-replayed completions byte-identical on every arm (greedy determinism gate, including across the port's one semantic seam and under a diffusion-style drafter with an fp8-quantized checkpoint). Validation [posted upstream](https://github.com/vllm-project/vllm/pull/50897#issuecomment-5448682111); hours later the fix went into **production on the GB10** (90.0% replay reuse on the real serve config; battery: GSM-250 0.996, tools 6/6, needle 6/6, det 5/5; single-stream spectrum 21.9 prose → 51.4 greedy structured). | [`notes/night-2026-08-28-pc50897-scout-h2h.md`](notes/night-2026-08-28-pc50897-scout-h2h.md) · [`results/RESULT_pc50897_replay_probe.json`](results/RESULT_pc50897_replay_probe.json) · [`results/RESULT_sm121-PROD-pc50897.json`](results/RESULT_sm121-PROD-pc50897.json) |
 | 2026-08-28 | **A 20 GB artifact that matches the 23.6 GB one — exactly.** rdtand's PrismaScout-AQUA-20GB vs our serving AQUA-5.5, paired n=250 greedy, identical config: **0.9720 vs 0.9720**, discordants 2:2, McNemar p=1.0, determinism 5/5 both — and the smaller artifact is ~10% *faster* (74.3 vs 67.4 tok/s single; 272.7 vs 247.5 at c=8: fewer weight bytes to read). At prod shape the KV pool grows **342,604 → 477,569 tokens (+39.4%)** on the 32 GB card. Adoption gated on the n=1319 verdict. | [`notes/night-2026-08-28-pc50897-scout-h2h.md`](notes/night-2026-08-28-pc50897-scout-h2h.md) · [`results/RESULT_sm120-h2h-scout20gb.json`](results/RESULT_sm120-h2h-scout20gb.json) · [`results/RESULT_sm120-h2h-aqua55.json`](results/RESULT_sm120-h2h-aqua55.json) |
 | 2026-08-24 | **The full memory-track triad ran on the 5090** — GridBook 13 GB weights + NVFP4-KV + DFlash2, with an **877k-token context config** (≈2× the AQUA-era headroom; briefly the primary route). Rolled back the same morning for a reason orthogonal to the triad: **prefix caching gets 0% hits under spec + hybrid GDN** ([vllm#52244](https://github.com/vllm-project/vllm/pull/52244)), and the agent tier lives on the cache. The composition itself booted and served; adoption is gated on #52244, plus the still-open GridBook gates (acceptance vs. this target, far-window pass, n=1319). | [`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md) |
