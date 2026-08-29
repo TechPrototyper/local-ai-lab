@@ -73,13 +73,16 @@ are in.
   cutover would appear safe; the operational rollout (an image carrying both
   the KV path and the spec seam) is its own step. *The pool, without paying
   quality — the quality side reads clear.*
-- **GridBook, remaining gates** — acceptance under the GridBook target
-  (drafter trained against BF16/AQUA; speed question, not quality),
-  a far-window pass on the 877k config, and the n=1319 quality verdict
-  ([`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md)).
+- **GridBook, remaining gates** — two of three closed on 2026-08-29
+  (see Findings): the **n=1319 quality verdict** (0.9757, identical to
+  both larger artifacts) and the **acceptance question** (measured:
+  roughly halves on prose vs the AQUA target — a GridBook-tuned drafter
+  is the open speed item). Still open: a far-window quality pass on the
+  ~900k config, and the NVFP4-KV × spec kernel-parity test (#53979 guard).
   The 13 GB artifact itself is public:
   [`rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm`](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm).
-  *Goal: 13 GB weights as the production default on the 32 GB card.*
+  *Goal: 13 GB weights as the production default on the 32 GB card — the
+  quality case now reads complete.*
 - **PrismaScout-AQUA-20GB head-to-head** — rdtand published a
   [20 GB AQUA export of Qwen3.8-27B](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaScout-AQUA-20GB)
   (19.97 GB verified; stock compressed-tensors, no plugin needed) — 3.4 GiB
