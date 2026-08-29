@@ -54,6 +54,6 @@ or the Option-2 symmetric-mask fix before it can serve.
 
 ## Provenance
 
-- Metrics: `scratchpad/night-results/sm120_pc50897_metrics.txt`
+- Metrics: [`results/sm120_pc50897_metrics.txt`](../results/sm120_pc50897_metrics.txt)
 - Image build: kaniko overlay on `sm120-v4-2cf8b8a` base, in-cluster (neo26).
 - Companion sm121 validation: [`night-2026-08-28-pc50897-scout-h2h.md`](night-2026-08-28-pc50897-scout-h2h.md)

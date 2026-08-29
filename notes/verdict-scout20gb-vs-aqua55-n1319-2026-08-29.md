@@ -38,8 +38,7 @@ floor; the symmetry already argues for it).
 
 So, stated conservatively: the ~3 GB the Scout build saves (20 vs 23 GB)
 **does not appear to cost measurable task accuracy** at this tier. The
-20 GB variant did **not** degrade — the failure mode we explicitly watched
-for ("wenn die 20-GB-Version abschmiert") did not occur.
+degradation this run was designed to catch did not appear.
 
 ## Scope / honesty
 
