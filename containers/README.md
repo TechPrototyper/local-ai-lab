@@ -17,6 +17,18 @@ All images are public on GHCR:
 | `sm121-dflash2-f4c27c0da` | sm121 (arm64) | GB10 DFlash2 line, self-contained (tree + FlashInfer + warm caches baked) | base `f4c27c0da` |
 | `sm121-dflash2-pc50897-dd02ed4d` | sm121 (arm64) | **GB10 production** — the above + #53122 fused-KV pick (`58f998f84`) + the vllm#50897 prefix-cache fix (`dd02ed4da1`) | see [`../notes/night-2026-08-28-pc50897-scout-h2h.md`](../notes/night-2026-08-28-pc50897-scout-h2h.md) |
 
+### 2026-08-31 — RTX drafter-free MTP-on-GridBook (new line)
+
+| Tag | Arch | What it is | Provenance |
+|---|---|---|---|
+| [`vllm-sm120:gridbook-mtp-088`](https://github.com/users/TechPrototyper/packages/container/package/vllm-sm120) | sm120 (x86_64) | **RTX production (current)** — drafter-free **MTP-on-GridBook**: GridBook-13GB + native MTP@2, NVFP4-KV, prefix-cache under speculation (~77% hit), **~624k KV pool**. Qualitäts-äquivalent zu no-spec (n=1319, p=0.83), volle Tool-Batterie grün. | image = #50897 prefix-cache + GridBook-Plugin 0.8.8 + #53977–79-Seam (`sm120-pc50897-gridbook-088`); checkpoint = GridBook-13GB + bit-exakter AQUA-BF16-embed-swap (`gridbook-13gb-mtpfix`). |
+
+Serve-Kommando + der Embed-Swap: **[`../recipes/rtx-5090-sm120-gridbook-mtp.md`](../recipes/rtx-5090-sm120-gridbook-mtp.md)** ·
+Cutover-Doku: [`../notes/rtx-gridbook-mtp-cutover-2026-08-31.md`](../notes/rtx-gridbook-mtp-cutover-2026-08-31.md).
+*(Hinweis: dieses Image liegt aktuell im separaten GHCR-Paket `vllm-sm120` statt im
+Sammel-Paket `vllm-sm12x` — bei Bedarf per `crane` ins `vllm-sm12x` re-taggen für
+Namens-Konsistenz.)*
+
 All four are fully baked — **no source mounts needed**. One honest caveat:
 GB10 production has since moved to NVFP4-KV, which the baked sm121 image
 does not yet carry (it also surfaced a FlashInfer-autotune cache issue under
