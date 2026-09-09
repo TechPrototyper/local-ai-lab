@@ -30,8 +30,16 @@ Seven failure modes, all measured on our own chain between 6 and 9 September:
 | 3 | Health lies in both directions | 7 Sep: `status: ok`, serverCount 12, with the route dead. 9 Sep: `degraded, unhealthy: ["ttp"]` with the same route answering 200 and listing 18 tools, upstream idle at 2 millicores. |
 | 4 | No SSE keep-alive | Two sessions held open for 300 s, one through the gateway and one direct. **124 bytes each** — the endpoint event and nothing else. |
 | 5 | No authentication | `KEY_LESS`, zero policies. All thirteen collections open to anything on the network. |
-| 6 | No per-tool rules | DEVONthink alone exposes 59 tools, Monkey Office 55. All or nothing. |
+| 6 | No per-tool rules | **310 tools across the thirteen collections** — 73 in the document pipeline, 59 in DEVONthink, 55 in the bookkeeping server. A client holds one collection at a time, and within it, all or nothing. |
 | 7 | Chained callback URLs | Each hop carries the next hop's public address in its config. A client connecting straight to the Mac is handed a cluster-internal DNS name it cannot resolve — the stream opens with 200 and the first tool call goes nowhere. |
+
+That last number is the one that decides whether per-tool rules are worth the
+trouble. The aggregator namespaces collections, it does not merge them: a client
+connects to `/mcp/<name>/sse` and sees that collection's tools and no others.
+There is no combined catalogue anywhere in the chain, and the only cross-collection
+fact the system exposes is a server count in a health endpoint that is wrong in both
+directions (#3). Three hundred and ten tools, reachable today by anything on the
+network, with the coarsest possible grain of control.
 
 Number 7 is worth dwelling on, because it explains a behaviour we kept seeing:
 agents that hit a `404` at the gateway would "find another way" to the Mac, and
