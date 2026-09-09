@@ -10,7 +10,7 @@ what I tried, what I measured, and where it led.
 |---|---|---|
 | **Inference** | Everything that makes local inference better: quantization, KV cache, speculation, serving configs. The bulk of this notebook — the framing, findings, and probes below. | this page |
 | **Harness engineering** | Making the agent harness work well: upstream contributions (an Azure Foundry provider, landed), a maintained carry-patch line (model routing, tool-call brake), and the bundled-skills update problem. | [`harness/`](harness/README.md) |
-| **Agent platform** | Serving many agents for many users: (specialist × user) cells as profiles, one multiplex gateway, Keycloak identity — plus cloud escalation behind a pseudonymization boundary. | [`platform/`](platform/README.md) |
+| **Agent platform** | Serving many agents for many users: (specialist × user) cells as profiles, one multiplex gateway, Keycloak identity — plus cloud escalation behind a pseudonymization boundary. Includes the [MCP gateway evaluation](platform/mcp-gateway.md) and the upstream keep-alive fix it produced ([agentgateway#3393](https://github.com/agentgateway/agentgateway/pull/3393)). | [`platform/`](platform/README.md) |
 
 ## The framing
 

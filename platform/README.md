@@ -67,6 +67,19 @@ Planned on that path — and the part we find genuinely exciting — is a
 The mapping table never leaves the cluster. Cloud capability, local
 identities — both, not either/or.
 
+## The front door: MCP gateway
+
+Cells need one door, and the door turned out to be its own research question.
+Thirteen MCP servers behind a four-hop chain, seven measured failure modes, a
+field of fourteen gateway projects — and both commercial gateways we already
+run gate MCP behind an enterprise licence. The one project that fit was missing
+exactly one of the seven, and reading its source showed the mechanism was built
+and simply never wired. That became
+[agentgateway#3393](https://github.com/agentgateway/agentgateway/pull/3393).
+
+Full account, with the measurements and the discards:
+[**MCP gateway: why nothing fit, and what we shipped**](mcp-gateway.md).
+
 ## Where this stands
 
 Honest ledger: profiles and the multiplex gateway are upstream Hermes
