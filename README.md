@@ -4,6 +4,13 @@ My personal lab notebook: making local AI **measurably** excellent on hardware
 people actually own. Spare-time research on my own machines — this repo tracks
 what I tried, what I measured, and where it led.
 
+**Start here.** One stack, top to bottom: the serving engine measured to
+a verdict ([framing](#the-framing), [findings](#findings-so-far)) · the
+same serve as Kubernetes objects, Flux-managed, with the gateway that makes
+two boxes one endpoint ([`deploy/`](deploy/)) · and the agent platform that
+runs on it — harness, cells, identity ([`harness/`](harness/README.md),
+[`platform/`](platform/README.md)).
+
 ## Three tracks
 
 | Track | What it covers | Where |
@@ -56,6 +63,9 @@ nodes being added — is sketched in [`nodes/homelab.md`](nodes/homelab.md).
 public vLLM nightly; build context and serve commands for both boxes are in
 [`containers/stock-nightly/`](containers/stock-nightly/). The August carry-line
 images stay on GHCR for reproducing the older findings ([`containers/`](containers/)).
+The Kubernetes side — the RTX serve as Flux-managed objects, the gateway
+in front of both boxes and the agent identity chain — is in
+[`deploy/`](deploy/) (reference state of 2026-08-31).
 
 ## Next up
 
@@ -143,6 +153,9 @@ Newest first.
   carry patches, skill maintenance
 - **`platform/`** — the agent-platform track: multi-user cell
   architecture, escalation, pseudonymization boundary
+- **`deploy/`** — the serving line as Kubernetes objects: the RTX 5090
+  serve with its power-cap gate and engine switch, and the two-tier
+  inference gateway with its measured routing policy
 - **`models/`** — one background page per model-and-config state: facts,
   quantization rationale, how to start, measured KPIs and quality — the
   page a published model card links to (the card itself links to the
@@ -173,6 +186,7 @@ per change to this repo. Newest first.
 | Date | Change | Why | Detail |
 |---|---|---|---|
 | 2026-10-11 | **Notebook brought up to date from late August to the present.** Three chapter notes: September hardening, abliteration in format, and the stock-nightly migration. Front page rebuilt around "what runs now". Findings for September and October. `containers/stock-nightly/` holds the production build context and serve commands. Node profiles and the home-lab map updated with the two iMac workers and the planned WireGuard edge node. | Six weeks of production work were missing from the record. The front page described a stack that hasn't run since September. | [`notes/vllm-stock-nightly-migration-2026-10.md`](notes/vllm-stock-nightly-migration-2026-10.md) · [`nodes/homelab.md`](nodes/homelab.md) |
+| 2026-09-10 | **`deploy/` added — the serving line as Kubernetes objects:** the RTX 5090 serve (power-cap gate, engine switch, memory safety net) and the two-tier inference gateway (four callbacks, GitOps semaphores, the measured `MAX_LOCAL` decision), extracted and sanitized from the private GitOps repo; a start-here block on this page; the platform page's status corrected (identity chain v1 verified end to end with a first cell since 08-20) | the notebook said "Kubernetes, GitOps via Flux" in eight files and showed no manifest; and the platform page was three weeks behind its own cluster | [`deploy/`](deploy/) · [`deploy/inference-gateway/README.md`](deploy/inference-gateway/README.md) |
 | 2026-08-29 | **Verdict day recorded:** three n=1319 equivalence verdicts + the same-config noise-floor control; #50897 confirmed on the 5090 under live speculation; the 13 GB GridBook line measured end to end (KV pool, sessions, prefix replays, spec spectrum); front page updated to the current production states (NVFP4-KV on the GB10, honest container status) | the notebook's bar is the verdict tier — the day the gates closed belongs in the record, and the front page must not contradict its own findings | [`notes/verdict-scout20gb-vs-aqua55-n1319-2026-08-29.md`](notes/verdict-scout20gb-vs-aqua55-n1319-2026-08-29.md) · [`notes/endgegner-gridbook-rtx-2026-08-29.md`](notes/endgegner-gridbook-rtx-2026-08-29.md) |
 | 2026-08-28 | **Containers went public:** the GB10 fullstand image (incl. the #50897 fix) and both sm120 images on GHCR; `containers/` section added, replacing the archived scaffold repo; findings + Next-up carried the night's results | one `docker pull` instead of a source build — and the archived repo's dead links needed a live home | [`containers/`](containers/) |
 | 2026-08-27 | Consolidated 3.6→3.8 pipeline write-up published (`notes/qwen38-pipeline-story.md`): the full-split verdict, the 3.8 pivot, the speculation re-evaluation — extended through the week that closed the chapter (adoption, drafter fp8, portable container, GridBook, the triad, the non-causal seam + upstream package) and the per-platform recommendation as of today; Spark recipe detail-pass (adoption-candidate leftover removed, #52816-merge status, prefix-caching caveat under spec) | the "Consolidated write-up" Next-up item is done — the record exists as one document instead of ten | [`notes/qwen38-pipeline-story.md`](notes/qwen38-pipeline-story.md) · [`recipes/dgx-spark-sm121.md`](recipes/dgx-spark-sm121.md) |

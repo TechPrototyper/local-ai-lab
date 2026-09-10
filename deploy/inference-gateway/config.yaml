@@ -1,0 +1,223 @@
+# LiteLLM routing policy: two boxes, one endpoint.
+#
+# Every local chat alias exists twice — plain, and with an "-overflow" twin
+# that points at the capacity tier. The overflow gate (overflow_notice.py)
+# rewrites a request to its twin when the RTX is at capacity; the
+# `fallbacks` block below covers the other case, the RTX being unreachable.
+# Clients only ever ask for the plain name.
+#
+# Hosts: llm-active is the engine switch in ../neo26/; spark and jetson are
+# the other two boxes (nodes/). Replace the example.internal names.
+model_list:
+# --- RTX 5090, latency tier (via the llm-active switch) -------------------
+- model_name: qwen3.8-27b
+  litellm_params:
+    model: openai/qwen3.8-27b
+    api_base: http://llm-active.inference.svc.cluster.local:8000/v1
+    api_key: none
+    temperature: 1.0
+    top_p: 0.95
+    extra_body:
+      top_k: 20
+  model_info:
+    supports_vision: true
+    max_input_tokens: 262144
+# Non-thinking profile with the anti-loop sampling (presence_penalty) the
+# greedy guard coerces cold requests to.
+- model_name: qwen3.8-27b-no-think
+  litellm_params:
+    model: openai/qwen3.8-27b
+    api_base: http://llm-active.inference.svc.cluster.local:8000/v1
+    api_key: none
+    temperature: 0.7
+    top_p: 0.8
+    presence_penalty: 1.5
+    extra_body:
+      top_k: 20
+      chat_template_kwargs:
+        enable_thinking: false
+  model_info:
+    supports_vision: true
+    max_input_tokens: 262144
+- model_name: qwen3.8-27b-tools
+  litellm_params:
+    model: openai/qwen3.8-27b
+    api_base: http://llm-active.inference.svc.cluster.local:8000/v1
+    api_key: none
+    temperature: 1.0
+    top_p: 0.95
+    extra_body:
+      top_k: 20
+  model_info:
+    supports_vision: true
+    max_input_tokens: 262144
+# --- DGX Spark, capacity tier (the "-overflow" twins) ---------------------
+- model_name: qwen3.8-27b-overflow
+  litellm_params:
+    model: openai/qwen3.8-27b
+    api_base: http://spark.example.internal:8000/v1
+    api_key: none
+    temperature: 1.0
+    top_p: 0.95
+    extra_body:
+      top_k: 20
+  model_info:
+    supports_vision: true
+    max_input_tokens: 262144
+- model_name: qwen3.8-27b-no-think-overflow
+  litellm_params:
+    model: openai/qwen3.8-27b
+    api_base: http://spark.example.internal:8000/v1
+    api_key: none
+    temperature: 0.7
+    top_p: 0.8
+    presence_penalty: 1.5
+    extra_body:
+      top_k: 20
+      chat_template_kwargs:
+        enable_thinking: false
+  model_info:
+    supports_vision: true
+    max_input_tokens: 262144
+- model_name: qwen3.8-27b-tools-overflow
+  litellm_params:
+    model: openai/qwen3.8-27b
+    api_base: http://spark.example.internal:8000/v1
+    api_key: none
+    temperature: 1.0
+    top_p: 0.95
+    extra_body:
+      top_k: 20
+  model_info:
+    supports_vision: true
+    max_input_tokens: 262144
+# --- The harness gateway, published behind the same endpoint -------------
+- model_name: hermes-agent
+  litellm_params:
+    model: openai/hermes-agent
+    api_base: http://hermes-gateway.agent-infra.svc.cluster.local:8000/v1
+    api_key: os.environ/HERMES_AGENT_API_KEY
+  model_info:
+    max_input_tokens: 262144
+# --- Embedders and rerankers (Jetson edge tier, Spark) --------------------
+- model_name: nomic-embed-text-v1.5.f16
+  litellm_params:
+    model: openai/nomic-embed-text-v1.5.f16
+    api_base: http://jetson.example.internal:8082/v1
+    api_key: none
+  model_info:
+    max_input_tokens: 8192
+    supports_embeddings: true
+    embedding_dimensions: 768
+- model_name: bge-m3
+  litellm_params:
+    model: openai/bge-m3
+    api_base: http://jetson.example.internal:51960/v1
+    api_key: none
+  model_info:
+    max_input_tokens: 8192
+    supports_embeddings: true
+    embedding_dimensions: 1024
+- model_name: qwen3-embed-8b
+  litellm_params:
+    model: openai/qwen3-embed-8b
+    api_base: http://spark.example.internal:8002/v1
+    api_key: none
+  model_info:
+    max_input_tokens: 8192
+    supports_embeddings: true
+    embedding_dimensions: 4096
+- model_name: harrier-embed
+  litellm_params:
+    model: openai/harrier-oss
+    api_base: http://spark.example.internal:8003/v1
+    api_key: none
+  model_info:
+    max_input_tokens: 8192
+    supports_embeddings: true
+    embedding_dimensions: 1024
+- model_name: qwen3-reranker
+  litellm_params:
+    model: cohere/qwen3-reranker
+    api_base: http://spark.example.internal:8004
+    api_key: none
+  model_info:
+    mode: rerank
+- model_name: bge-reranker-v2-m3
+  litellm_params:
+    model: cohere/bge-reranker-v2-m3
+    api_base: http://spark.example.internal:8005
+    api_key: none
+  model_info:
+    mode: rerank
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  # No key database. It cost resources, and every DB hiccup was an
+  # incident; one master key under GitOps is the decided steady state.
+  # Keyless access to local models is the auth policy (custom_auth.py).
+  store_model_in_db: false
+  custom_auth: custom_auth.user_api_key_auth
+  custom_auth_settings:
+    mode: auto
+
+litellm_settings:
+  drop_params: true
+  # Long builder turns. ACTIVE_TTL on the Deployment must equal this.
+  request_timeout: 3600
+  telemetry: false
+  success_callback: []
+  failure_callback: []
+  # Order matters: the gate decides the backend before the loop breaker
+  # rewrites the payload; the normalizer runs last so every path sees a
+  # template-valid message list.
+  callbacks:
+  - overflow_notice.proxy_handler_instance
+  - loop_breaker.proxy_handler_instance
+  - system_message_normalizer.proxy_handler_instance
+  num_retries: 0
+  allowed_fails: 20
+  cooldown_time: 5
+  require_auth_for_metrics_endpoint: false
+  cache: false
+  # Embedders are small boxes; keep bulk indexing from starving them.
+  rate_limit:
+  - model_name: bge-m3
+    max_requests: 600
+    time_period: 60
+    concurrent_requests: 10
+  - model_name: nomic-embed-text-v1.5.f16
+    max_requests: 900
+    time_period: 60
+    concurrent_requests: 15
+  - model_name: harrier-embed
+    max_requests: 300
+    time_period: 60
+    concurrent_requests: 5
+  - model_name: qwen3-embed-8b
+    max_requests: 120
+    time_period: 60
+    concurrent_requests: 2
+  # The "RTX unreachable" case. The "RTX busy" case is the gate.
+  fallbacks:
+  - qwen3.8-27b:
+    - qwen3.8-27b-overflow
+  - qwen3.8-27b-no-think:
+    - qwen3.8-27b-no-think-overflow
+  - qwen3.8-27b-tools:
+    - qwen3.8-27b-tools-overflow
+  - hermes:
+    - qwen3.8-27b-overflow
+  - hermes-primary:
+    - qwen3.8-27b-overflow
+
+router_settings:
+  routing_strategy: simple-shuffle
+  pre_check_delay: false
+  # Stable names for the harness; what they resolve to is a policy change
+  # here, not a harness redeploy.
+  model_group_alias:
+    hermes: qwen3.8-27b
+    hermes-primary: qwen3.8-27b
+    hermes-overflow: qwen3.8-27b-overflow
+    hermes-embed: qwen3-embed-8b

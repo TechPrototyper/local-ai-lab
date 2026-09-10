@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: inference
+  labels:
+    # The serve needs the nvidia runtime class and a privileged PSA level
+    # (device access, memory-backed /dev/shm). Warn at baseline so anything
+    # that could run tighter shows up in the audit log.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: baseline

@@ -1,0 +1,33 @@
+---
+# llm-active: the one Service the gateway points at. Which engine is behind
+# it is a selector, not a redeploy.
+#
+# The port stays 8000 for every client; only the selector (and, for
+# llama.cpp, the targetPort) changes. Engine cutover and rollback are a
+# one-object git change with no client impact:
+#
+#   vLLM (current):      engine=vllm, model-family=qwen3.8   → targetPort 8000
+#   llama.cpp fallback:  app=llamacpp                        → targetPort 8080
+#
+# Rolling back is: this selector to the fallback, vLLM to replicas 0, the
+# fallback to replicas 1 — in that order, in one commit. The gateway's own
+# resilience semaphores are a separate layer on top (../inference-gateway/).
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-active
+  namespace: inference
+  labels:
+    app: llm-inference
+    role: active-inference
+spec:
+  selector:
+    app: llm-inference
+    engine: vllm
+    model-family: qwen3.8
+    role: inference
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  type: ClusterIP

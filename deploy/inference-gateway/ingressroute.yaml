@@ -1,0 +1,47 @@
+---
+# TLS front door for the gateway. The only non-default is the transport:
+# agent turns are long, and a proxy that times out a 20-minute builder turn
+# at 60 s is a bug you find at 2 a.m. Response-header and idle timeouts are
+# raised to 20 minutes here; the gateway's own request_timeout (config.yaml)
+# is the real ceiling.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: litellm-tls
+  namespace: inference
+spec:
+  secretName: litellm-tls
+  dnsNames:
+    - litellm.example.internal
+  issuerRef:
+    name: internal-ca
+    kind: ClusterIssuer
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: litellm
+  namespace: inference
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`litellm.example.internal`)
+      kind: Rule
+      services:
+        - name: litellm
+          port: 4000
+          serversTransport: litellm-longtimeout
+  tls:
+    secretName: litellm-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: litellm-longtimeout
+  namespace: inference
+spec:
+  forwardingTimeouts:
+    dialTimeout: "30s"
+    responseHeaderTimeout: "1200s"
+    idleConnTimeout: "1200s"

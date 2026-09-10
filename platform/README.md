@@ -4,8 +4,8 @@ Harness engineering ([previous track](../harness/README.md)) makes *one*
 agent run well. This track is about serving **many**: multiple humans,
 multiple specialist agents, one cluster — without the permission and
 context soup that usually follows. Status: the concept is decided (ADR),
-the upstream mechanics exist, provisioning and identity wiring are in
-build. Documented now because the architecture is the interesting part.
+the upstream mechanics exist, the identity chain is verified end to
+end, provisioning is in build. Documented now because the architecture is the interesting part.
 
 ## Cells: (specialist × user)
 
@@ -82,10 +82,22 @@ Full account, with the measurements and the discards:
 
 ## Where this stands
 
-Honest ledger: profiles and the multiplex gateway are upstream Hermes
-features (since v2026.8.x); the cell architecture is decided; today the
-cluster runs a single default profile that existing consumers keep using
-unchanged, and cells arrive additively. Identity resolution, cell
-provisioning, and the permission model are the open construction sites —
-followed by the pseudonymization pipeline. Findings will show up in the
+Honest ledger, as of 2026-09-10. Profiles and the multiplex gateway are
+upstream Hermes features (since v2026.8.x). The cell architecture is
+decided (ADR). **The identity chain is built and verified end to end**
+since 2026-08-20, with a first cell: Keycloak issues a JWT carrying a
+per-user claim; the API gateway validates it against Keycloak's JWKS,
+swaps the bearer for the cell's own key from a dictionary keyed by that
+claim, and rewrites the path to the cell's profile at the multiplex
+gateway — fail-closed at every hop (no claim → no route; unprovisioned
+cell → 404; never the default profile). The cluster still runs the default
+profile for existing consumers; cells arrive additively.
+
+Still open, in order: the provisioner that turns the five manual steps of
+a new cell into one merge request (with the vault/secret-operator wiring
+for profile secrets); the grants-to-Keycloak sync; retiring the keyless
+plan on the MCP side (precondition for further human users — see
+[the MCP gateway note](mcp-gateway.md)); a declarative realm. The
+pseudonymization pipeline follows those. The serving side the platform
+sits on is in [`deploy/`](../deploy/). Findings will show up in the
 [main table](../README.md#findings-so-far) as they become measurable.

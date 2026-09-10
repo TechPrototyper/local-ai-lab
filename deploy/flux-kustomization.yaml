@@ -1,0 +1,27 @@
+---
+# The Flux Kustomization that reconciles this tree. In the cluster it sits
+# next to its siblings (infrastructure, identity, prerequisites, …) under the
+# Flux root; `dependsOn` + `wait: true` order it after the prerequisites and
+# make Flux hold until the serve is actually Ready before declaring success.
+#
+# deletionPolicy: Orphan — removing a manifest must never take a volume with
+# it. The storage rules in the private repo are absolute: no reclaim policy
+# other than Retain, no automated deletion of volumes, ever. Flux is allowed
+# to prune objects; it is not allowed to prune data.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: inference
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./deploy
+  prune: true
+  deletionPolicy: Orphan
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: flux-system
+  wait: true
+  timeout: 15m

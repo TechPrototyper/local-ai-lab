@@ -1,0 +1,21 @@
+---
+# ClusterIP for the vLLM serve itself. Clients do not use this one; they
+# use llm-active (llm-active-service.yaml), which is the switch.
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-qwen38
+  namespace: inference
+  labels:
+    app: llm-inference
+    engine: vllm
+spec:
+  selector:
+    app: llm-inference
+    engine: vllm
+    model-family: qwen3.8
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  type: ClusterIP

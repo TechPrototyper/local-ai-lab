@@ -1,0 +1,63 @@
+---
+# GPU power cap, set at node start: `nvidia-smi -pl 550`.
+#
+# This is the fix for what looked like driver crashes for months. The
+# 5090's millisecond load transients can trip a PSU's over-current
+# protection; the machine hard-resets, and the log looks exactly like a
+# driver fault (nodes/rtx-5090.md, "Power lesson"). A 550 W cap has kept the
+# box stable under sustained full load since. 570 W was tried and still
+# tripped on fast transients in rare cases.
+#
+# Privileged is required: `nvidia-smi -pl` needs CAP_SYS_ADMIN, which the
+# NVIDIA container runtime does not grant on its own. The cap persists
+# across pod restarts; only a node reboot resets it — which is why the serve
+# gates its own start on this value (initContainer in vllm-deployment.yaml)
+# instead of trusting boot order.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: gpu-power-limit
+  namespace: gpu-operator
+  labels:
+    app: gpu-power-limit
+spec:
+  selector:
+    matchLabels:
+      app: gpu-power-limit
+  template:
+    metadata:
+      labels:
+        app: gpu-power-limit
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: neo26
+      runtimeClassName: nvidia
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: set-power-limit
+        image: nvidia/cuda:12.8.0-base-ubuntu24.04
+        securityContext:
+          runAsUser: 0
+          privileged: true
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo "=== Setting GPU power limit to 550W ==="
+          nvidia-smi -i 0 -pl 550
+          echo "Verifying..."
+          nvidia-smi --query-gpu=name,power.limit,power.default_limit,power.draw --format=csv
+          echo "Done. Power limit persists until next node reboot."
+          # Sleep forever — the pod only restarts on node reboot.
+          while true; do sleep 3600; done
+        resources:
+          requests:
+            memory: 64Mi
+            cpu: 10m
+          limits:
+            memory: 128Mi
+            cpu: 50m

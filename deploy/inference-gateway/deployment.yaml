@@ -1,0 +1,151 @@
+---
+# LiteLLM in front of two inference boxes. One process on purpose
+# (--num_workers=1): the overflow gate keeps its in-flight counter in
+# process memory, and that is only correct with a single worker. Going to
+# multiple workers means moving that state to Redis first.
+#
+# The semaphores below are the operator's hand on the pool. They are plain
+# env on this Deployment — which makes every flip a commit, and the git log
+# of this file the audit trail of when a box was taken out for research and
+# when it came back.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  namespace: inference
+  labels:
+    app: litellm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: neo26
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: litellm
+        image: ghcr.io/berriai/litellm-database@sha256:6151ddc97c5dc4590740bd14646d78d48267d8b7a1bf398eeaffcd6729b8f0b9
+        imagePullPolicy: IfNotPresent
+        terminationMessagePolicy: FallbackToLogsOnError
+        ports:
+        - containerPort: 4000
+          name: http
+        command:
+        - litellm
+        args:
+        - --config=/etc/litellm/config.yaml
+        - --port=4000
+        - --num_workers=1
+        env:
+        # --- Concurrency gate ------------------------------------------
+        # How many local requests may be in flight before the next one is
+        # sent to the capacity tier. Measured, not assumed: `--max-num-seqs 4`
+        # on the serve is a ceiling, not a capacity. Over 4.7 days and 7,745
+        # requests, 98.4% of scheduler iterations processed ≤8 tokens; with
+        # MTP at 2 speculative tokens that is 3 tokens per running sequence,
+        # i.e. one to two concurrent sequences, not four. At MAX_LOCAL=4 the
+        # third and fourth request queued locally instead of overflowing.
+        # The full measurement is in README.md.
+        - name: MAX_LOCAL
+          value: "2"
+        # Must equal litellm_settings.request_timeout in config.yaml. When
+        # the two drifted (600 vs 3600 s) the gate silently under-counted:
+        # a request longer than the TTL fell out of the counter while still
+        # holding a vLLM slot. Set both together.
+        - name: ACTIVE_TTL
+          value: "3600"
+        # --- Resilience semaphores -------------------------------------
+        # SPARK_FORCE=1  everything to the capacity tier (test windows)
+        # SPARK_DOWN=1   capacity tier out of the pool: no overflow, local
+        #                requests queue on the RTX instead
+        # RTX_DOWN=1     RTX out of the pool: everything to the capacity tier
+        # both DOWN      honest HTTP 503 with Retry-After — never silent
+        - name: SPARK_FORCE
+          value: "0"
+        - name: SPARK_DOWN
+          value: "0"
+        - name: RTX_DOWN
+          value: "0"
+        # --- Guards ----------------------------------------------------
+        # Client-set near-greedy sampling on the local model makes it loop
+        # (tool-call relays, chunk loops). Coerce it to the anti-loop profile.
+        - name: GREEDY_COERCE
+          value: "1"
+        # --- Plumbing --------------------------------------------------
+        - name: PROMETHEUS_MULTIPROC_DIR
+          value: /tmp/prometheus
+        # JSON-structured logs so a collector can ship them; a documented
+        # LiteLLM feature, not a code change.
+        - name: JSON_LOGS
+          value: "true"
+        # The callbacks are mounted next to config.yaml and imported by
+        # module name.
+        - name: PYTHONPATH
+          value: /etc/litellm
+        # Master key is internal only (key-admin API). Clients use keyless
+        # access to local models (custom_auth.py); nothing else is exposed.
+        - name: LITELLM_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litellm-secrets
+              key: master-key
+        # The harness gateway is published behind this endpoint as
+        # model=hermes-agent; its API key is shared via this secret.
+        - name: HERMES_AGENT_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: litellm-hermes-agent-secret
+              key: api_key
+        resources:
+          requests:
+            cpu: "100m"
+            memory: 1Gi
+          limits:
+            cpu: "2"
+            memory: 8Gi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/litellm
+          readOnly: true
+        - name: prometheus-multiproc
+          mountPath: /tmp/prometheus
+        startupProbe:
+          httpGet:
+            path: /health/readiness
+            port: 4000
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 40
+        livenessProbe:
+          httpGet:
+            path: /health/liveliness
+            port: 4000
+          periodSeconds: 30
+          timeoutSeconds: 10
+          # Generous: a periodic DB-init path once blocked the event loop
+          # and a tight liveness probe turned it into a kill loop.
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: /health/readiness
+            port: 4000
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 10
+      volumes:
+      - name: config
+        configMap:
+          name: litellm-config
+      - name: prometheus-multiproc
+        emptyDir: {}

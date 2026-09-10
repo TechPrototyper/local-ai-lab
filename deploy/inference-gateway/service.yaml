@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm
+  namespace: inference
+  labels:
+    app: litellm
+spec:
+  selector:
+    app: litellm
+  ports:
+  - port: 4000
+    targetPort: 4000
+    name: http
+  # The overflow gate exports its own metrics (in-flight gauge, routing
+  # decisions, greedy-sampling counters) on a second port; see README.md.
+  - port: 9105
+    targetPort: 9105
+    name: guard-metrics
+  type: LoadBalancer
+  # In the cluster this pins a MetalLB address so the endpoint survives
+  # pod restarts. Set yours, or drop it and use the Ingress only.
+  # loadBalancerIP: <your VIP>

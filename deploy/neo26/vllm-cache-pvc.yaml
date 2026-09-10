@@ -1,0 +1,26 @@
+---
+# Model weights, HF cache, and the FlashInfer/Torch JIT caches. The sm120
+# NVFP4 kernels are JIT-compiled on first start (see the env block in the
+# deployment); keeping that cache on the volume turns a 20-minute cold boot
+# into a 3-minute warm one.
+#
+# prune: disabled — Flux must never garbage-collect this volume, even if
+# the serving tree is removed. In the cluster the PVC lives in a separate
+# prerequisite Kustomization for the same reason; it is inlined here for
+# readability, with the same annotation.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vllm-cache-pvc
+  namespace: inference
+  labels:
+    app: llm-inference
+  annotations:
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 150Gi
+  storageClassName: longhorn

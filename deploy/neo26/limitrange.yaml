@@ -1,0 +1,25 @@
+---
+# Memory safety net. Every serve and job manifest here sets explicit
+# requests and limits; this LimitRange only backstops the case where an
+# ad-hoc `kubectl apply` forgets one. It came out of an incident: a
+# quantization job carried no memory limit, grew until it starved the node,
+# and the serve — which needs most of the box — wedged with it. An uncapped
+# container now stops at 16Gi, well below the serve's headroom.
+#
+# Explicit limits always win; large legitimate jobs (calibration at 48Gi)
+# keep setting their own, as they already do. The node-side half of the
+# same fix (kube-reserved, an early-OOM daemon) is machine config, not here.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: inference-mem-safety-net
+  namespace: inference
+  labels:
+    app.kubernetes.io/part-of: inference
+spec:
+  limits:
+    - type: Container
+      default:
+        memory: 16Gi
+      defaultRequest:
+        memory: 1Gi

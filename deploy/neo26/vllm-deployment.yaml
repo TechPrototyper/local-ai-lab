@@ -1,0 +1,248 @@
+---
+# vLLM serve on the RTX 5090 (sm120): Qwen3.8-27B GridBook-13GB, native
+# MTP@2, NVFP4 KV cache, prefix caching, 262k context. The serve command
+# itself — every flag explained, checkpoint preparation — is
+# recipes/rtx-5090-sm120-gridbook-mtp.md. This file is that configuration
+# as a Kubernetes object, plus everything around it that keeps it alive.
+#
+# Two invariants, not preferences:
+#   - replicas changes in git only. `kubectl scale` is reverted by Flux at
+#     the next interval, and the git log of this file is the audit trail of
+#     when the GPU was handed to research and when it came back.
+#   - one GPU, one serve. This deployment, the passive llama.cpp fallback,
+#     and any experiment pod share the card: never more than one at
+#     replicas 1. Cutover is old-to-0, then new-to-1; `strategy: Recreate`
+#     enforces the same at pod level.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-qwen38
+  namespace: inference
+  labels:
+    app: llm-inference
+    engine: vllm
+    model-family: qwen3.8
+    role: inference
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: llm-inference
+      engine: vllm
+      model-family: qwen3.8
+      role: inference
+  template:
+    metadata:
+      labels:
+        app: llm-inference
+        engine: vllm
+        model-family: qwen3.8
+        role: inference
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: neo26
+      runtimeClassName: nvidia
+      terminationGracePeriodSeconds: 180
+      # Cap before load. After a node reboot the gpu-power-limit DaemonSet
+      # sets the 550 W cap only once CNI and the GPU operator are up — and
+      # this serve may be scheduled first. Without the gate it could start
+      # and drive the 5090 at its 600 W default under load: the exact
+      # PSU-OCP trip that once masqueraded as a driver crash. The
+      # initContainer blocks until the cap reads 550 W. It fails open after
+      # ~3.5 minutes with a loud warning, because a serve that starts
+      # uncapped is a risk, while a serve that never starts is an outage.
+      initContainers:
+      - name: wait-for-power-cap
+        image: ghcr.io/techprototyper/vllm-sm120:gridbook-mtp-088
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Waiting for the 550W power cap (PSU-OCP protection)..."
+          i=0
+          while [ "$(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null | cut -d. -f1)" != "550" ]; do
+            i=$((i+1))
+            if [ "$i" -ge 42 ]; then
+              echo "WARNING: cap not at 550W after ~3.5 min (currently $(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null)W). Fail-open: starting anyway — PSU-OCP risk; check the gpu-power-limit DaemonSet."
+              break
+            fi
+            echo "  currently: $(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null)W — waiting ($i/42)..."
+            sleep 5
+          done
+          echo "Power-cap check done — vLLM may start."
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+      containers:
+      - name: vllm
+        # The public image of this serving line (roster and provenance in
+        # containers/). The cluster pulls the same build from a private
+        # registry mirror; nothing else differs.
+        image: ghcr.io/techprototyper/vllm-sm120:gridbook-mtp-088
+        imagePullPolicy: IfNotPresent
+        # The image's WORKDIR is the vLLM source tree (no compiled .so).
+        # With `python -m`, cwd lands on sys.path and the source tree
+        # shadows the installed package (ModuleNotFoundError:
+        # vllm._C_stable_libtorch). Start from / instead.
+        workingDir: /
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        # Split-KV for NVFP4: 4–10× decode at mid and long context, A/B- and
+        # needle-validated on this line (vllm#46329 thread).
+        - name: VLLM_NVFP4_KV_SPLIT_KV
+          value: "1"
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        - name: HUGGING_FACE_HUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token
+              key: token
+              optional: true
+        - name: HF_HOME
+          value: "/cache"
+        - name: HUGGINGFACE_HUB_CACHE
+          value: "/cache/hub"
+        - name: HF_HUB_DISABLE_PROGRESS_BARS
+          value: "1"
+        - name: VLLM_ALLOW_LONG_MAX_MODEL_LEN
+          value: "1"
+        # NVFP4-KV runs through FlashInfer (FA2 path). Every JIT and compile
+        # cache goes to the volume so the sm120 kernels compile once, not
+        # once per pod.
+        - name: VLLM_ATTENTION_BACKEND
+          value: "FLASHINFER"
+        - name: VLLM_NVFP4_GEMM_BACKEND
+          value: "flashinfer-cutlass"
+        - name: XDG_CACHE_HOME
+          value: "/cache/xdg"
+        - name: FLASHINFER_WORKSPACE_BASE
+          value: "/cache/flashinfer"
+        - name: TORCH_EXTENSIONS_DIR
+          value: "/cache/torch_extensions"
+        - name: TORCH_CUDA_ARCH_LIST
+          value: "12.0"
+        # Tames fragmentation (autotuner OOM at ~540 MiB reserved but
+        # unallocated). Must come out if a KV connector using CUDA IPC is
+        # ever enabled — IPC does not tolerate VMM segments.
+        - name: PYTORCH_CUDA_ALLOC_CONF
+          value: "expandable_segments:True"
+        resources:
+          requests:
+            nvidia.com/gpu: "1"
+            memory: 8Gi
+            cpu: "3"
+          limits:
+            nvidia.com/gpu: "1"
+            memory: 75Gi
+            cpu: "16"
+        command:
+        - "python3"
+        - "-m"
+        - "vllm.entrypoints.openai.api_server"
+        args:
+        # Checkpoint: GridBook-13GB with the bit-exact BF16 embedding swap
+        # that lets native MTP load (recipes/rtx-5090-sm120-gridbook-mtp.md).
+        - "--model"
+        - "/cache/models/gridbook-13gb-mtpfix"
+        - "--served-model-name"
+        - "qwen3.8-27b"
+        - "--trust-remote-code"
+        - "--reasoning-parser"
+        - "qwen3"
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "8000"
+        - "--generation-config"
+        - "vllm"
+        - "--override-generation-config"
+        - '{"temperature":1.0,"top_p":0.95,"top_k":20}'
+        - "--kv-cache-dtype"
+        - "nvfp4"
+        # XQA off is load-bearing for the NVFP4 path on current code
+        # (recipes/rtx5090-sm120.md).
+        - "--attention-config"
+        - '{"use_trtllm_attention": false}'
+        - "--max-model-len"
+        - "262144"
+        - "--max-num-seqs"
+        - "4"
+        - "--block-size"
+        - "32"
+        # 0.97 OOMs with GridBook-13GB plus the MTP draft head (244 MiB
+        # free at capture); 0.92 is safe and still yields a ~570k-token KV
+        # pool.
+        - "--gpu-memory-utilization"
+        - "0.92"
+        - "--enable-auto-tool-choice"
+        - "--tool-call-parser"
+        - "qwen3_coder"
+        - "--enable-prefix-caching"
+        - "--enable-chunked-prefill"
+        - "--max-num-batched-tokens"
+        - "4096"
+        - "--compilation-config"
+        - '{"cudagraph_capture_sizes": [1, 2, 4]}'
+        - "--speculative-config"
+        - '{"method":"qwen3_5_mtp","num_speculative_tokens":2}'
+        - "--async-scheduling"
+        volumeMounts:
+        - name: hf-cache
+          mountPath: /cache
+        - name: dshm
+          mountPath: /dev/shm
+        # One image line was built without FlashInfer's submodules, so
+        # flashinfer/data/{cutlass,cccl,spdlog} are empty and the JIT fails
+        # on missing headers. The pinned checkouts (SHAs from `git submodule
+        # status` in the image) live on the volume and are mounted over the
+        # empty directories. If your image has them populated, delete these
+        # three mounts.
+        - name: hf-cache
+          mountPath: /opt/venv/lib/python3.12/site-packages/flashinfer/data/cutlass
+          subPath: flashinfer-3rdparty/cutlass
+        - name: hf-cache
+          mountPath: /opt/venv/lib/python3.12/site-packages/flashinfer/data/cccl
+          subPath: flashinfer-3rdparty/cccl
+        - name: hf-cache
+          mountPath: /opt/venv/lib/python3.12/site-packages/flashinfer/data/spdlog
+          subPath: flashinfer-3rdparty/spdlog
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          # Model load plus FlashInfer JIT on a cold cache: allow 25 minutes.
+          failureThreshold: 150
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+      volumes:
+      - name: hf-cache
+        persistentVolumeClaim:
+          claimName: vllm-cache-pvc
+      # Memory-backed /dev/shm, sized as headroom for a later KV-offload
+      # experiment. Unused capacity is not allocated.
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 26Gi

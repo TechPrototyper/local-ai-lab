@@ -1,0 +1,36 @@
+# Fleet-aware backpressure. Downstream pipelines (here: a document/OCR
+# worker in its own namespace) read the inference semaphores — RTX_DOWN,
+# SPARK_DOWN, SPARK_FORCE — straight off the litellm Deployment through the
+# Kubernetes API, read-only. If both boxes are out, the workers queue their
+# jobs and release them on their own once a semaphore is lifted. No polling
+# a dead endpoint, no retry storms, no separate coordination service: the
+# Deployment's env *is* the coordination.
+#
+# Kept as a Role in the inference namespace (not inside the gateway's own
+# kustomization) so the gateway's namespace transformer cannot rewrite the
+# downstream subject.
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: litellm-semaphore-reader
+  namespace: inference
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["litellm"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: downstream-semaphore-reader
+  namespace: inference
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: downstream-worker   # your pipeline's namespace
+roleRef:
+  kind: Role
+  name: litellm-semaphore-reader
+  apiGroup: rbac.authorization.k8s.io
