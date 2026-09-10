@@ -1,0 +1,76 @@
+# The DEFAULT profile's config. Cells carry their own config.yaml on the
+# volume, rendered from a specialist template plus a per-user overlay; this
+# one keeps existing consumers running unchanged while cells arrive
+# additively. Trimmed to what the identity chain and the harness track need
+# to show; the cluster's copy also configures web research, the sandbox
+# terminal, and auxiliary models.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-agent-config
+  namespace: agent-infra
+  labels:
+    app: hermes-gateway
+data:
+  config.yaml: |
+    # Everything goes through the inference gateway (../inference-gateway/),
+    # keyless: the harness never holds a model credential.
+    model:
+      default: qwen3.8-27b
+      provider: custom
+      auth_mode: api_key
+      base_url: http://litellm.inference.svc.cluster.local:4000
+      context_length: 262144
+      api_key: keyless
+      api_mode: chat_completions
+      max_tokens: 65536
+    providers:
+      custom:
+        request_timeout_seconds: 900
+        stale_timeout_seconds: 900
+        models:
+          qwen3.8-27b:
+            timeout_seconds: 900
+            stale_timeout_seconds: 900
+            max_output_tokens: 8192
+          qwen3.8-27b-tools:
+            timeout_seconds: 900
+            stale_timeout_seconds: 900
+            max_output_tokens: 2048
+            force_non_streaming: true
+          qwen3.8-27b-no-think:
+            timeout_seconds: 900
+            stale_timeout_seconds: 900
+            max_output_tokens: 4096
+    gateway:
+      api_server:
+        max_concurrent_runs: 10
+      # One multiplex gateway serves every profile cell. This config is the
+      # DEFAULT profile; cells are reached at /p/<cell>/ with their own key.
+      # An unknown profile is a 404 — fail-closed, never the default.
+      multiplex_profiles: true
+    # The differentiated tool-call brake (carry patch CP-2, see harness/):
+    # identical calls capped per signature, cycle detection with steering
+    # instead of abort. The escalation ladder is named in the steering
+    # message; which rungs a cell may actually climb is decided by the
+    # cell's grants, not by this list.
+    tool_loop_guardrails:
+      warnings_enabled: true
+      hard_stop_enabled: true
+      loop_caps:
+        max_identical_calls: 50
+      cycle_detection:
+        enabled: true
+        warn_after_cycles: 2
+        block_after_cycles: 3
+      escalation_ladder:
+        - "<cloud tier 1>"
+        - "<cloud tier 2>"
+        - "<cloud tier 3>"
+    agent:
+      image_input_mode: native
+    # Headless gateway: no interactive approver, so tool calls are released
+    # automatically. Tools execute in an isolated sandbox pod whose
+    # NetworkPolicy limits egress to DNS and 80/443.
+    approvals:
+      mode: "off"

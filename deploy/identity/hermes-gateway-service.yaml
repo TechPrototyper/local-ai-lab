@@ -1,0 +1,18 @@
+---
+# Name and port match the specialist's A2A agent card (url:
+# http://hermes-gateway:8000) so discovery stays correct without a change.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes-gateway
+  namespace: agent-infra
+  labels:
+    app: hermes-gateway
+spec:
+  type: ClusterIP
+  selector:
+    app: hermes-gateway
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

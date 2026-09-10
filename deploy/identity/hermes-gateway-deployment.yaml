@@ -1,0 +1,131 @@
+---
+# The Hermes multiplex gateway: one process, every cell. Trimmed to the
+# multiplex core — the cluster's copy also carries the web-research
+# backend, a sandbox SSH key, and a CA bundle, none of which belong to the
+# identity chain.
+#
+# strategy: Recreate — the profile volume is ReadWriteOnce and replicas is
+# 1; two pods must never mount HERMES_HOME at the same time.
+#
+# No runAsNonRoot / capability drop here on purpose: the image starts as
+# root and drops itself to HERMES_UID via gosu (its own entrypoint). That
+# needs root capabilities (usermod, chown) that a hard "drop: [ALL]" would
+# break. fsGroup makes the volume writable for the dropped user.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes-gateway
+  namespace: agent-infra
+  labels:
+    app: hermes-gateway
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hermes-gateway
+  template:
+    metadata:
+      labels:
+        app: hermes-gateway
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 10000
+      containers:
+        - name: hermes-gateway
+          # Build from github.com/TechPrototyper/hermes-agent (the carry-patch
+          # line, see harness/): upstream release + adaptive routing +
+          # differentiated tool-call brake + patch-schema examples + skill
+          # reconciliation + Graph email. The cluster builds it in-cluster
+          # with kaniko and pushes to its private registry.
+          image: hermes-agent:consolidation
+          imagePullPolicy: IfNotPresent
+          args: ["gateway", "run"]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          env:
+            - name: HERMES_UID
+              value: "10000"
+            - name: HERMES_GID
+              value: "10000"
+            - name: API_SERVER_HOST
+              value: "0.0.0.0"
+            - name: API_SERVER_PORT
+              value: "8000"
+            - name: API_SERVER_MODEL_NAME
+              value: "hermes-agent"
+            # The DEFAULT profile's key (existing consumers). Each cell has
+            # its own key in its profile .env on the volume — generated
+            # in-pod, never in git, never in a transcript.
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-agent-api-key
+                  key: api_key
+            # Vision: the local model takes image_url natively, so images go
+            # straight to the inference gateway instead of via a temp file.
+            - name: HERMES_MODEL_SUPPORTS_VISION
+              value: "native"
+          volumeMounts:
+            # HERMES_HOME. Profiles live at /opt/data/profiles/<cell>/ with
+            # their own config.yaml, .env (API_SERVER_KEY), SOUL.md, skills,
+            # memory. The multiplexer enumerates them at start.
+            - name: data
+              mountPath: /opt/data
+            - name: config
+              mountPath: /opt/data/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: dshm
+              mountPath: /dev/shm
+          securityContext:
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 6
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hermes-agent-data
+        - name: config
+          configMap:
+            name: hermes-agent-config
+            items:
+              - key: config.yaml
+                path: config.yaml
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi

@@ -1,0 +1,104 @@
+---
+# The identity chain, declaratively: /agents/hermes -> the cell's profile
+# at the multiplex gateway. This is the one API definition that serves
+# every cell of the specialist; adding a user changes nothing here.
+#
+# Chain: the caller gets an OAuth2 token from Keycloak (the realm's client
+# scope "hermes" maps a per-user attribute into the claim `hermes_user`).
+# The JWT plan validates the token against Keycloak's JWKS and extracts the
+# claims. Two flow policies then map claim -> profile path (dynamic-routing)
+# and replace the Authorization header with the cell's own API key
+# (transform-headers), looked up in a dictionary by the same claim.
+#
+# FAIL-CLOSED at every hop: no or invalid JWT -> the plan rejects (401);
+# no hermes_user claim -> the EL lookup fails, there is no default-profile
+# fallback; an unprovisioned profile -> the multiplex gateway answers 404.
+#
+# Secrets: the cell keys are NOT in git. They live in the API manager's
+# environment dictionary `cell-keys` (one entry per cell), maintained via
+# its management API. Dictionaries are outside this object's reconciliation
+# and are therefore never overwritten by it.
+apiVersion: gravitee.io/v1alpha1
+kind: ApiV4Definition
+metadata:
+  name: agents-hermes
+  namespace: apim
+spec:
+  contextRef: { name: apim-home }
+  name: "Agents: Hermes (cell routing)"
+  version: "1.0.0"
+  type: PROXY
+  description: >-
+    Hermes agent endpoint with dynamic cell resolution: OAuth2 JWT
+    (Keycloak) -> claim hermes_user -> /p/<cell>/ at the Hermes multiplex
+    gateway. Authorization is replaced by the cell's API key after
+    validation.
+  listeners:
+    - type: HTTP
+      paths: [{ path: /agents/hermes }]
+      entrypoints: [{ type: http-proxy }]
+  endpointGroups:
+    - name: default-group
+      type: http-proxy
+      endpoints:
+        - name: hermes-multiplex
+          type: http-proxy
+          weight: 1
+          inheritConfiguration: false
+          configuration:
+            target: http://hermes-gateway.agent-infra.svc.cluster.local:8000
+          # Agent runs are long-lived (SSE, long answers); an hour of read
+          # and idle timeout, keep-alive on.
+          sharedConfigurationOverride:
+            http:
+              version: HTTP_1_1
+              keepAlive: true
+              connectTimeout: 10000
+              readTimeout: 3600000
+              idleTimeout: 3600000
+              keepAliveTimeout: 300000
+              pipelining: false
+              followRedirects: false
+              useCompression: true
+  flows:
+    - name: cell-routing
+      enabled: true
+      selectors:
+        - type: HTTP
+          path: /
+          pathOperator: STARTS_WITH
+      request:
+        # (1) swap the validated bearer for the cell's own key
+        - name: cell-key-injection
+          enabled: true
+          policy: transform-headers
+          configuration:
+            scope: REQUEST
+            addHeaders:
+              - name: Authorization
+                value: "Bearer {#dictionaries['cell-keys'][#context.attributes['jwt.claims']['hermes_user']]}"
+        # (2) route to the cell's profile path
+        - name: claim-to-profile-path
+          enabled: true
+          policy: dynamic-routing
+          configuration:
+            rules:
+              - pattern: "/(.*)"
+                url: "http://hermes-gateway.agent-infra.svc.cluster.local:8000/p/{#context.attributes['jwt.claims']['hermes_user']}/{#group[0]}"
+  plans:
+    jwt:
+      name: "Keycloak JWT"
+      description: >-
+        Validates bearer JWTs against the identity provider's JWKS and
+        extracts claims for cell routing. No keyless access.
+      security:
+        type: JWT
+        configuration:
+          signature: RSA_RS256
+          publicKeyResolver: JWKS_URL
+          resolverParameter: http://keycloak.idp.svc.cluster.local:8080/realms/example/protocol/openid-connect/certs
+          extractClaims: true
+          propagateAuthHeader: false
+      mode: STANDARD
+  lifecycleState: PUBLISHED
+  state: STARTED

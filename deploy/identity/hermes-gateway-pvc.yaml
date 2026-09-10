@@ -1,0 +1,17 @@
+---
+# HERMES_HOME: session DB, response store, and every cell's profile
+# directory. Retain is the only reclaim policy allowed in this cluster.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-agent-data
+  namespace: agent-infra
+  labels:
+    app: hermes-gateway
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi

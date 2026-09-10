@@ -98,6 +98,9 @@ a new cell into one merge request (with the vault/secret-operator wiring
 for profile secrets); the grants-to-Keycloak sync; retiring the keyless
 plan on the MCP side (precondition for further human users — see
 [the MCP gateway note](mcp-gateway.md)); a declarative realm. The
-pseudonymization pipeline follows those. The serving side the platform
+pseudonymization pipeline follows those. The chain's declarative half —
+the API definition with its two flow policies, the multiplex gateway,
+the grants pattern, the five-step runbook and the 401 matrix — is in
+[`deploy/identity/`](../deploy/identity/); the serving side the platform
 sits on is in [`deploy/`](../deploy/). Findings will show up in the
 [main table](../README.md#findings-so-far) as they become measurable.

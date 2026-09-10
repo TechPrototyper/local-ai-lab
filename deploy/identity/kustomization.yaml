@@ -1,0 +1,12 @@
+# Not included from ../kustomization.yaml on purpose: in the cluster these
+# objects live in two other namespaces (apim, agent-infra) and are
+# reconciled by the apps Kustomization, not by inference. Build alone:
+#   kubectl kustomize deploy/identity
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - agents-hermes-api.yaml
+  - hermes-gateway-pvc.yaml
+  - hermes-gateway-configmap.yaml
+  - hermes-gateway-deployment.yaml
+  - hermes-gateway-service.yaml

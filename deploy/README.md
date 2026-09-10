@@ -47,10 +47,16 @@ deploy/
 ├── flux-kustomization.yaml     the Flux Kustomization that reconciles this tree
 ├── kustomization.yaml          → neo26 + inference-gateway
 ├── neo26/                      the RTX 5090 serving line (vLLM on Kubernetes)
-└── inference-gateway/          LiteLLM: two boxes, one endpoint, measured routing
+├── inference-gateway/          LiteLLM: two boxes, one endpoint, measured routing
+└── identity/                   the cell identity chain, verified with a first cell
+                                (other namespaces; built alone, not from the root)
 ```
 
 Apply order is Flux's business (`dependsOn`, `wait: true`). By hand it is
 `neo26` first — namespace, PVC, power-cap DaemonSet, serve — then the
-gateway. Each subdirectory's README says what every object does and which
-incident put it there.
+gateway. `identity/` lives in the platform's namespaces and is reconciled
+by a different Flux Kustomization in the cluster; it is here because the
+[platform page](../platform/README.md) claims the chain works, and a claim
+without the objects is what this directory exists to end. Each
+subdirectory's README says what every object does and which incident put it
+there.
