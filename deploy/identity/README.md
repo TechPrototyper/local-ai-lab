@@ -114,6 +114,35 @@ From the verification tests. Which hop said no tells you what to fix.
 `/health` and `/p/<cell>/health` are unauthenticated; test auth against
 `/p/<cell>/v1/models`.
 
+## What a regulated deployment adds
+
+The chain above is what a one-operator lab needs: identity is checked once,
+at the entrance, and the inference gateway behind it stays keyless (see the
+[trust boundary](../README.md#trust-boundary)). A deployment that has to
+satisfy an auditor rather than an operator adds four things, and the design
+already has a place for each:
+
+- **Authentication at the inference gateway itself.** Today the LiteLLM
+  layer trusts the network. Under a regulated perimeter it gets its own
+  virtual keys, one per cell, issued by the same provisioning step that
+  writes the `cell-keys` dictionary — the mapping is already per cell, only
+  the second consumer of it is missing.
+- **An audit trail per cell.** Every hop already logs with the cell name in
+  the path (`/p/<cell>/…`); what is missing is retention and an immutable
+  sink, not the signal.
+- **Per-cell keys — already here.** The dictionary entry and the profile's
+  `API_SERVER_KEY` are the per-cell secret today; rotation is the five-step
+  runbook re-run for one cell.
+- **Pseudonymisation on the wire.** A planned gateway callback that replaces
+  personal identifiers before the prompt reaches the model and restores them
+  in the response — streaming-safe, tool-argument-safe, measured for latency
+  overhead before it earns a place in the notebook. It is a building block,
+  not a claim; nothing in this directory pretends it exists yet.
+
+None of these change the two design sentences. The path stays the
+specialist, the token stays the identity; a regulated deployment only asks
+the chain to prove both more often, and to write it down.
+
 ## What is generalized
 
 The realm is `example`; the JWKS URL and the gateway target keep their

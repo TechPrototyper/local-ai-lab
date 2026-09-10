@@ -56,7 +56,8 @@ semaphores are a separate layer on top of this
   without `--recurse-submodules`; if `flashinfer/data/cutlass` is populated
   in your image, delete the three mounts.
 - First start on a cold cache compiles the sm120 kernels: the startupProbe
-  allows 25 minutes for a reason. A warm start takes about three.
+  allows 25 minutes for a reason. A warm start is much shorter; the number
+  follows once measured.
 - `nodeSelector: kubernetes.io/hostname: neo26` — rename to your node.
 
 ## What is not in this directory

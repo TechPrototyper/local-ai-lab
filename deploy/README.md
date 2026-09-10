@@ -28,6 +28,21 @@ inference production-grade, with the reasoning kept and the diary cut.
 throughout this notebook, and a `nodeSelector` without a real key is not a
 reference.
 
+## Trust boundary
+
+This is a single-operator LAN. The inference gateway in `inference-gateway/`
+is **keyless on purpose**: it is reachable only from inside the cluster
+network, and every caller that can reach it has already been admitted
+somewhere else. Authentication lives at the two places where an identity
+actually enters the system — the API gateway (JWT plan against the IdP) and
+the cell identity chain in `identity/`, which turns a token into exactly one
+profile. Nothing between those hops and the model server re-checks who is
+calling; the model server sees a request, not a person. Keyless-internal is
+therefore a scoping decision, not an oversight: the boundary is drawn at the
+entrance, and the reference documents where. What a deployment with a
+regulated perimeter adds on top of this is spelled out in
+[`identity/README.md`](identity/README.md#what-a-regulated-deployment-adds).
+
 ## What is deliberately not here
 
 - The other namespaces: identity, storage guardrails, monitoring, the
