@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "model": "qwen3.8-27b",
+    "base_url": "http://127.0.0.1:18800",
+    "scope": "first-pass needle+determinism, NOT verdict-tier",
+    "ctx": [
+      2048
+    ],
+    "depths": [
+      0.5
+    ]
+  },
+  "needle": [
+    {
+      "ctx": 2048,
+      "depth": 0.5,
+      "hit": false,
+      "prompt_tokens": 1387,
+      "latency_s": 2.4,
+      "answer_head": "\n\n<think>\nThe user is asking me to recall a \"vault access co"
+    }
+  ],
+  "determinism": {
+    "ctx": 2048,
+    "identical": true,
+    "hashes": [
+      "1d6e4d704ffaf85a",
+      "1d6e4d704ffaf85a"
+    ]
+  }
+}

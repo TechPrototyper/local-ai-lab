@@ -1,0 +1,281 @@
+{
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "labels": {
+      "app": "llm-farwindow",
+      "engine": "vllm",
+      "role": "research",
+      "variant": "farwindow"
+    },
+    "name": "vllm-qwen38-gridbook-farwindow",
+    "namespace": "inference"
+  },
+  "spec": {
+    "replicas": 0,
+    "revisionHistoryLimit": 10,
+    "selector": {
+      "matchLabels": {
+        "app": "llm-farwindow",
+        "engine": "vllm",
+        "role": "research",
+        "variant": "farwindow"
+      }
+    },
+    "strategy": {
+      "type": "Recreate"
+    },
+    "template": {
+      "metadata": {
+        "labels": {
+          "app": "llm-farwindow",
+          "engine": "vllm",
+          "role": "research",
+          "variant": "farwindow"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "args": [
+              "--model",
+              "/cache/models/gridbook-13gb-mtpfix",
+              "--served-model-name",
+              "qwen3.8-27b",
+              "--trust-remote-code",
+              "--reasoning-parser",
+              "qwen3",
+              "--host",
+              "0.0.0.0",
+              "--port",
+              "8000",
+              "--generation-config",
+              "vllm",
+              "--override-generation-config",
+              "{\"temperature\":1.0,\"top_p\":0.95,\"top_k\":20}",
+              "--kv-cache-dtype",
+              "nvfp4",
+              "--attention-config",
+              "{\"use_trtllm_attention\": false}",
+              "--max-model-len",
+              "524288",
+              "--max-num-seqs",
+              "1",
+              "--block-size",
+              "32",
+              "--gpu-memory-utilization",
+              "0.90",
+              "--enable-auto-tool-choice",
+              "--tool-call-parser",
+              "qwen3_coder",
+              "--enable-prefix-caching",
+              "--enable-chunked-prefill",
+              "--max-num-batched-tokens",
+              "4096",
+              "--speculative-config",
+              "{\"method\":\"qwen3_5_mtp\",\"num_speculative_tokens\":2}",
+              "--async-scheduling"
+            ],
+            "command": [
+              "python3",
+              "-m",
+              "vllm.entrypoints.openai.api_server"
+            ],
+            "env": [
+              {
+                "name": "CUDA_VISIBLE_DEVICES",
+                "value": "0"
+              },
+              {
+                "name": "HUGGING_FACE_HUB_TOKEN",
+                "valueFrom": {
+                  "secretKeyRef": {
+                    "key": "token",
+                    "name": "hf-token",
+                    "optional": true
+                  }
+                }
+              },
+              {
+                "name": "HF_HOME",
+                "value": "/cache"
+              },
+              {
+                "name": "HUGGINGFACE_HUB_CACHE",
+                "value": "/cache/hub"
+              },
+              {
+                "name": "HF_HUB_DISABLE_PROGRESS_BARS",
+                "value": "1"
+              },
+              {
+                "name": "VLLM_ALLOW_LONG_MAX_MODEL_LEN",
+                "value": "1"
+              },
+              {
+                "name": "VLLM_ATTENTION_BACKEND",
+                "value": "FLASHINFER"
+              },
+              {
+                "name": "VLLM_NVFP4_GEMM_BACKEND",
+                "value": "flashinfer-cutlass"
+              },
+              {
+                "name": "XDG_CACHE_HOME",
+                "value": "/cache/xdg"
+              },
+              {
+                "name": "FLASHINFER_WORKSPACE_BASE",
+                "value": "/cache/flashinfer"
+              },
+              {
+                "name": "TORCH_EXTENSIONS_DIR",
+                "value": "/cache/torch_extensions"
+              },
+              {
+                "name": "TORCH_CUDA_ARCH_LIST",
+                "value": "12.0"
+              },
+              {
+                "name": "PYTORCH_CUDA_ALLOC_CONF",
+                "value": "expandable_segments:True"
+              },
+              {
+                "name": "PYTHONPATH",
+                "value": "/cache/pip-extra"
+              }
+            ],
+            "image": "10.1.0.243/inference/vllm-nvfp4:sm120-pc50897-gridbook-088",
+            "imagePullPolicy": "IfNotPresent",
+            "livenessProbe": {
+              "failureThreshold": 3,
+              "httpGet": {
+                "path": "/health",
+                "port": 8000,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 60,
+              "periodSeconds": 30,
+              "successThreshold": 1,
+              "timeoutSeconds": 10
+            },
+            "name": "vllm",
+            "ports": [
+              {
+                "containerPort": 8000,
+                "name": "http",
+                "protocol": "TCP"
+              }
+            ],
+            "readinessProbe": {
+              "failureThreshold": 3,
+              "httpGet": {
+                "path": "/health",
+                "port": 8000,
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 30,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "timeoutSeconds": 5
+            },
+            "resources": {
+              "limits": {
+                "cpu": "16",
+                "memory": "75Gi",
+                "nvidia.com/gpu": "1"
+              },
+              "requests": {
+                "cpu": "4",
+                "memory": "8Gi",
+                "nvidia.com/gpu": "1"
+              }
+            },
+            "startupProbe": {
+              "failureThreshold": 150,
+              "httpGet": {
+                "path": "/health",
+                "port": 8000,
+                "scheme": "HTTP"
+              },
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "timeoutSeconds": 1
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "volumeMounts": [
+              {
+                "mountPath": "/cache",
+                "name": "hf-cache"
+              },
+              {
+                "mountPath": "/dev/shm",
+                "name": "dshm"
+              },
+              {
+                "mountPath": "/opt/venv/lib/python3.12/site-packages/flashinfer/data/cutlass",
+                "name": "hf-cache",
+                "subPath": "flashinfer-3rdparty/cutlass"
+              },
+              {
+                "mountPath": "/opt/venv/lib/python3.12/site-packages/flashinfer/data/cccl",
+                "name": "hf-cache",
+                "subPath": "flashinfer-3rdparty/cccl"
+              },
+              {
+                "mountPath": "/opt/venv/lib/python3.12/site-packages/flashinfer/data/spdlog",
+                "name": "hf-cache",
+                "subPath": "flashinfer-3rdparty/spdlog"
+              }
+            ],
+            "workingDir": "/"
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "initContainers": [
+          {
+            "command": [
+              "/bin/sh",
+              "-c",
+              "echo \"Warte auf 570W-Power-Cap (PSU-OCP-Schutz)...\"\ni=0\nwhile [ \"$(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null | cut -d. -f1)\" != \"570\" ]; do\n  i=$((i+1))\n  if [ \"$i\" -ge 42 ]; then\n    echo \"WARNUNG: Cap nach ~3.5 min NICHT auf 570W. Fail-open: vLLM startet trotzdem.\"\n    break\n  fi\n  echo \"  aktuell: $(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null)W \u2014 warte ($i/42)...\"\n  sleep 5\ndone\necho \"Power-Cap-Check fertig \u2014 vLLM darf starten.\"\n"
+            ],
+            "image": "10.1.0.243/inference/vllm-nvfp4:sm120-pc50897-gridbook-088",
+            "imagePullPolicy": "IfNotPresent",
+            "name": "wait-for-power-cap",
+            "resources": {
+              "limits": {
+                "nvidia.com/gpu": "1"
+              }
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File"
+          }
+        ],
+        "nodeSelector": {
+          "kubernetes.io/hostname": "neo26"
+        },
+        "restartPolicy": "Always",
+        "runtimeClassName": "nvidia",
+        "schedulerName": "default-scheduler",
+        "securityContext": {},
+        "terminationGracePeriodSeconds": 180,
+        "volumes": [
+          {
+            "name": "hf-cache",
+            "persistentVolumeClaim": {
+              "claimName": "vllm-cache-pvc"
+            }
+          },
+          {
+            "emptyDir": {
+              "medium": "Memory",
+              "sizeLimit": "26Gi"
+            },
+            "name": "dshm"
+          }
+        ]
+      }
+    }
+  }
+}

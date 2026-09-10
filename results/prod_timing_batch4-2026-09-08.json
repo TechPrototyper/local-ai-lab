@@ -1,0 +1,44 @@
+[
+ {
+  "qo": 8,
+  "kv": 32768,
+  "head_dim_qk": 256,
+  "head_dim_vo": 256,
+  "gate_median_ms": 3.3921,
+  "forced_median_ms": 1.2799,
+  "speedup_x": 2.65,
+  "gate": {
+   "mean_ms": 3.4862,
+   "median_ms": 3.3921,
+   "min_ms": 3.3702,
+   "max_ms": 4.0852
+  },
+  "forced": {
+   "mean_ms": 1.3228,
+   "median_ms": 1.2799,
+   "min_ms": 1.2646,
+   "max_ms": 1.6132
+  }
+ },
+ {
+  "qo": 8,
+  "kv": 131072,
+  "head_dim_qk": 256,
+  "head_dim_vo": 256,
+  "gate_median_ms": 14.0212,
+  "forced_median_ms": 4.8032,
+  "speedup_x": 2.919,
+  "gate": {
+   "mean_ms": 13.8597,
+   "median_ms": 14.0212,
+   "min_ms": 13.3252,
+   "max_ms": 14.493
+  },
+  "forced": {
+   "mean_ms": 4.8961,
+   "median_ms": 4.8032,
+   "min_ms": 4.7622,
+   "max_ms": 5.5313
+  }
+ }
+]

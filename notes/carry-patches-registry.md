@@ -20,18 +20,38 @@ vor Carry-Patches — Wartbarkeit ist Präferenz, nicht Veto gegen die optimale 
 - **Wo:** `MyCluster/…/litellm/overflow_notice.py` (`_greedy_check` → coerce im pre_call_hook).
 - **Abschaltbar:** `GREEDY_COERCE=0`. **Re-Apply:** erweitert Tims 17.08.-`_greedy_check`.
 
-### CP-2 · LiteLLM loop-breaker (Force-Progress + Debloat) · Layer: LiteLLM · Status: **staged, offline-getestet**
+### CP-2 · LiteLLM loop-breaker (Force-Progress + Debloat) · Layer: LiteLLM · Status: **DEPLOYED/LIVE** (2026-09-02)
 - **Was:** erkennt Tool-Call-Loops im Request-Tail (identisch K≥3 **oder** Zyklus
   Periode 2–5, ≥2×) → (1) `tool_choice:"none"` + harte Direktive (Zwang zum Fortschritt),
   (2) Prune der wiederholten (assistant-tool_call + tool-result)-Paare, (3) Out-of-Band-
   Signal `x_loop_intervention` für Hermes.
 - **Warum:** Loops nicht mit Fehler abbrechen, sondern zum Fortschritt zwingen + den
   aufgeblähten Kontext retten. Auf Inferenz-/Ansteuerungs-Ebene, nicht im Verhalten.
-- **Wo:** `MyCluster/…/litellm/loop_breaker.py` (neu). Registrieren in `config.yaml`
-  `litellm_settings.callbacks`. **Abschaltbar:** `LOOP_BREAKER=0`.
-- **Test:** offline grün (identisch/Zyklus/keine-False-Positives). **Offen:** Signal-
-  Zustellung (Header vs. Feld) verifizieren; live an einem echten Loop-Mitschnitt testen
-  vor Deploy.
+- **Wo:** `MyCluster/…/litellm/loop_breaker.py` (neu). **Registrierung GESTAGED (2026-09-01):**
+  in `kustomization.yaml` `configMapGenerator.files: + loop_breaker.py` UND in `config.yaml:670`
+  `callbacks: [overflow_notice…, loop_breaker.proxy_handler_instance]`. **Abschaltbar:** `LOOP_BREAKER=0`.
+- **Signal-Vertrag VERIFIZIERT:** Header `x-litellm-loop-intervention` (loop_breaker.py:177) ==
+  was Hermes CP-3 liest (`run_agent.py:4361`, consume-once `conversation_loop.py:7960`). CP-3 ist
+  im laufenden Gateway (consolidation @ fa02bd44) → **kein Hermes-Change/Restart nötig.** (Non-
+  Streaming-Body-Feld `x_loop_intervention` wird von CP-3 NICHT gelesen — nur Streaming-Header;
+  für Subagenten offen, für Hauptpfad egal.)
+- **Test:** offline grün — Detektor + Prune am 2026-09-01 erneut gefahren (identical×4 → erkannt,
+  cycle A-B×3 → erkannt, batch-distinct×6 → **kein FP**, short → neg; Prune: 1 Block bleibt,
+  dropped=3, tool_choice=none, letzter Turn=Direktive). Lokaler `kubectl kustomize` grün (neuer
+  ConfigMap-Hash `gfdh2g5552`, loop_breaker.py in der generierten CM). **Gate zum Live-Deploy
+  (`kubectl apply -k`): Tims Go + idealerweise echter Loop-Mitschnitt** (bestätigt Fenster-Passung
+  an realer Loop-Form). Nebeneffekt des Deploys: frischt die veraltete deployte overflow_notice.py
+  auf → **CP-1 greedy-coerce kommt mit live** (deployt = bk24g2d9ch, 8d, hatte nur `_greedy_check`
+  ohne Coerce).
+- **DEPLOYED 2026-09-02** (Tim fuhr `kubectl apply -k`): ConfigMap `bk24g2d9ch`→`gfdh2g5552`,
+  Pod `litellm-6cdc695b76-m6zwd` 1/1, restarts=0, „Application startup complete" ohne Fehler
+  → beide Callbacks importiert (LiteLLM importiert callbacks vor Startup-Complete, harter Abbruch
+  bei Fehler blieb aus). **Damit LIVE: loop_breaker + CP-1 greedy-coerce.** Strategie bewusst
+  `maxSurge:0/maxUnavailable:1` belassen (Tim: nie 2 Pods / kein Node-Wedge; ~min Blip egal).
+  **OFFEN — nur noch die End-to-End-Realprobe:** an einem echten Loop bestätigen, dass (1) das
+  Detektor-Fenster (K≥3/Periode2-5) an Tims realer Loop-Form greift und (2) CP-3 im Gateway den
+  Header konsumiert + die Historie kollabiert. Canary-Import im Container war classifier-geblockt;
+  Kill-Switch `LOOP_BREAKER=0` scharf.
 
 ### CP-3 · Hermes loop-signal-cleanup · Layer: Hermes · Status: **IMPLEMENTIERT** (Commit `eae7ea3d74`, Branch `consolidation`)
 - **Was:** Hermes liest den Header `x-litellm-loop-intervention` → kollabiert die Loop-

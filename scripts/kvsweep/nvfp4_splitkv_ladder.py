@@ -138,10 +138,44 @@ def run_case(qo_len, kv_len, *, num_qo_heads, num_kv_heads, head_dim_qk,
     return out.float()
 
 
+def time_case(qo_len, kv_len, *, repeats, warmup, **kw):
+    """Wall-clock plan()+run() latency for one (qo,kv,split_mode) point,
+    via CUDA events. Reuses run_case's build/plan/run path exactly, just
+    wrapped in timed iterations instead of a single correctness call."""
+    for _ in range(warmup):
+        run_case(qo_len, kv_len, **kw)
+    torch.cuda.synchronize()
+    samples_ms = []
+    for _ in range(repeats):
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        start.record()
+        run_case(qo_len, kv_len, **kw)
+        end.record()
+        torch.cuda.synchronize()
+        samples_ms.append(start.elapsed_time(end))
+    samples_ms.sort()
+    n = len(samples_ms)
+    return {
+        "mean_ms": round(sum(samples_ms) / n, 4),
+        "median_ms": round(samples_ms[n // 2], 4),
+        "min_ms": round(samples_ms[0], 4),
+        "max_ms": round(samples_ms[-1], 4),
+    }
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--qo", default="1,2,3,5,9")
     ap.add_argument("--kv", default="2048,8192,32768,131072")
+    ap.add_argument("--timing", action="store_true",
+                    help="Latenz statt Korrektheit messen: fuer jeden "
+                    "(qo,kv)-Punkt plan()+run() ueber --repeats "
+                    "Wiederholungen timen (gate vs. forced), statt einen "
+                    "Divergenz-Check zu machen. Fuer die eigene Prod-Shape "
+                    "gedacht, nicht die Gemma-4-Korruptions-Ladder.")
+    ap.add_argument("--repeats", type=int, default=15)
+    ap.add_argument("--warmup", type=int, default=3)
     ap.add_argument("--heads", type=int, default=64)
     ap.add_argument("--kv-heads", type=int, default=8)
     ap.add_argument("--head-dim", type=int, default=128,
@@ -178,6 +212,25 @@ def main():
                       fixed_split_size=args.fixed_split, seed=args.seed,
                       causal=not args.non_causal, batch=args.batch,
                       vo_chunk=args.vo_chunk)
+            if args.timing:
+                gate_t = time_case(qo, kv, split_mode="gate",
+                                   repeats=args.repeats, warmup=args.warmup,
+                                   **kw)
+                forced_t = time_case(qo, kv, split_mode="forced",
+                                     repeats=args.repeats, warmup=args.warmup,
+                                     **kw)
+                row = {
+                    "qo": qo, "kv": kv,
+                    "head_dim_qk": head_dim_qk, "head_dim_vo": head_dim_vo,
+                    "gate_median_ms": gate_t["median_ms"],
+                    "forced_median_ms": forced_t["median_ms"],
+                    "speedup_x": round(gate_t["median_ms"]
+                                       / max(forced_t["median_ms"], 1e-6), 3),
+                    "gate": gate_t, "forced": forced_t,
+                }
+                rows.append(row)
+                print(row, flush=True)
+                continue
             ref = run_case(qo, kv, split_mode="gate", **kw)
             got = run_case(qo, kv, split_mode="forced", **kw)
             diff = (got - ref).abs()

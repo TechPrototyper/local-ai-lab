@@ -1,0 +1,29 @@
+[
+ {
+  "ctx": 8192,
+  "prompt_tokens": 7595,
+  "decode_tok_s_mean": 60.1,
+  "decode_tok_s_min": 59.9,
+  "decode_tok_s_max": 60.3,
+  "acceptance": 0.586,
+  "pairs": 4
+ },
+ {
+  "ctx": 65536,
+  "prompt_tokens": 60459,
+  "decode_tok_s_mean": 20.3,
+  "decode_tok_s_min": 20.3,
+  "decode_tok_s_max": 20.3,
+  "acceptance": 0.591,
+  "pairs": 4
+ },
+ {
+  "ctx": 262144,
+  "prompt_tokens": 241643,
+  "decode_tok_s_mean": 6.3,
+  "decode_tok_s_min": 6.3,
+  "decode_tok_s_max": 6.3,
+  "acceptance": 0.598,
+  "pairs": 4
+ }
+]

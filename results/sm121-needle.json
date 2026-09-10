@@ -1,0 +1,20 @@
+[
+ {
+  "ctx": 32768,
+  "hits": 3,
+  "of": 3,
+  "deterministic": true
+ },
+ {
+  "ctx": 131072,
+  "hits": 3,
+  "of": 3,
+  "deterministic": true
+ },
+ {
+  "ctx": 262144,
+  "hits": 3,
+  "of": 3,
+  "deterministic": true
+ }
+]

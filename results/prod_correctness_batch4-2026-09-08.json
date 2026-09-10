@@ -1,0 +1,26 @@
+[
+ {
+  "qo": 8,
+  "kv": 32768,
+  "head_dim_qk": 256,
+  "head_dim_vo": 256,
+  "vo_chunk": null,
+  "max_abs": 0.0625,
+  "max_rel": 0.005208,
+  "frac_gt_1e2": 0.141663,
+  "nan": false,
+  "corrupt": false
+ },
+ {
+  "qo": 8,
+  "kv": 131072,
+  "head_dim_qk": 256,
+  "head_dim_vo": 256,
+  "vo_chunk": null,
+  "max_abs": 0.0625,
+  "max_rel": 0.005208,
+  "frac_gt_1e2": 0.135376,
+  "nan": false,
+  "corrupt": false
+ }
+]
