@@ -40,8 +40,11 @@ spec:
           # line, see harness/): upstream release + adaptive routing +
           # differentiated tool-call brake + patch-schema examples + skill
           # reconciliation + Graph email. The cluster builds it in-cluster
-          # with kaniko and pushes to its private registry.
-          image: hermes-agent:consolidation
+          # with kaniko and pushes to its private registry. Two lines are in
+          # use: the cluster pod runs the `current` line (checked 2026-09-17:
+          # current-v2026.8.18), the launchd gateway on the bridge host runs
+          # the `consolidation` line.
+          image: hermes-agent:current
           imagePullPolicy: IfNotPresent
           args: ["gateway", "run"]
           ports:
