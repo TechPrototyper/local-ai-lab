@@ -10,8 +10,8 @@ graph TB
 
     subgraph CLUSTER["Kubernetes cluster — Talos Linux, GitOps via Flux"]
         MAIN["Main node — RTX 5090<br/>latency tier · LiteLLM gateway<br/>(nodes/rtx-5090.md)"]
-        W1["Old Mac, now running Talos<br/>worker node"]
-        W2["Old Mac, now running Talos<br/>worker node"]
+        W1["Planned: retired Mac as Talos<br/>worker node (not yet joined)"]
+        W2["Planned: MS-01 as third<br/>control-plane member"]
     end
 
     SW(("High-speed<br/>switch"))
@@ -37,9 +37,11 @@ graph TB
   inference plus the LiteLLM gateway that makes both inference boxes one
   endpoint ([profile](rtx-5090.md)). Also carries the cluster's ingress,
   API management, and the multi-user agent gateway.
-- **Worker nodes** — two retired Macs, repurposed as Talos workers: the
-  cluster's services don't all need a GPU, and three nodes make it a
-  cluster rather than a box with opinions.
+- **Further nodes (planned)** — today the cluster runs productively on the
+  one main node. A retired Mac is prepared as a Talos worker (first join
+  attempt failed, retry pending) and a small MS-01 box is earmarked as the
+  third etcd member for control-plane HA. The services don't all need a
+  GPU, and three nodes make it a cluster rather than a box with opinions.
 - **DGX Spark (GB10)** — capacity tier and research testbed
   ([profile](dgx-spark-gb10.md)). Deliberately *not* a cluster node: one
   box, explicit memory budgeting, no scheduler moving things mid-benchmark.
