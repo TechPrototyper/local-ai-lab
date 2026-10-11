@@ -1,44 +1,43 @@
-# Spark (sm121) GridBook+DFlash2 — evaluiert, VERWORFEN (Speed)
+# Spark (sm121) GridBook+DFlash2 — evaluated, DISCARDED (speed)
 
-**Stand 2026-08-31. Entscheidung: der Spark bleibt AQUA+DFlash2.** GridBook-13GB
-wurde auf dem Spark voll zum Laufen gebracht (inkl. Whisper-Headroom), aber wegen
-~35 % Decode-Verlust nicht übernommen. **Auf dem Spark gilt: Speed ist das
-Spitzenkriterium direkt nach Qualität** (die Kiste ist bandbreiten-limitiert und
-ohnehin langsam) — ein −35 % ist inakzeptabel, auch für +10 GB Whisper-Headroom.
+**As of 2026-08-31. Decision: the Spark stays AQUA+DFlash2.** GridBook-13GB
+was brought fully to a working state on the Spark (incl. Whisper headroom), but not adopted because of
+~35 % decode loss. **On the Spark, speed is the top criterion right after
+quality** (the box is bandwidth-limited and slow anyway) — a −35 % is unacceptable, even for +10 GB Whisper headroom.
 
-## Was funktioniert hat (self-serve, ohne Rob-Re-Export, ohne #52883)
-Die rdtand-3.8-gridbook ist multimodal-verpackt-aber-text-deklariert (Export-Bug).
-Vier programmatisch validierte Eingriffe → lädt + serviert mit DFlash2 auf sm121:
-1. **Prefix-Strip** `model.language_model.` → `model.` (header-only + config_groups/ignore/execution_contracts).
-2. **NVFP4-Activation-Contract re-attestiert** (`target_values_sha256` mit gridbooks eigener Funktion über SHORT-Namen neu, Gate grün).
-3. **BF16-embed-Swap** aus AQUA (CB-quantisierte Embedding vom Plugin-Pfad nicht unterstützt).
-4. **BF16-lm_head-Swap + config_group group_8 entfernt** (DFlash2 verlangt unquantisierten Target-LM-Head für Candidate-TopK — genau der Fehler, den #52883 upstream adressiert).
+## What worked (self-serve, without Rob re-export, without #52883)
+The rdtand-3.8-gridbook is packaged multimodal but declared text (export bug).
+Four programmatically validated interventions → loads + serves with DFlash2 on sm121:
+1. **Prefix strip** `model.language_model.` → `model.` (header-only + config_groups/ignore/execution_contracts).
+2. **NVFP4 activation contract re-attested** (`target_values_sha256` recomputed with gridbook's own function over SHORT names, gate green).
+3. **BF16 embed swap** from AQUA (CB-quantized embedding not supported by the plugin path).
+4. **BF16 lm_head swap + config_group group_8 removed** (DFlash2 requires an unquantized target LM head for candidate top-k — exactly the error that #52883 addresses upstream).
 
-## Messung — GridBook gewinnt NICHT auf Speed
+## Measurement — GridBook does NOT win on speed
 | | GridBook+DFlash2 | AQUA+DFlash2 |
 |---|---|---|
-| single tok/s prosa/count200/json/retr | 13,4 / 42,2 / 24,3 / 31,0 | **19,6 / 62,2 / 38,9 / 40,1** |
-| batched-8 tok/s | 65,9 | **99,6** |
-| GSM8K(30) | 0,867 | 0,90 |
-| Tool-Fidelity / Acceptance / KV-Pool | 1,0 / 0,27 / 775.766 | 1,0 / 0,27 / 775.766 |
-| Footprint | **53 GB (+10 frei → Whisper)** | 63 GB |
+| single tok/s prose/count200/json/retr | 13.4 / 42.2 / 24.3 / 31.0 | **19.6 / 62.2 / 38.9 / 40.1** |
+| batched-8 tok/s | 65.9 | **99.6** |
+| GSM8K(30) | 0.867 | 0.90 |
+| Tool fidelity / acceptance / KV pool | 1.0 / 0.27 / 775,766 | 1.0 / 0.27 / 775,766 |
+| Footprint | **53 GB (+10 free → Whisper)** | 63 GB |
 
-**~35 % langsamer** (CB-Dequant-Kernels vs. AQUAs NVFP4+FP8 auf sm121). Qualität +
-Tool-Calling gleichauf, Prefix-Cache greift auch unter DFlash2 (#50897). Der einzige
-Vorteil (10 GB Headroom → 2 Whisper) wiegt den Speed-Verlust nicht auf.
+**~35 % slower** (CB dequant kernels vs. AQUA's NVFP4+FP8 on sm121). Quality +
+tool calling on par, prefix cache works under DFlash2 too (#50897). The only
+advantage (10 GB headroom → 2 Whisper) does not outweigh the speed loss.
 
-## Konsequenz
-- **Spark bleibt AQUA+DFlash2+NVFP4-KV** (`vllm-prod-nvfp4kv`). Rollback vollzogen 2026-08-31.
-- **Whisper-Transcriber:** vorerst NICHT auf dem Spark (kein Headroom ohne GridBook) →
-  Tim nutzt dafür Apple Silicon / MacBook.
-- **Der Cross-Arch-Kontrast steht:** GridBook gewinnt auf sm120/RTX (KV-knapp → Headroom
-  zählt, MTP-Turbo, ~624k Pool), verliert auf sm121/Spark (pool-reich → Headroom egal,
-  CB-Dequant zu langsam). Plattform-differenziert, wie im Entscheidungs-Register.
+## Consequence
+- **Spark stays AQUA+DFlash2+NVFP4-KV** (`vllm-prod-nvfp4kv`). Rollback completed 2026-08-31.
+- **Whisper transcriber:** for now NOT on the Spark (no headroom without GridBook) →
+  Tim uses Apple Silicon / MacBook for it.
+- **The cross-arch contrast stands:** GridBook wins on sm120/RTX (KV-scarce → headroom
+  matters, MTP-Turbo, ~624k pool), loses on sm121/Spark (pool-rich → headroom irrelevant,
+  CB dequant too slow). Platform-differentiated, as in the decision register.
 
-## Artefakte (auf dem Spark belassen, für ein etwaiges Follow-up)
+## Artifacts (left on the Spark, for a possible follow-up)
 `build_gridbook_fixed.py`, `recompute_contract.py`, `embed_swap_fixed.py`,
 `lmhead_swap_fixed.py`, `cb-serve-dflash2-gridbook.sh`, `battery_gridbook.json`,
-`battery_aqua.json`, sowie `gridbook-13gb-fixed`. **Sauberer Weg für die Zukunft:**
-rdtand-Re-Export text-nativ (`model.*`-Prefix, BF16 embed+lm_head, ohne MTP) → die
-4-Fix-Surgery entfiele. Aber nur relevant, falls der Speed-Nachteil kernel-seitig
-verschwindet — sonst bleibt der Spark ohnehin bei AQUA.
+`battery_aqua.json`, as well as `gridbook-13gb-fixed`. **Clean path for the future:**
+rdtand re-export text-native (`model.*` prefix, BF16 embed+lm_head, without MTP) → the
+4-fix surgery would no longer be needed. But only relevant if the speed disadvantage
+disappears on the kernel side — otherwise the Spark stays on AQUA anyway.

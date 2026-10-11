@@ -1,249 +1,249 @@
 # Recon: NVFP4-KV + non-causal DFlash2 drafter attention on sm120/sm121
 
-**Status:** DRAFT — Recon-Spike (Kanban #29). Kein GPU-Lauf, reine Code-/Architektur-Archäologie.
-**Datum:** 2026-08-20 (Nacht). **Autor:** Session-B Agent.
-**Quellen:** lokaler Fork-Checkout `~/Projects/vllm-upstream-work` (Branch
-`jethac/spark/hijinks-020-aeon-qwen-dflash-sm121a`, HEAD `e2a8197a9` — der im Auftrag
-genannte `e24d26638` ist lokal nicht vorhanden, Branch-Inhalt ist inhaltlich äquivalent),
-flashinfer PR **#3684** (MERGED, via `gh`, read-only), vLLM PRs **#52816/#52883** (beide OPEN),
+**Status:** DRAFT — recon spike (Kanban #29). No GPU run, pure code/architecture archaeology.
+**Date:** 2026-08-20 (night). **Author:** Session-B agent.
+**Sources:** local fork checkout `~/Projects/vllm-upstream-work` (branch
+`jethac/spark/hijinks-020-aeon-qwen-dflash-sm121a`, HEAD `e2a8197a9` — the `e24d26638`
+named in the assignment is not present locally, the branch contents are equivalent),
+flashinfer PR **#3684** (MERGED, via `gh`, read-only), vLLM PRs **#52816/#52883** (both OPEN),
 InferenceDream (`custom_kv_kernel.cu`, `kdev.py`, `RESUME_NIGHT_KERNEL_OPT.md`).
 
-Zeilennummern beziehen sich auf den obigen Branch-Stand.
+Line numbers refer to the branch state above.
 
 ---
 
-## 1. The gap (Kurzfassung)
+## 1. The gap (summary)
 
-DFlash/DFlash2-Verify braucht Attention, bei der ein kleiner **Query-Block** von
-`1 + num_speculative_tokens` Tokens (bei `num_speculative_tokens=15` → **16 Query-Tokens/Req**)
-**den gesamten committeten Prefix voll sieht UND innerhalb des Draft-Blocks bidirektional** ist
-(Block-Diffusion). Der Prefix-K/V liegt als NVFP4-Page-Pool vor.
+DFlash/DFlash2 verify needs attention in which a small **query block** of
+`1 + num_speculative_tokens` tokens (for `num_speculative_tokens=15` → **16 query tokens/req**)
+**sees the entire committed prefix in full AND is bidirectional within the draft block**
+(block diffusion). The prefix K/V is present as an NVFP4 page pool.
 
-Diese Kombination — **non-causal Query-Block über NVFP4-KV-Pages** — existiert an **keiner**
-Stelle des Stacks:
+This combination — **non-causal query block over NVFP4-KV pages** — exists **nowhere**
+in the stack:
 
-- **flashinfer:** Der NVFP4-Paged-Prefill-Pfad (FA2, sm120/121) aus #3684 ist im vLLM-Aufruf
-  effektiv **causal-only** verdrahtet; ob der Kernel selbst `mask_mode ≠ causal` / `custom_mask`
-  über NVFP4-Pages korrekt trägt, ist **ungetestet** (siehe §4-Option-A).
-- **vLLM:** Zwei harte Guards (Backend-Selektion + hartkodiertes `causal=True` im Build)
-  verhindern, dass der non-causale Drafter überhaupt auf den FlashInfer-NVFP4-Pfad kommt. Der
-  Drafter wird auf ein non-causal-fähiges Backend (FLASH_ATTN) gezwungen, dessen KV-Pages **nicht
-  NVFP4** sind (bf16/fp16; fp8 nur via `kv_cache_dtype_skip_layers`). Ergebnis: getrennter/gepolsterter
-  Page-Pool für die Drafter-Layer → Page-Padding-Blowup (~41 GiB @32k). Der Skip-Layer-Ausweg ist
-  genau dieser Blowup und damit tot.
+- **flashinfer:** The NVFP4 paged-prefill path (FA2, sm120/121) from #3684 is wired in the vLLM call
+  effectively **causal-only**; whether the kernel itself correctly carries `mask_mode ≠ causal` / `custom_mask`
+  over NVFP4 pages is **untested** (see §4 Option A).
+- **vLLM:** Two hard guards (backend selection + hard-coded `causal=True` in the build)
+  prevent the non-causal drafter from reaching the FlashInfer NVFP4 path at all. The
+  drafter is forced onto a non-causal-capable backend (FLASH_ATTN) whose KV pages are **not
+  NVFP4** (bf16/fp16; fp8 only via `kv_cache_dtype_skip_layers`). Result: separate/padded
+  page pool for the drafter layers → page-padding blowup (~41 GiB @32k). The skip-layer escape route is
+  exactly this blowup and is therefore dead.
 
-**Payoff bei Auflösung:** Spekulation **und** 4-bit-KV gleichzeitig auf jeder speichergebundenen
-Karte — der zentrale speed↔kv-max-Konflikt wird aufgelöst statt gemanagt.
+**Payoff when resolved:** speculation **and** 4-bit KV simultaneously on every memory-bound
+card — the central speed↔kv-max conflict is resolved instead of managed.
 
 ---
 
-## 2. Where exactly it lives (Dateien + Zeilen)
+## 2. Where exactly it lives (files + lines)
 
-### 2a. Guard #1 — Backend-Selektion schließt FlashInfer für non-causal aus
-- `vllm/v1/attention/backend.py:229-237` — `AttentionBackend.supports_non_causal()` liefert per
-  Default **`False`**. **FlashInferBackend überschreibt dies NICHT** (kein Override in
+### 2a. Guard #1 — backend selection excludes FlashInfer for non-causal
+- `vllm/v1/attention/backend.py:229-237` — `AttentionBackend.supports_non_causal()` returns
+  **`False`** by default. **FlashInferBackend does NOT override this** (no override in
   `vllm/v1/attention/backends/flashinfer.py`).
-- `vllm/v1/attention/backend.py:323-324` — `validate_configuration(...)`: bei
-  `use_non_causal and not cls.supports_non_causal()` → invalid-reason
-  `"non-causal attention not supported"`. Damit fällt FlashInfer für den Drafter raus.
-- `vllm/v1/attention/backends/flash_attn.py:113-114` — nur **FLASH_ATTN** (plus rocm_attn,
-  rocm_aiter_fa, flex_attention) liefert `supports_non_causal() == True`.
+- `vllm/v1/attention/backend.py:323-324` — `validate_configuration(...)`: for
+  `use_non_causal and not cls.supports_non_causal()` → invalid reason
+  `"non-causal attention not supported"`. This drops FlashInfer for the drafter.
+- `vllm/v1/attention/backends/flash_attn.py:113-114` — only **FLASH_ATTN** (plus rocm_attn,
+  rocm_aiter_fa, flex_attention) returns `supports_non_causal() == True`.
 - `vllm/v1/attention/backends/flash_attn.py:70-74` — FLASH_ATTN
-  `supported_kv_cache_dtypes = ["auto","float16","bfloat16"]` → **kein fp8, kein nvfp4**.
-- `vllm/config/speculative.py:114` — der Kommentar sagt es explizit:
+  `supported_kv_cache_dtypes = ["auto","float16","bfloat16"]` → **no fp8, no nvfp4**.
+- `vllm/config/speculative.py:114` — the comment says it explicitly:
   *"DFlash needs a non-causal-capable backend like FLASH_ATTN"*.
-- Wahl-/Init-Pfad: `vllm/v1/spec_decode/dflash.py:73-82` (`_create_draft_vllm_config` setzt
-  `use_non_causal=not self.dflash_causal`), Assertion in `dflash.py:286-293`
-  (jedes Layer muss `attn_metadata.causal is False` erfüllen), Drafter-Backend-Init in
+- Selection/init path: `vllm/v1/spec_decode/dflash.py:73-82` (`_create_draft_vllm_config` sets
+  `use_non_causal=not self.dflash_causal`), assertion in `dflash.py:286-293`
+  (every layer must satisfy `attn_metadata.causal is False`), drafter backend init in
   `vllm/v1/worker/gpu_model_runner.py:6816-6819`.
 
-**Netto:** non-causal ⇒ nur FLASH_ATTN qualifiziert ⇒ Drafter-KV kann nicht NVFP4 sein.
+**Net:** non-causal ⇒ only FLASH_ATTN qualifies ⇒ drafter KV cannot be NVFP4.
 
-### 2b. Guard #2 — FlashInfer-Build verdrahtet `causal=True` hart
-Selbst wenn Guard #1 umgangen würde:
+### 2b. Guard #2 — FlashInfer build hard-wires `causal=True`
+Even if Guard #1 were bypassed:
 - `vllm/v1/attention/backends/flashinfer.py:1445-1463` — `prefill_wrapper.plan(..., causal=True, ...)`
-  **hartkodiert**; `common_attn_metadata.causal` wird ignoriert, **kein `custom_mask`/`packed_custom_mask`
+  **hard-coded**; `common_attn_metadata.causal` is ignored, **no `custom_mask`/`packed_custom_mask`
   plumbing**.
-- Ebenso `flashinfer.py:1350` (Cascade) und die trtllm-Prefill-Pfade — überall `causal=True`.
-- Der einzige non-causal-Prefill im Backend ist der **DCP-Context-Run**
-  (`flashinfer.py:450 causal=False` / `:466 causal=True` = Two-Pass Context+NewTokens mit
-  LSE-Merge) — aber der ist für den FA2-NVFP4-Pfad **explizit gesperrt**
+- Likewise `flashinfer.py:1350` (cascade) and the trtllm prefill paths — `causal=True` everywhere.
+- The only non-causal prefill in the backend is the **DCP context run**
+  (`flashinfer.py:450 causal=False` / `:466 causal=True` = two-pass context+new tokens with
+  LSE merge) — but that is **explicitly blocked** for the FA2-NVFP4 path
   (`flashinfer.py:877-880`: `use_fa2_nvfp4_kv and use_dcp` → `NotImplementedError`).
 
-### 2c. Der NVFP4-FA2-Pfad selbst (sm120/121)
+### 2c. The NVFP4-FA2 path itself (sm120/121)
 - `vllm/v1/attention/backends/flashinfer.py:815-835` — `is_kvcache_nvfp4` +
-  `use_fa2_nvfp4_kv = is_device_capability_family(120)`; sm100 → trtllm-gen, sonst Fehler.
-- `flashinfer.py:995-1005` — Prefill-Wrapper `BatchPrefillWithPagedKVCacheWrapper(..., backend="fa2")`
-  für den NVFP4-KV-Fall; `flashinfer.py:1024-1042` analog Decode.
-- `flashinfer.py:1145-1146` — für FA2-NVFP4 wird `prefill_use_trtllm=False` erzwungen (also der
-  native FA2-Prefill-Pfad, der prinzipiell Masken kennt).
-- V-Scale-Deswizzle-Flag: `flashinfer.py:82, 273-278, 881-886`
+  `use_fa2_nvfp4_kv = is_device_capability_family(120)`; sm100 → trtllm-gen, otherwise error.
+- `flashinfer.py:995-1005` — prefill wrapper `BatchPrefillWithPagedKVCacheWrapper(..., backend="fa2")`
+  for the NVFP4-KV case; `flashinfer.py:1024-1042` analogous for decode.
+- `flashinfer.py:1145-1146` — for FA2-NVFP4, `prefill_use_trtllm=False` is forced (i.e. the
+  native FA2 prefill path, which in principle knows masks).
+- V-scale deswizzle flag: `flashinfer.py:82, 273-278, 881-886`
   (`-DFLASHINFER_PAGED_V_SF_DESWIZZLE=1`).
-- NVFP4-Page-Geometrie: `vllm/utils/torch_utils.py:415 nvfp4_kv_cache_full_dim`,
+- NVFP4 page geometry: `vllm/utils/torch_utils.py:415 nvfp4_kv_cache_full_dim`,
   `:472 nvfp4_kv_cache_split_views`.
 
-### 2d. Skip-Layer-Ausweg (der tote Pfad)
+### 2d. Skip-layer escape route (the dead path)
 - `vllm/config/cache.py:115 kv_cache_dtype_skip_layers`,
-  `vllm/model_executor/layers/attention/attention.py:253-265` (Layer → native dtype),
-  `vllm/platforms/interface.py:596`. Diese Layer bekommen eine **andere Page-Geometrie** →
-  Padding auf die größere Page-Breite → der genannte ~41 GiB-Blowup @32k.
+  `vllm/model_executor/layers/attention/attention.py:253-265` (layer → native dtype),
+  `vllm/platforms/interface.py:596`. These layers get a **different page geometry** →
+  padding to the larger page width → the aforementioned ~41 GiB blowup @32k.
 
-### 2e. DFlash2-Delta (Upstream, OPEN, im Fork gecherrypickt)
+### 2e. DFlash2 delta (upstream, OPEN, cherry-picked into the fork)
 - vLLM **#52816** (SubSir): `DFlash2DraftModel` = DFlash + grouped dynamic depthwise conv +
-  Candidate-Selector; V2-Runner: `model_executor/models/qwen3_dflash2.py`,
+  candidate selector; V2 runner: `model_executor/models/qwen3_dflash2.py`,
   `v1/worker/gpu/spec_decode/dflash2/speculator.py`, `.../__init__.py`, `registry.py`.
-- vLLM **#52883** (oceanplexian, stacked auf #52816): LM-Head-Guard-Fix (unquantized head bei
-  quantisiertem Body).
-- **Wichtig:** Conv + Selector sind Zusatz-Sublayer; die **Attention-Mask-Semantik** erbt DFlash2
-  unverändert vom DFlash-Proposer (§3). Für dieses Kernel-Problem ist DFlash == DFlash2.
+- vLLM **#52883** (oceanplexian, stacked on #52816): LM-head guard fix (unquantized head with
+  quantized body).
+- **Important:** conv + selector are additional sublayers; DFlash2 inherits the **attention-mask semantics**
+  unchanged from the DFlash proposer (§3). For this kernel problem, DFlash == DFlash2.
 
 ---
 
-## 3. Required mask semantics (präzise)
+## 3. Required mask semantics (precise)
 
-Aus `vllm/v1/spec_decode/dflash.py`:
-- **Geometrie:** `num_query_per_req = 1 + num_speculative_tokens` (`dflash.py:104`). Bonus-Token +
-  `num_speculative_tokens` Mask/Proposal-Tokens sind die **einzigen Queries**; der gesamte
-  Kontext (akzeptierter Prefix) ist **K/V** und wird per `precompute_and_store_context_kv` vorab in
-  den Cache geschrieben (`dflash.py:238, 265-269`). Bei `num_speculative_tokens=15` → **16 Queries/Req**.
-- **Mask:** `new_cad.causal = self.dflash_causal` (Default **False**, `dflash.py:71, 189`) und
-  Draft-Config `use_non_causal = not dflash_causal` (`dflash.py:80`). Der Proposer **assertet**
-  `causal is False` für alle Draft-Layer (`dflash.py:286-293`).
-- **Effektiv:** Voll-non-causal über `[Prefix | Block]`. Da der Block **nach** dem gesamten
-  Prefix angehängt wird, ist "voll-non-causal" **identisch** zur Auftrags-Formulierung
-  *"kausal zum Prefix + bidirektional im Draft-Block"*:
-  jede der 16 Query-Positionen sieht (a) **alle** Prefix-Spalten (rechteckige Voll-Sicht) und
-  (b) **jede** andere Block-Position (nicht-trianguläre `16×16`-Submatrix). Kein Sliding-Window,
-  kein Soft-Cap-Zwang.
-- **Konsequenz für die Kernel-API:** Der reine Block-Diffusion-Fall braucht **kein** bespoke
-  `custom_mask` — eine FA2-Paged-Append-Prefill-`plan(causal=False)` liefert genau diese
-  Semantik (Query = die letzten `qo_len` Positionen der KV-Sequenz, non-causal ⇒ jede Query sieht
-  jede KV-Position). Ein **packed custom_mask** wäre nur nötig, falls DFlash2 später eine
-  strengere Intra-Block-Struktur (z.B. Tree-/Kausal-Sub-Maske) einführt.
+From `vllm/v1/spec_decode/dflash.py`:
+- **Geometry:** `num_query_per_req = 1 + num_speculative_tokens` (`dflash.py:104`). Bonus token +
+  `num_speculative_tokens` mask/proposal tokens are the **only queries**; the entire
+  context (accepted prefix) is **K/V** and is written into the cache in advance via `precompute_and_store_context_kv`
+  (`dflash.py:238, 265-269`). With `num_speculative_tokens=15` → **16 queries/req**.
+- **Mask:** `new_cad.causal = self.dflash_causal` (default **False**, `dflash.py:71, 189`) and
+  draft config `use_non_causal = not dflash_causal` (`dflash.py:80`). The proposer **asserts**
+  `causal is False` for all draft layers (`dflash.py:286-293`).
+- **Effectively:** fully non-causal over `[prefix | block]`. Since the block is appended **after** the entire
+  prefix, "fully non-causal" is **identical** to the assignment's formulation
+  *"causal to the prefix + bidirectional within the draft block"*:
+  each of the 16 query positions sees (a) **all** prefix columns (rectangular full view) and
+  (b) **every** other block position (non-triangular `16×16` submatrix). No sliding window,
+  no soft-cap requirement.
+- **Consequence for the kernel API:** The pure block-diffusion case needs **no** bespoke
+  `custom_mask` — an FA2 paged-append-prefill `plan(causal=False)` delivers exactly these
+  semantics (query = the last `qo_len` positions of the KV sequence, non-causal ⇒ every query sees
+  every KV position). A **packed custom_mask** would only be needed if DFlash2 later introduces
+  a stricter intra-block structure (e.g. tree/causal sub-mask).
 
 ---
 
-## 4. Lösungsarchitekturen A / B / C
+## 4. Solution architectures A / B / C
 
-### Option A — Mask-Mode-Erweiterung der bestehenden NVFP4-FA2-Kernelfamilie in flashinfer
-**Idee:** Den FA2-NVFP4-Paged-Prefill (#3684, `include/flashinfer/attention/prefill.cuh`) für
-`mask_mode = kNone` (non-causal) bzw. `kCustom` über NVFP4-Pages nutzbar machen; vLLM so verdrahten,
-dass der Drafter-Prefill mit `causal=False` (statt hartem `causal=True`) plant.
+### Option A — Mask-mode extension of the existing NVFP4-FA2 kernel family in flashinfer
+**Idea:** Make the FA2-NVFP4 paged prefill (#3684, `include/flashinfer/attention/prefill.cuh`) usable for
+`mask_mode = kNone` (non-causal) or `kCustom` over NVFP4 pages; wire up vLLM so
+that the drafter prefill plans with `causal=False` (instead of hard `causal=True`).
 
-**Evidenz pro:**
-- #3684 fasst **genau diesen Kernel** an (prefill.cuh +99/-41, scheduler.cuh, page.cuh,
-  `flashinfer/prefill.py` +132/-19) und enthält bereits einen **Custom-Mask-Fix**:
-  *"plan(): move `mask_indptr` to the custom mask's device before `segment_packbits`"* — d.h.
-  die **Masken-Plumbing des Paged/Ragged-Prefill-Wrappers ist vorhanden und wurde sogar repariert**.
-- Der FA2-Prefill ist der generische FA2-Pfad, der `custom_mask`/`packed_custom_mask` prinzipiell
-  kennt (im fp16/fp8-Fall Standard).
+**Evidence for:**
+- #3684 touches **exactly this kernel** (prefill.cuh +99/-41, scheduler.cuh, page.cuh,
+  `flashinfer/prefill.py` +132/-19) and already contains a **custom-mask fix**:
+  *"plan(): move `mask_indptr` to the custom mask's device before `segment_packbits`"* — i.e.
+  the **mask plumbing of the paged/ragged prefill wrapper exists and was even repaired**.
+- The FA2 prefill is the generic FA2 path that in principle knows `custom_mask`/`packed_custom_mask`
+  (standard in the fp16/fp8 case).
 
-**Evidenz contra / offene Punkte:**
-- #3684 validiert numerisch nur **causal** ("multi-tile seq 512/1024 + causal all sane") und
-  symmetrische Shapes; **non-causal / custom_mask über den NVFP4-V-Load-Pfad ist nicht
-  nachgewiesen**. Risiko: der FP4-V-Load + `[all-data|all-SF]`-SF-Layout + asymmetrische Offsets
-  interagieren mit Mask-Iteration/Tile-Skipping.
-- **Split-KV ist für NVFP4 hart abgeschaltet** (#3684-Zusatzfix: mid-block-Split verletzt die
-  16-Element-FP8-Block-Alignment → Retrieval-Cliff). Drafter-Verify ist **exakt** die
-  Extend-Geometrie (`qo_len=16 ≪ kv_len`), die den Scheduler sonst in Split-KV treibt → der Pfad
-  läuft **single-split** (korrekt, aber ohne Flash-Decoding-Parallelismus). Perf-Fußnote, kein Blocker.
-- Wo Kausalität hart sitzt: `CTA_TILE_Q`/Schedule-Dispatch (`scheduler.cuh`) + die Tile-Iteration
-  in `prefill.cuh` (mask-abhängiges KV-Tile-Skipping). Bei non-causal entfällt das Skipping, d.h.
-  potentiell **mehr** KV-Tiles pro Query-Tile — bei 16 Queries vernachlässigbar.
-- vLLM-Seite: Guard #1 (`supports_non_causal` Override für FlashInfer, gated auf `use_fa2_nvfp4_kv`)
-  **und** Guard #2 (`causal` aus `common_attn_metadata` statt hart `True`, + optional custom_mask-
-  Plumbing durch `plan()`).
+**Evidence against / open points:**
+- #3684 numerically validates only **causal** ("multi-tile seq 512/1024 + causal all sane") and
+  symmetric shapes; **non-causal / custom_mask over the NVFP4 V-load path is not
+  demonstrated**. Risk: the FP4 V-load + `[all-data|all-SF]` SF layout + asymmetric offsets
+  interact with mask iteration/tile skipping.
+- **Split-KV is hard-disabled for NVFP4** (#3684 additional fix: mid-block split violates the
+  16-element FP8 block alignment → retrieval cliff). Drafter verify is **exactly** the
+  extend geometry (`qo_len=16 ≪ kv_len`) that would otherwise drive the scheduler into split-KV → the path
+  runs **single-split** (correct, but without flash-decoding parallelism). Perf footnote, not a blocker.
+- Where causality is hard-wired: `CTA_TILE_Q`/schedule dispatch (`scheduler.cuh`) + the tile iteration
+  in `prefill.cuh` (mask-dependent KV tile skipping). With non-causal the skipping is dropped, i.e.
+  potentially **more** KV tiles per query tile — negligible with 16 queries.
+- vLLM side: Guard #1 (`supports_non_causal` override for FlashInfer, gated on `use_fa2_nvfp4_kv`)
+  **and** Guard #2 (`causal` from `common_attn_metadata` instead of hard `True`, + optional custom_mask
+  plumbing through `plan()`).
 
-**Scope:** **mittel–groß.** flashinfer-Kernel-Verifikation/-Anpassung (unbekannte Tiefe) + zwei
-vLLM-Guards + Metadaten-Plumbing. Perf-Erwartung: **hoch** (nativer FA2, tensor-core-nah), sobald
-non-causal korrekt.
+**Scope:** **medium–large.** flashinfer kernel verification/adaptation (unknown depth) + two
+vLLM guards + metadata plumbing. Perf expectation: **high** (native FA2, close to tensor cores) once
+non-causal is correct.
 
-### Option B — On-the-fly-Dequant-Shim (NVFP4-Pages → bf16/fp8 nur für Drafter-Attention)
-**Idee:** Nur für die (wenigen) Drafter-Attention-Aufrufe die relevanten NVFP4-Prefix-Pages in
-einen **Scratch-Buffer** nach bf16 (oder fp8) dequantisieren und den **bestehenden non-causal
-FLASH_ATTN-Kernel** darauf laufen lassen. Der persistente KV-Pool bleibt durchgehend NVFP4 (kein
-Page-Padding, kein zweiter Pool).
+### Option B — On-the-fly dequant shim (NVFP4 pages → bf16/fp8 only for drafter attention)
+**Idea:** Only for the (few) drafter attention calls, dequantize the relevant NVFP4 prefix pages into
+a **scratch buffer** to bf16 (or fp8) and run the **existing non-causal
+FLASH_ATTN kernel** on that. The persistent KV pool stays NVFP4 throughout (no
+page padding, no second pool).
 
-**Evidenz/Infra:**
-- Dequant-Bausteine existieren bereits: `nvfp4_kv_cache_split_views` (`torch_utils.py:472`) und der
-  Triton-Dequant `trtllm_prefill_attn_kvfp8_dequant` (`flashinfer.py:292-394`) als Vorlage für einen
-  NVFP4→bf16-Scratch-Dequant.
-- FLASH_ATTN kann non-causal (`flash_attn.py:113`) und bf16-KV (`:70-74`) — passt direkt.
+**Evidence/infra:**
+- Dequant building blocks already exist: `nvfp4_kv_cache_split_views` (`torch_utils.py:472`) and the
+  Triton dequant `trtllm_prefill_attn_kvfp8_dequant` (`flashinfer.py:292-394`) as a template for an
+  NVFP4→bf16 scratch dequant.
+- FLASH_ATTN supports non-causal (`flash_attn.py:113`) and bf16 KV (`:70-74`) — fits directly.
 
-**Memory-/Latenz-Abschätzung (Drafter, pro Layer, pro Req):**
-- Zu dequantisierender Kontext ≈ `seq_len × num_kv_heads × head_size` bf16. Beispiel Gemma-Voll-
-  Attn (HS=256, NKV klein): @32k, HS=256, NKV=2, bf16 = `32768·2·256·2 B ≈ 32 MiB/Layer/Req`.
-  Als **einmaliger** Scratch (wiederverwendet über Layer/Req, nicht persistent) ist das eine kleine
-  feste Reserve, **nicht** das ~41 GiB-Padding — der springende Vorteil gegen den Skip-Layer-Ausweg.
-- Latenz: zusätzlicher Dequant-Read/Write des Prefix pro Drafter-Forward. Da der Drafter nur
-  16 Queries hat, aber den **vollen** Prefix als K/V liest, ist der Dequant memory-bound ~ die
-  Attention selbst — grob **~2× Bandbreite** des Drafter-Attention-Anteils. Drafter-Attention ist
-  ein kleiner Bruchteil des Gesamt-Steps → moderater, planbarer Overhead; **keine** neuen MMA-Kernel.
+**Memory/latency estimate (drafter, per layer, per req):**
+- Context to dequantize ≈ `seq_len × num_kv_heads × head_size` bf16. Example Gemma full
+  attention (HS=256, NKV small): @32k, HS=256, NKV=2, bf16 = `32768·2·256·2 B ≈ 32 MiB/layer/req`.
+  As a **one-time** scratch (reused across layers/reqs, not persistent) this is a small
+  fixed reserve, **not** the ~41 GiB padding — the key advantage over the skip-layer escape route.
+- Latency: additional dequant read/write of the prefix per drafter forward. Since the drafter has only
+  16 queries but reads the **full** prefix as K/V, the dequant is memory-bound ~ the
+  attention itself — roughly **~2× bandwidth** of the drafter attention share. Drafter attention is
+  a small fraction of the total step → moderate, predictable overhead; **no** new MMA kernels.
 
-**Scope:** **klein–mittel.** Ein Dequant-Shim + Scratch-Allocator + Drafter-Attention-Routing.
-Perf-Erwartung: **moderat** (Bandbreiten-Overhead), **Korrektheit trivial verifizierbar**
-(Dequant→SDPA ist die Referenz selbst). **Bester Correctness-first-Startpunkt.**
+**Scope:** **small–medium.** A dequant shim + scratch allocator + drafter attention routing.
+Perf expectation: **moderate** (bandwidth overhead), **correctness trivially verifiable**
+(dequant→SDPA is the reference itself). **Best correctness-first starting point.**
 
-### Option C — Eigener non-causal NVFP4-KV-Kernel from scratch
-**Nur falls A strukturell scheitert** (Kernel trägt non-causal nicht) **und B perf-technisch nicht
-reicht.** **Wichtig:** ein solcher Kernel existiert bereits substanziell in InferenceDream —
-`custom_kv_kernel.cu` (870 Zeilen): NVFP4-KV-Attention, Modi 0 (K+V NVFP4) / 1 (K fp8 / V NVFP4),
-HS=128/256-Templates, Stream-Fix, **MTP-kompatibel**, **bit-exakte Parität** vs. Stock verifiziert.
-Kausalität sitzt an **einer** Stelle: `custom_kv_kernel.cu:216`
-`int num_keys = seq_lens[s_idx] - q_len + q_offset + 1;` (obere Key-Grenze pro Query = eigene Position).
-Für Block-Diffusion: `num_keys` so, dass jede Query den **vollen** Prefix + **alle** Block-Positionen
-sieht (Prefix-Länge + volle Block-Sicht statt `+ q_offset + 1`). Split-K-Variante (`:395ff`) analog.
+### Option C — Custom non-causal NVFP4-KV kernel from scratch
+**Only if A fails structurally** (kernel does not carry non-causal) **and B is not sufficient performance-wise.**
+**Important:** such a kernel already exists substantially in InferenceDream —
+`custom_kv_kernel.cu` (870 lines): NVFP4-KV attention, modes 0 (K+V NVFP4) / 1 (K fp8 / V NVFP4),
+HS=128/256 templates, stream fix, **MTP-compatible**, **bit-exact parity** vs. stock verified.
+Causality sits in **one** place: `custom_kv_kernel.cu:216`
+`int num_keys = seq_lens[s_idx] - q_len + q_offset + 1;` (upper key bound per query = own position).
+For block diffusion: `num_keys` such that each query sees the **full** prefix + **all** block positions
+(prefix length + full block view instead of `+ q_offset + 1`). The split-K variant (`:395ff`) analogous.
 
-**Scope:** **mittel** (nicht groß, weil Kernel + Split-K-Skelett + Parität schon da sind), aber
-**Perf-Ceiling niedrig** (scalar software-dequant, **keine** Tensor-Cores — belegt in
-`RESUME_NIGHT_KERNEL_OPT.md`). Für 16 Drafter-Queries über langen Prefix jedoch akzeptabel, da
-memory-bound. Perf-Erwartung: **niedrig–moderat**; Vorteil = volle Kontrolle + vorhandene Parität.
+**Scope:** **medium** (not large, because kernel + split-K skeleton + parity are already there), but
+**low perf ceiling** (scalar software dequant, **no** tensor cores — documented in
+`RESUME_NIGHT_KERNEL_OPT.md`). For 16 drafter queries over a long prefix it is nevertheless acceptable, since
+memory-bound. Perf expectation: **low–moderate**; advantage = full control + existing parity.
 
 ---
 
 ## 5. Recommended path
 
-**Zweistufig: B zuerst (Correctness-Gate + sofortiger Nutzen), A als Perf-Ziel parallel sondieren.**
+**Two-stage: B first (correctness gate + immediate benefit), probe A in parallel as the perf target.**
 
-1. **B als Correctness-first-Prototyp** — löst den 41-GiB-Blowup sofort (durchgehend NVFP4-Pool),
-   Korrektheit ist gegen Dequant-SDPA trivial verifizierbar, keine neuen MMA-Kernel, kleiner Scope.
-   Liefert das erste "Spekulation + 4-bit-KV auf einer Karte"-Ergebnis.
-2. **A als Perf- Upgrade** — parallel eine **Mikro-Probe** (kein vLLM nötig): den flashinfer-FA2-
-   NVFP4-Paged-Prefill direkt mit `mask_mode=kNone`/`custom_mask` gegen eine bf16-Referenz testen.
-   Trägt der Kernel non-causal korrekt, ist A der Endzustand (nativer Speed) und B fällt als
-   Fallback zurück. Trägt er es nicht → A = Kernel-Patch in prefill.cuh, oder C.
-3. **C nur** wenn A-Probe rot **und** B-Perf unzureichend — mit dem InferenceDream-Kernel als Basis.
+1. **B as a correctness-first prototype** — resolves the 41 GiB blowup immediately (NVFP4 pool throughout),
+   correctness is trivially verifiable against dequant-SDPA, no new MMA kernels, small scope.
+   Delivers the first "speculation + 4-bit KV on one card" result.
+2. **A as the perf upgrade** — in parallel a **micro-probe** (no vLLM needed): test the flashinfer FA2
+   NVFP4 paged prefill directly with `mask_mode=kNone`/`custom_mask` against a bf16 reference.
+   If the kernel carries non-causal correctly, A is the end state (native speed) and B falls back
+   to being the fallback. If not → A = kernel patch in prefill.cuh, or C.
+3. **C only** if the A probe is red **and** B perf is insufficient — with the InferenceDream kernel as the base.
 
 ---
 
-## 6. Phased plan (Correctness-Gate vor Perf-Phase)
+## 6. Phased plan (correctness gate before perf phase)
 
-**Phase 0 — Referenz & Fixtures (kein GPU nötig).**
-- `kdev.py`-Oracle (InferenceDream) um einen **non-causal / Block-Diffusion-Referenzpfad** erweitern:
-  `ref_attention(..., causal=False)` bzw. eine `[Prefix voll | Block voll]`-Maske; Gate **cos > 0.99**
-  gegen Dequant-KV-SDPA, Batch-Fall mit variablen `seq_lens`/`q_lens=16` (`kdev.py:139-166`).
-- DFlash2-Mask-Fixture: `qo_len=16`, langer Prefix, NVFP4-Pages, gegen bf16-Ground-Truth.
+**Phase 0 — Reference & fixtures (no GPU needed).**
+- Extend the `kdev.py` oracle (InferenceDream) with a **non-causal / block-diffusion reference path**:
+  `ref_attention(..., causal=False)` or a `[prefix full | block full]` mask; gate **cos > 0.99**
+  against dequant-KV SDPA, batch case with variable `seq_lens`/`q_lens=16` (`kdev.py:139-166`).
+- DFlash2 mask fixture: `qo_len=16`, long prefix, NVFP4 pages, against bf16 ground truth.
 
-**Phase 1 — Correctness-Prototyp (Option B).**
-- Dequant-Shim NVFP4→bf16-Scratch (Vorlage `flashinfer.py:292-394`), Drafter-Attention auf
-  FLASH_ATTN non-causal. **Gate:** bit-nahe Parität (cos > 0.99) drafter-output vs. voll-bf16-Drafter,
-  Acceptance-Rate unverändert vs. fp8/bf16-Baseline. **Erst nach grünem Gate** → Perf.
+**Phase 1 — Correctness prototype (Option B).**
+- Dequant shim NVFP4→bf16 scratch (template `flashinfer.py:292-394`), drafter attention on
+  FLASH_ATTN non-causal. **Gate:** near-bit parity (cos > 0.99) drafter output vs. full-bf16 drafter,
+  acceptance rate unchanged vs. fp8/bf16 baseline. **Only after a green gate** → perf.
 
-**Phase 1' (parallel) — A-Machbarkeitsprobe.**
-- Standalone flashinfer-Test: FA2-NVFP4-Paged-Prefill mit non-causal/custom_mask, `max_abs_err`
-  gegen bf16 (analog #3684-Validierung `~0.0047`). Rot/Grün entscheidet A vs. C.
+**Phase 1' (parallel) — A feasibility probe.**
+- Standalone flashinfer test: FA2-NVFP4 paged prefill with non-causal/custom_mask, `max_abs_err`
+  against bf16 (analogous to the #3684 validation `~0.0047`). Red/green decides A vs. C.
 
-**Phase 2 — Perf & Integration.**
-- Bei grünem A: vLLM Guard #1 (`supports_non_causal` Override gated auf `use_fa2_nvfp4_kv`) +
-  Guard #2 (`causal` aus Metadata, optional custom_mask-Plumbing durch `plan()`); E2E gegen bf16-
-  Facts (Retrieval-Needle wie #3684, radix/prefix-cache **on**).
-- Bei B als Endzustand: Scratch-Allocator-Tuning, Overhead-Messung, ggf. Dequant-Fusion.
+**Phase 2 — Perf & integration.**
+- If A is green: vLLM Guard #1 (`supports_non_causal` override gated on `use_fa2_nvfp4_kv`) +
+  Guard #2 (`causal` from metadata, optional custom_mask plumbing through `plan()`); E2E against bf16
+  facts (retrieval needle as in #3684, radix/prefix cache **on**).
+- If B is the end state: scratch allocator tuning, overhead measurement, possibly dequant fusion.
 
-**Risiken (größte zuerst):**
-- **A:** FA2-NVFP4-Kernel trägt non-causal/custom_mask evtl. nicht korrekt (FP4-V-Load × Mask-Tile-
-  Iteration ungetestet) → Fallback B/C. **Split-KV-Gate** macht Drafter-Verify single-split (Perf-Fußnote).
-- **B:** Dequant-Overhead pro Drafter-Forward (memory-bound, ~2×); Scratch-Lebenszeit/CUDA-Graph-
-  Stabilität (Buffer-Adressen stabil halten — vgl. DFlash-Context-Buffer-Muster `dflash.py:42-62`).
-- **Fork-Drift:** DFlash2 (#52816/#52883) ist **OPEN** upstream; Mask-Semantik kann sich mit
-  Selector/Conv noch ändern (aktuell erbt sie unverändert von DFlash).
-- **Timing-Wette:** Upstream-Issue erst nach Prototyp-Entscheid posten (Auftrag).
+**Risks (largest first):**
+- **A:** The FA2-NVFP4 kernel may not carry non-causal/custom_mask correctly (FP4 V-load × mask-tile
+  iteration untested) → fallback B/C. The **split-KV gate** makes drafter verify single-split (perf footnote).
+- **B:** Dequant overhead per drafter forward (memory-bound, ~2×); scratch lifetime/CUDA-graph
+  stability (keep buffer addresses stable — cf. DFlash context buffer pattern `dflash.py:42-62`).
+- **Fork drift:** DFlash2 (#52816/#52883) is **OPEN** upstream; the mask semantics may still change with
+  selector/conv (currently it inherits unchanged from DFlash).
+- **Timing bet:** post the upstream issue only after the prototype decision (assignment).
