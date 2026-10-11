@@ -118,7 +118,7 @@ Key decisions, each measured:
   values yield wildly different pools depending on service start order
   (README finding 2026-08-06). At 20 GiB explicit (21474836480 bytes) the
   NVFP4 KV pool is **~966k tokens ≈ 3.7 × 262k-token sessions in parallel**
-  ([node profile](../nodes/dgx-spark-gb10.md#serving-stack)).
+  ([node profile](../nodes/dgx-spark-gb10.md#serving-stack-since-2026-10-11)).
 - **`gpu-memory-utilization 0.44` is a startup check, not the pool** — that
   fraction of total memory must be free at launch or vLLM refuses to start.
   Size it to actual need (weights + pool + activations).
@@ -138,7 +138,7 @@ Key decisions, each measured:
 - **Start order:** bring the small services (embedder/reranker/audio) up
   *first* and cap their CUDA-graph capture sizes — default capture costs
   ~5 GiB *per service* — so the LLM's explicit pool math holds
-  ([node profile](../nodes/dgx-spark-gb10.md#serving-stack)).
+  ([node profile](../nodes/dgx-spark-gb10.md#serving-stack-since-2026-10-11)).
 - **Speculative decoding is DFlash2, draft length 7** (adopted
   2026-08-21, replacing "MTP off" as the box's speculation stance): every
   gate passed at verdict level — GSM8K n=1319 paired p=0.122, tool-calling
