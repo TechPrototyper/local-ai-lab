@@ -27,7 +27,7 @@ Entscheidungs-Register (Stand Cutover):
 
 ## 2. Build — wie das vLLM zusammengepatcht ist
 
-**Serving-Image:** `10.1.0.243/inference/vllm-nvfp4:sm120-pc50897-gridbook-088`
+**Serving-Image:** `<registry>/inference/vllm-nvfp4:sm120-pc50897-gridbook-088`
 - vLLM-Basis: sm120-NVFP4-Linie (V1-Engine, `v0.1.dev1+g2cf8b8ae0`).
 - **`pc50897`** = vllm#50897 vorab integriert: lookahead-aware Prefix-Cache-Hashing
   für EAGLE-/spec-Drafter (stellt Prefix-Cache-Hits unter Spekulation her; adressiert
@@ -63,7 +63,7 @@ Entscheidungs-Register (Stand Cutover):
 
 ## 3. Serving-Konfiguration (live)
 
-**k8s-Deployment `vllm-qwen38-mtp-gridbook`** (namespace inference, Node neo26/RTX 5090),
+**k8s-Deployment `vllm-qwen38-mtp-gridbook`** (namespace inference, Node <rtx-node>/RTX 5090),
 hinter Service `llm-active` (Selector-Match), litellm routet `qwen3.8-27b` → llm-active:8000.
 
 vLLM-Serve (Kernflags):
@@ -131,7 +131,7 @@ Fix in Arbeit: `gridbook-13gb-fixed` (Prefix-Strip) für Whisper-Headroom.
   ist stabil** (Batterie inkl. Needle 9/9). Offener Optimierungshebel:
   `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` könnte höheren util stabil machen
   → Pool-Rückgewinnung. Noch nicht gegengetestet.
-- **Kein GPU-Split:** neo26/RTX ist splitbar (allocatable 2), aber wir splitten nicht —
+- **Kein GPU-Split:** <rtx-node>/RTX ist splitbar (allocatable 2), aber wir splitten nicht —
   der Prod-Pod braucht die GPU exklusiv (sonst re-profiliert vLLM gegen weniger Speicher,
   534k statt 624k).
 - **Verdikt-Robustheit:** der n=1319-Lauf ging zweimal an Ephemeralität verloren

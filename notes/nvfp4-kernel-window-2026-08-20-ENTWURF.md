@@ -1,7 +1,7 @@
-# NVFP4 non-causal kernel window — RTX 5090/neo26 (Kanban #31 + #30) — ENTWURF
+# NVFP4 non-causal kernel window — RTX 5090/<rtx-node> (Kanban #31 + #30) — ENTWURF
 
 **Status:** ENTWURF (nicht committen/pushen). Nacht 2026-08-20/21. Automations-Agent.
-**Fenster:** RTX 5090 (neo26, von Tim freigegeben; RCA #28 GO mit Auflagen). Green path a–c.
+**Fenster:** RTX 5090 (<rtx-node>, von Tim freigegeben; RCA #28 GO mit Auflagen). Green path a–c.
 **Companion:** [`nvfp4-noncausal-kernel-recon.md`](nvfp4-noncausal-kernel-recon.md),
 `vllm-upstream-work@kernel/nvfp4-noncausal-shim-b:docs/kernel-initiative/{RUNBOOK,DESIGN-NOTES}`.
 
@@ -56,7 +56,7 @@ vor Vertrauen in Drafter-KV**.
 **(d) E2E-Smoke — bewusst ausgelassen (OFFEN).** Zwei Gründe: (i) DESIGN-NOTES §4 — die Live-Attention-
 Dispatch-Verdrahtung ist NICHT gemacht (der flag-gated Seam `maybe_dequant_nvfp4_context` ist ein No-op);
 ohne echte Integration ist Acceptance/Greedy-Parity kein valider Test. (ii) RCA #28 — Engine-Boot = exakt
-die Profiling-Phase, die neo26 gewedged hat. Auflage „bei Zweifel d auslassen" → ausgelassen.
+die Profiling-Phase, die <rtx-node> gewedged hat. Auflage „bei Zweifel d auslassen" → ausgelassen.
 
 ## Betriebs-/Sicherheits-Belege (RCA #28-Auflagen)
 
@@ -140,9 +140,9 @@ Kein scriptbarer Kanban gefunden (kein Gitea-Ingress; local-ai-lab-Issues leer; 
 ## Phase 1 — BUILD (#32)
 
 - **Wie das Parity-Image gebaut wird (rekonstruiert):** sm120/RTX5090 nutzt `scripts/build-vllm-nvfp4.sh`
-  → Kaniko-Job in ns `registry`, nodeSelector neo26, FROM `nvidia/cuda:13.0.2-devel`, torch 2.13.0/cu130,
+  → Kaniko-Job in ns `registry`, nodeSelector <rtx-node>, FROM `nvidia/cuda:13.0.2-devel`, torch 2.13.0/cu130,
   `pip install .` (vLLM IN das Image kompiliert, TORCH_CUDA_ARCH_LIST=12.0), Push nach Harbor
-  `10.1.0.243/inference/vllm-nvfp4:<tag>`. (sm121/Spark dagegen = Source-Mount, vLLM NICHT im Image.)
+  `<registry>/inference/vllm-nvfp4:<tag>`. (sm121/Spark dagegen = Source-Mount, vLLM NICHT im Image.)
 - **Shim-Quelle ohne GitHub-Push:** Shim-Branch ist local-only. Basis `e2a8197a9` (jethac, öffentlich)
   per SHA **gefetcht** (fetch ≠ push), Shim-Diff (54 KB, 7 Dateien) via **ConfigMap** `shim-patch-6b86a309f`
   im Kaniko-initContainer `git apply`. Nichts nach GitHub geschrieben.
@@ -196,7 +196,7 @@ auf fa2-nvfp4-Pfad), `756474a97` Guard #1 (FlashInfer.supports_non_causal), beid
 **E2E-Pfad auf der RTX GEFUNDEN (statt schwachem MTP-Fallback):**
 - Drafter-Blocker gelöst: `z-lab/Qwen3.6-27B-DFlash` (DFlash **v1**, public, ungated, 3.46 GB) passt zu
   meinem Image (DFlash-v1-Support, KEIN DFlash2 in e2a8197a9) UND zur Basis `qwen3.6-27b-prismaaura55`
-  (NVFP4, bereits auf neo26-PVC). Drafter heruntergeladen → `/cache/models/qwen3.6-27b-dflash`.
+  (NVFP4, bereits auf <rtx-node>-PVC). Drafter heruntergeladen → `/cache/models/qwen3.6-27b-dflash`.
 - Ergo: **Qwen3.6 + DFlash-v1 + NVFP4-KV** ist der runnbare Durchbruch-Pfad (non-causal Drafter + 4-bit-KV
   auf EINER Karte). E2E-Job `e2e-dflash-nvfp4` (ns inference) fertig: Overlay → serve (--kv-cache-dtype
   nvfp4, --speculative-config dflash n=15, --kv-cache-memory-bytes, --swap-space 0, 40Gi limit) → e2e_perf.
@@ -218,7 +218,7 @@ Board, DESIGN-NOTES. Cleanup bis 11:00 UTC PFLICHT (Jobs/ConfigMaps weg, GPU fre
 
 ---
 
-## UPDATE 3 — E2E-Fenster 2026-08-21 (~14:00 CEST, RTX5090/neo26, Image `sm120-shim-6b86a309f`)
+## UPDATE 3 — E2E-Fenster 2026-08-21 (~14:00 CEST, RTX5090/<rtx-node>, Image `sm120-shim-6b86a309f`)
 
 **Auftrag:** E2E `e2e-dflash-nvfp4` (DFlash-v1 + NVFP4-KV) memory-fitten + messen. Prod war GitOps-0/0,
 GPU alloc=2 frei. Board Gitea diesmal **erreichbar** (#31 comment 251, #30 comment 252 gepostet).

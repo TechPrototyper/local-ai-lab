@@ -145,7 +145,7 @@
                 "value": "/cache/pip-extra"
               }
             ],
-            "image": "10.1.0.243/inference/vllm-nvfp4:sm120-pc50897-gridbook-088",
+            "image": "<registry>/inference/vllm-nvfp4:sm120-pc50897-gridbook-088",
             "imagePullPolicy": "IfNotPresent",
             "livenessProbe": {
               "failureThreshold": 3,
@@ -240,7 +240,7 @@
               "-c",
               "echo \"Warte auf 570W-Power-Cap (PSU-OCP-Schutz)...\"\ni=0\nwhile [ \"$(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null | cut -d. -f1)\" != \"570\" ]; do\n  i=$((i+1))\n  if [ \"$i\" -ge 42 ]; then\n    echo \"WARNUNG: Cap nach ~3.5 min NICHT auf 570W. Fail-open: vLLM startet trotzdem.\"\n    break\n  fi\n  echo \"  aktuell: $(nvidia-smi --query-gpu=power.limit --format=csv,noheader,nounits 2>/dev/null)W \u2014 warte ($i/42)...\"\n  sleep 5\ndone\necho \"Power-Cap-Check fertig \u2014 vLLM darf starten.\"\n"
             ],
-            "image": "10.1.0.243/inference/vllm-nvfp4:sm120-pc50897-gridbook-088",
+            "image": "<registry>/inference/vllm-nvfp4:sm120-pc50897-gridbook-088",
             "imagePullPolicy": "IfNotPresent",
             "name": "wait-for-power-cap",
             "resources": {
@@ -253,7 +253,7 @@
           }
         ],
         "nodeSelector": {
-          "kubernetes.io/hostname": "neo26"
+          "kubernetes.io/hostname": "<rtx-node>"
         },
         "restartPolicy": "Always",
         "runtimeClassName": "nvidia",

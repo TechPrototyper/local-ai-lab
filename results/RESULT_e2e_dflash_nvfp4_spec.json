@@ -1,8 +1,8 @@
 {
  "kanban": "#31",
  "date": "2026-08-21",
- "node": "neo26 / RTX 5090 / sm120",
- "image": "10.1.0.243/inference/vllm-nvfp4:sm120-shim-6b86a309f",
+ "node": "<rtx-node> / RTX 5090 / sm120",
+ "image": "<registry>/inference/vllm-nvfp4:sm120-shim-6b86a309f",
  "branch": "kernel/nvfp4-noncausal-shim-b",
  "context": "prod vllm-qwen38 GitOps 0/0, GPU free, exclusive, no co-tenant",
  "task": "clear DFlash non-causal drafter-attention seam (dflash.py:335), then measure E2E spec",
@@ -27,7 +27,7 @@
   "pushed": false,
   "note": "predecessor's dflash.py:335 hypothesis was the correct seam; it required TWO lifts (metadata pass-through + forward-side assert), on top of the pre-existing Guard #1 (756474a97 supports_non_causal) and Guard #2 (7c8f60bbf plan causal)."
  },
- "verification_method": "image sm120-shim-6b86a309f + overlays (tv-shim, vpe-fix, vllm-guardlift-overlay incl. both new commits), serve on neo26 (enforce-eager), VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4=1, expandable_segments, kv-cache-dtype nvfp4, kv-cache-memory-bytes 3.0GiB, len4096, mnbt4096, seqs4, dflash n=15, drafter /cache/models/qwen3.6-27b-dflash, base /cache/models/qwen3.6-27b-prismaaura55. Serve manifest committed: vllm-upstream-work/docs/kernel-initiative/e2e-dflash-nvfp4-serve.yaml",
+ "verification_method": "image sm120-shim-6b86a309f + overlays (tv-shim, vpe-fix, vllm-guardlift-overlay incl. both new commits), serve on <rtx-node> (enforce-eager), VLLM_DFLASH_ALLOW_NONCAUSAL_NVFP4=1, expandable_segments, kv-cache-dtype nvfp4, kv-cache-memory-bytes 3.0GiB, len4096, mnbt4096, seqs4, dflash n=15, drafter /cache/models/qwen3.6-27b-dflash, base /cache/models/qwen3.6-27b-prismaaura55. Serve manifest committed: vllm-upstream-work/docs/kernel-initiative/e2e-dflash-nvfp4-serve.yaml",
  "e2e_spec_numbers": {
   "measured": true,
   "mode": "enforce-eager (graph mode blocked; see remaining_blockers[0])",

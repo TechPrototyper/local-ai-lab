@@ -1,6 +1,6 @@
 # Split-KV-Gate: Validierung für unsere eigene Prod-Shape (Spark, sm121)
 
-**Stand 2026-09-08. Alle Tests auf `vllm-prod-nvfp4kv` (Spark/GB10, 10.1.0.229),
+**Stand 2026-09-08. Alle Tests auf `vllm-prod-nvfp4kv` (Spark/GB10, <spark-host>),
 ohne Downtime, ohne einen anderen Container anzufassen (Whisper/Reranker/
 Embedder liefen die ganze Zeit durch).**
 
@@ -10,7 +10,7 @@ Patch live gebracht, echter Container-Restart (kein synthetisches
 Mikrobenchmark mehr): `/vllm-src` in `vllm-prod-nvfp4kv` läuft auf Branch
 `exp/pc50897` (Commit `83a9ef7f4`, nicht `kernel/dflash2-nvfp4-sm120-v2`
 wie zunächst angenommen — separates Spark-residentes Repo
-`/home/timw/nvfp4-work/vllm-dflash2`, von unserem Mac-Checkout entkoppelt).
+`~/nvfp4-work/vllm-dflash2`, von unserem Mac-Checkout entkoppelt).
 Original-Datei vorher gesichert (`/tmp/flashinfer.py.orig-backup-20260908`
 im Container), Patch direkt an der realen Codestelle angebracht (passte
 fast 1:1 auf unsere Referenzimplementierung), Container neu gestartet,

@@ -117,7 +117,7 @@ vor Carry-Patches — Wartbarkeit ist Präferenz, nicht Veto gegen die optimale 
   statt still auf SMTP zu degradieren. `EMAIL_AUTH_MODE=graph` aktiviert (in `~/.hermes/.env`);
   der Auth-Selektor registriert dann nur `GraphEmailAdapter`, die IMAP-`adapter.py` bleibt inaktiv.
 - **LIVE seit 2026-08-31**: Deploy-Checkout `~/.hermes/hermes-agent` steht auf `consolidation`,
-  Konto `hermes1_mac@sjanasek.de` (Token in `~/.hermes/mail_oauth_token.json`). Ein Re-Auth kann
+  Konto `<agent-mailbox>` (Token in `~/.hermes/mail_oauth_token.json`). Ein Re-Auth kann
   nötig werden — Tim: „wenn wir das nochmal testen müssen, so be it."
 - **Achtung Lifecycle:** falls Upstream je einen eigenen Graph-E-Mail-Adapter bringt → keep-both/
   Reconcile wie bei den anderen Carry-Patches.

@@ -10,7 +10,7 @@
   },
   "sm121_gb10": {
     "date_utc": "2026-08-27T00:17-00:45Z",
-    "node": "gx10-a2e4 (GB10, sm121, 128GB unified, ~273 GB/s)",
+    "node": "<spark-host> (GB10, sm121, 128GB unified, ~273 GB/s)",
     "stack": "image vllm-sm121:f4c27c0da (source-mount contract), tree vllm-dflash2-v2exp = prod dflash2 lineage (incl. fp8-drafter fixes) + the four fixes via git am (branch exp/nvfp4-spec-v2), flashinfer prod mount, fresh fi/compile caches",
     "config": {
       "target": "/models/qwen3.8-27b-prismaaqua55",
@@ -96,7 +96,7 @@
     }
   },
   "ops_log": [
-    "02:05 Tim-Freigabe GPUs; prod vllm-qwen38 replicas 0 via git (flux branch test/nvfp4-bugfix-neo26)",
+    "02:05 Tim-Freigabe GPUs; prod vllm-qwen38 replicas 0 via git (flux branch test/nvfp4-bugfix-<rtx-node>)",
     "heslab shutdown in Tim's order vanw02 -> sql -> dc01 (VMs Halted via runStrategy patch), master-boot 0, wg-gateway left up",
     "Spark fleet stopped (vllm-aura38, qwen3-embedder, harrier-embedder, qwen3-reranker, bge-reranker); restore = docker start reverse order + warmup request",
     "01:46-01:50 premature shutdown + full restore (documented mistake; fleet and prod were restored and re-freed at 02:05 by Tim)"

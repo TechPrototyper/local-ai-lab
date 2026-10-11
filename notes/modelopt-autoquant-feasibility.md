@@ -9,7 +9,7 @@ verified). Kanban #13, precursor to the AutoQuantize-vs-AURA head-to-head.
 **Update 2026-08-20 (B1, Kanban #24):** Q1 uniform-FP8 follow-up run — the
 uniform-FP8 ModelOpt export IS accepted by the parity vLLM `modelopt` loader
 (the #13 mixed-export blocker is gone). BUT the confirmatory greedy-generate
-was **not** captured: during the serve run neo26 hard-froze for ~23 min in
+was **not** captured: during the serve run <rtx-node> hard-froze for ~23 min in
 vLLM's KV-cache memory-profiling phase, taking the co-located Talos control
 plane (etcd/apiserver) down with it (~20:13→~20:32 UTC); the serve pod was
 evicted before generation. Prod restored + verified (chat smoke ok,
@@ -28,7 +28,7 @@ compressed-tensors, (4) design a fair paired comparison.
 ## Method
 Single Job in `quant-experiments` (reuses the prismaquant PVCs
 `quant-models`/`quant-results`, image = parity vLLM build, nodeSelector
-neo26, runtimeClass nvidia, gpu:1, activeDeadlineSeconds 5400). Job created
+<rtx-node>, runtimeClass nvidia, gpu:1, activeDeadlineSeconds 5400). Job created
 **suspended**, then `vllm-qwen38` merge-patched replicas 1→0 (NOT scale
 subresource, NOT Flux), then Job **unsuspended** → runs alone on the idle
 5090 (honours the "sequential, not GPU parallelism" rule on a single
@@ -98,21 +98,21 @@ the per-layer MIXED_PRECISION (FP8+AWQ) export. Effective-bits note: the
 5.5 constraint was raised to 8.0 because a single 8-bit format can't reach
 5.5 → the search assigns FP8 everywhere = uniform (documented, intended-path
 adaptation of "formats=[FP8]"). **Caveat — greedy-generate NOT captured:** a
-neo26 node freeze (see INCIDENT) evicted the serve pod before `llm.generate`
+<rtx-node> node freeze (see INCIDENT) evicted the serve pod before `llm.generate`
 returned. A short confirmatory generate remains, gated on Tim + freeze RCA.
 
-**INCIDENT — neo26 node freeze + control-plane outage (2026-08-20 ~20:13–
+**INCIDENT — <rtx-node> node freeze + control-plane outage (2026-08-20 ~20:13–
 20:32 UTC).** The serve pod's log jumps 20:10:33 (weights loaded) → 20:33:24
 (KV cache) — a ~23-min node freeze that began exactly when vLLM entered the
 KV-cache memory-profiling phase (profiling forward pass + 11.88 GiB KV
-reservation). The Talos control plane is co-located on neo26; apiserver
-(10.1.0.138:6443) wedged (TCP open, TLS/request layer blocked on etcd) for
+reservation). The Talos control plane is co-located on <rtx-node>; apiserver
+(<k8s-api>:6443) wedged (TCP open, TLS/request layer blocked on etcd) for
 ~19 min, so `vllm-qwen38` (scaled to 0 for the window) could not be restored
 until the API returned. Self-recovered ~20:32; Flux had already reconciled
 `vllm-qwen38` to replicas 1; chat smoke re-verified. No reboot/talosctl
 (agent-guarded). The earlier combined job — killed before the KV-profiling
 phase — did NOT freeze the node, so the phase correlation is strong. **A
-re-run would re-enter the same phase and may re-freeze neo26 + the control
+re-run would re-enter the same phase and may re-freeze <rtx-node> + the control
 plane; do not repeat unprompted. Root-cause first (system-RAM/IO pressure on
 the etcd-colocated GPU node; consider isolating etcd from the GPU worker).**
 

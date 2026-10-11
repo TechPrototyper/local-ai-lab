@@ -29,8 +29,8 @@
  "meets_100_toks": false,
  "provenance": {
   "date_utc": "2026-08-21T12:42:20.396240Z",
-  "window": "2026-08-21 ~14:00 CEST, RTX5090/neo26, kernel-nvfp4-noncausal initiative (Kanban #31/#30)",
-  "image": "10.1.0.243/inference/vllm-nvfp4:sm120-shim-6b86a309f",
+  "window": "2026-08-21 ~14:00 CEST, RTX5090/<rtx-node>, kernel-nvfp4-noncausal initiative (Kanban #31/#30)",
+  "image": "<registry>/inference/vllm-nvfp4:sm120-shim-6b86a309f",
   "image_lineage": "vLLM e2a8197a9 (jethac spark) + shim-patch 6b86a309f via ConfigMap; torch2.13/cu130; flashinfer 0.6.15; triton 3.6/3.7.1",
   "base_model": "/cache/models/qwen3.6-27b-prismaaura55 (qwen3_5 hybrid GDN, NVFP4 compressed-tensors, vocab 248320, 64 layers, native MTP=1)",
   "kv_cache": "nvfp4 (FlashInfer FA2 NVFP4 backend, SM12x, V-scale deswizzle)",

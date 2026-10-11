@@ -1,7 +1,7 @@
 {
  "_provenance": {
-  "run": "2026-08-20 ~16:45 CEST, RTX 5090 host (Talos node neo26, k8s ns inference); JSON reconstructed verbatim from captured probe-Job stdout",
-  "image": "10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213",
+  "run": "2026-08-20 ~16:45 CEST, RTX 5090 host (Talos node <rtx-node>, k8s ns inference); JSON reconstructed verbatim from captured probe-Job stdout",
+  "image": "<registry>/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213",
   "execution": "model-free reshape_and_cache_flash round-trip in a batch/v1 Job on the freed GPU (vllm-qwen38 scaled 1->0 for the window, restored + /health 200 verified)",
   "probe": "nvfp4_online_hadamard_probe",
   "vllm": "0.1.dev1+gf4c27c0da.d20260818",

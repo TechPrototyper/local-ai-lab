@@ -47,7 +47,7 @@ Metadaten-Bumps (jschmied 08-24 letzter echter Kommentar, „kein Invest"); #508
 - **Update-Modell:** `updates.parked_branch_strategy: update_in_place` in `~/.hermes/config.yaml`
   → `hermes update` merged origin/main IN `consolidation` statt wegzuschalten. Alternativ sauberer
   Rebase im Arbeits-Repo + Fork-Push + Deploy-Pull.
-- **E-Mail:** `EMAIL_AUTH_MODE=graph` in `~/.hermes/.env`; Konto `hermes1_mac@sjanasek.de`, Token
+- **E-Mail:** `EMAIL_AUTH_MODE=graph` in `~/.hermes/.env`; Konto `<agent-mailbox>`, Token
   auto-refreshed. Details/Registry: `notes/carry-patches-registry.md`, Design: `notes/cp5-…`,
   Cutover: `notes/hupdate-v7-and-checkout-convergence.md`. Memory: `hermes-deploy-linie-consolidation`.
 - **Safety-Netze:** Tag `pre-consolidation-cutover-20260831`, Plist/Config/.env-Backups in update-backups.
@@ -55,7 +55,7 @@ Metadaten-Bumps (jschmied 08-24 letzter echter Kommentar, „kein Invest"); #508
   gescheitert, daher Merge-Commit); test1 löschen; LiteLLM-Loop-Breaker deployen (siehe §3).
 
 ## 2) AI-Lab Serving (RTX / Spark)
-- **RTX (sm120, neo26):** drafter-freies **MTP-on-GridBook** primär (624k KV-Pool, McNemar p=0.83,
+- **RTX (sm120, <rtx-node>):** drafter-freies **MTP-on-GridBook** primär (624k KV-Pool, McNemar p=0.83,
   Graph… äh Tool-Batterie grün). Image `sm120-pc50897-gridbook-088`, Checkpoint `gridbook-13gb-mtpfix`.
 - **Spark (sm121):** **AQUA+DFlash2+NVFP4-KV** als Overflow, volle Batterie, **kein Whisper**
   (GridBook-auf-Spark verworfen: ~35% langsamer — `notes/spark-gridbook-eval-2026-08-31.md`).
@@ -98,10 +98,10 @@ angebot ist raus: [#53334 comment 5486190018](https://github.com/vllm-project/vl
   bleibt eigenständig — anderer Quant-Pfad, kein Überlapp, kein „Einreihen" dort.
 
 ## Nacht-Stand 2026-09-01 (Far-Window + Parity)
-**Prod UNANGETASTET** (`vllm-qwen38-mtp-gridbook` 1/1 auf neo26). Ich habe Prod
-bewusst NICHT gekippt: Cluster ist single-node neo26, DGX/Spark läuft extern, und
+**Prod UNANGETASTET** (`vllm-qwen38-mtp-gridbook` 1/1 auf <rtx-node>). Ich habe Prod
+bewusst NICHT gekippt: Cluster ist single-node <rtx-node>, DGX/Spark läuft extern, und
 der saubere Failover war nachts nicht sicher verifizierbar (LiteLLM-Endpunkte
-zeigten auf 10.1.0.229/10.1.0.190 — kein eindeutiger separater DGX-Endpunkt
+zeigten auf <spark-host>/<lan-host> — kein eindeutiger separater DGX-Endpunkt
 erkennbar). Blinder Scale-to-0 = Risiko Total-Ausfall über Nacht → gestoppt.
 Lektion als Memory [[rtx-erst-runter-dann-arbeiten]] hinterlegt.
 - **Startklar für supervised Morgen-Lauf:** `scripts/farwindow/RUNBOOK.md`
@@ -331,7 +331,7 @@ Deploy bewusst gegatet. Details: Memory [[qwen38-tool-loop-rootcauses]] (§2026-
   liftbar nach E2E-Validierung). Harness im Post eingebettet
   (`scripts/kvsweep/nvfp4_splitkv_ladder.py`), Rohdaten
   `results/nvfp4-splitkv-ladder-2026-09-03.tgz`. Angebot erneuert:
-  Patch-Validierung sm120+sm121 binnen eines Tages. neo26-Lärm-Check davor:
+  Patch-Validierung sm120+sm121 binnen eines Tages. <rtx-node>-Lärm-Check davor:
   alles grün (Load 1,9 / 28 °C / GPU 5 W / Lüfter <1000 RPM) — Verdacht
   Mechanik/Spindel, remote nicht weiter diagnostizierbar.
 
@@ -989,7 +989,7 @@ hochgezogen.** Arbeits-Repo: `~/Projects/vllm-upstream-work`.
   liegen**; Re-Rollout nur mit DFlash-Fix + Durchsatz ≥ alt (Task #9).
 
 ### Spark-Incident 09-02 ~18:00 UTC (Prod-Ausfallfenster ~15 min)
-- `vllm-prod-nvfp4kv` auf gx10 (10.1.0.229) crashte mit
+- `vllm-prod-nvfp4kv` auf gx10 (<spark-host>) crashte mit
   **`CUBLAS_STATUS_INTERNAL_ERROR`** in einem bf16-GEMM (`cublasGemmEx`,
   CUDA_R_16BF) — mitten in einem **64k-Token-Long-Context-Request mit
   DFlash-Spec-Decode (num_spec_tokens=7)**, kv_cache_usage nur 14%.

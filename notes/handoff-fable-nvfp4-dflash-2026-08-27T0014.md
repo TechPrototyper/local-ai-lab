@@ -54,7 +54,7 @@ Kontext, den Tim mitgeschickt hat: DFlash-v1 (Qwen3.6-27B) und DFlash2 (Qwen3.8-
 2. **VocabParallelEmbedding tp==1 OOB-Bug** — Spec-Decode-Padding-Token-ID `-1` wird ungemaskt in `F.embedding` gereicht (out-of-bounds).
 3. **NVFP4-Dequant-Referenz vs. Store-Kernel-Scale-Layout** — die Dequant-Hilfe muss dem Scale-Layout des Store-Kernels entsprechen (K linear geschrieben; V nur auf CC<12 swizzled, auf sm12x linear).
 
-> ❓ **OFFEN für Fable:** Der exakte Mail-Wortlaut liegt im Sitzungstranskript, nicht im Repo. Falls du ihn 1:1 brauchst: `/Users/timw/.claude/projects/-Users-timw-Projects-local-ai-lab/4191a373-12a2-45cd-b71a-486a340d1603.jsonl`. Die drei Punkte oben sind die verifizierte Substanz.
+> ❓ **OFFEN für Fable:** Der exakte Mail-Wortlaut liegt im Sitzungstranskript, nicht im Repo. Falls du ihn 1:1 brauchst: `~/.claude/projects/-Users-timw-Projects-local-ai-lab/4191a373-12a2-45cd-b71a-486a340d1603.jsonl`. Die drei Punkte oben sind die verifizierte Substanz.
 
 ---
 

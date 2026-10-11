@@ -11,7 +11,7 @@ not just the GB10.*
   (EAGLE/successor-aware prefix-cache hashing) **∪ the jethac SWA guard**
   (`61f980bb5`). Python-only overlay onto the compiled v4 base — no kernel
   recompile. Tag `sm120-v4-pc50897-guard-61f980bb-v2`.
-- **Serve (neo26 / RTX 5090):** `scout-aqua-20gb` target + `qwen3.8-27b-dflash2`
+- **Serve (<rtx-node> / RTX 5090):** `scout-aqua-20gb` target + `qwen3.8-27b-dflash2`
   drafter (DFlash2 spec, 7 tokens), **fp8 KV**, prefix caching on, 8k ctx.
 - **Probe:** the same long (~250-fact) prefix sent repeatedly; read the
   engine's prefix-cache hit rate and spec metrics.
@@ -55,5 +55,5 @@ or the Option-2 symmetric-mask fix before it can serve.
 ## Provenance
 
 - Metrics: [`results/sm120_pc50897_metrics.txt`](../results/sm120_pc50897_metrics.txt)
-- Image build: kaniko overlay on `sm120-v4-2cf8b8a` base, in-cluster (neo26).
+- Image build: kaniko overlay on `sm120-v4-2cf8b8a` base, in-cluster (<rtx-node>).
 - Companion sm121 validation: [`night-2026-08-28-pc50897-scout-h2h.md`](night-2026-08-28-pc50897-scout-h2h.md)

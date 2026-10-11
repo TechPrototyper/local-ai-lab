@@ -1,9 +1,9 @@
 {
   "task": "B1 (follow-up #24) — uniform-FP8 ModelOpt AutoQuantize export served under parity vLLM; positively close Q1 of the #13 spike",
   "date": "2026-08-20",
-  "host": "neo26 / RTX 5090 (sm120), single physical card time-sliced",
+  "host": "<rtx-node> / RTX 5090 (sm120), single physical card time-sliced",
   "env": {
-    "image": "10.1.0.243/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213",
+    "image": "<registry>/inference/vllm-nvfp4:sm120-nvfp4-f4c27c0da-t213",
     "vllm": "0.1.dev1+gf4c27c0da.d20260818 (parity build)",
     "torch_before": "2.13.0+cu130",
     "torch_after": "2.13.0+cu130 (NOT clobbered by modelopt install)",
@@ -57,11 +57,11 @@
   "operational_notes": {
     "multiproc_spawn_guard": "First (combined) run failed only operationally: vLLM V1 EngineCore uses multiprocessing spawn, which re-imports the driver module; the unguarded top-level driver re-ran auto_quantize in the spawned child then raised the 'start a new process before bootstrapping' RuntimeError. Fix: run vLLM under `if __name__=='__main__'` + VLLM_ENABLE_V1_MULTIPROCESSING=0. quant+export had already succeeded in that run.",
     "INCIDENT_node_freeze": {
-      "what": "neo26 hard-froze ~23 min: serve pod log advances 20:10:33 (weights loaded) -> 20:33:24 (KV cache) with a 23-min gap; the co-located Talos control plane (etcd/apiserver on 10.1.0.138:6443) was unreachable 20:12:58 -> ~20:32:30 (TCP :6443 open, TLS/request layer wedged = apiserver blocked on etcd).",
+      "what": "<rtx-node> hard-froze ~23 min: serve pod log advances 20:10:33 (weights loaded) -> 20:33:24 (KV cache) with a 23-min gap; the co-located Talos control plane (etcd/apiserver on <k8s-api>:6443) was unreachable 20:12:58 -> ~20:32:30 (TCP :6443 open, TLS/request layer wedged = apiserver blocked on etcd).",
       "correlation": "Froze exactly when vLLM entered the KV-cache memory-profiling phase (gpu_worker profiling forward pass + 11.88 GiB KV reservation). The earlier combined job, killed before this phase, did NOT freeze the node.",
       "impact": "vllm-qwen38 was at replicas=0 (my scale-down) during the outage; could not be restored until API returned. No reboot/talosctl performed (guarded). Control plane self-recovered ~20:32; Flux had already reconciled vllm-qwen38 back to replicas=1.",
-      "risk": "A confirmatory serve re-run would re-enter the same KV-profiling phase and may re-freeze neo26 + the co-located control plane. NOT attempted unprompted.",
-      "open_question": "Root-cause the neo26 freeze during vLLM KV-cache profiling (system-RAM/IO pressure on the etcd-colocated node?) BEFORE any further RTX serve jobs; consider isolating etcd from the GPU worker."
+      "risk": "A confirmatory serve re-run would re-enter the same KV-profiling phase and may re-freeze <rtx-node> + the co-located control plane. NOT attempted unprompted.",
+      "open_question": "Root-cause the <rtx-node> freeze during vLLM KV-cache profiling (system-RAM/IO pressure on the etcd-colocated node?) BEFORE any further RTX serve jobs; consider isolating etcd from the GPU worker."
     }
   },
   "status": "Q1 POSITIVELY CLOSED for load/serve-acceptance (uniform FP8 modelopt export IS accepted by parity vLLM); greedy-generate deferred pending Tim go/no-go due to node-freeze incident.",

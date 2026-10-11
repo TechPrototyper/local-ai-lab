@@ -288,7 +288,7 @@ das `ready`-Label. Weiter „durchziehen wie besprochen".
 
 ## §9 · Beschlossen (Tim, 27.08.): Zwei Vorhaben, sobald GPUs frei
 
-**Auf dem Board angelegt** (Gitea `gitadmin/AIResearchAndDevelopment`, Zugriff jetzt
+**Auf dem Board angelegt** (Gitea `<internal-board>`, Zugriff jetzt
 scriptbar via scoped Token `~/.config/gitea/token`, write:issue+read:repository):
 **#40** (50897-Validierung) und **#41** (jschmied-Allianz), beide `status/ready`;
 Lage-Update als Kommentar 378 auf #38. Inhalt:

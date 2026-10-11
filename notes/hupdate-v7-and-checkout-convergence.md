@@ -38,13 +38,13 @@ Erst die Checkout-Situation klären, DANN wird `consolidation` die Deploy-Linie.
   fremder SMTP". Als **CP-6** in die Carry-Patch-Registry aufgenommen (Commit `82ef37a4d4`).
 - **Fork-Push:** `fork`=TechPrototyper/hermes-agent zu `hermes-agent` hinzugefügt; `consolidation`
   → `fork/consolidation` gepusht (Tracking gesetzt). 7 Commits über origin/main.
-- **Deploy-Repo:** v7-Vorschlag `HERMES_REPO` → `/Users/timw/Projects/hermes-agent` gesetzt (TODO raus).
+- **Deploy-Repo:** v7-Vorschlag `HERMES_REPO` → `~/Projects/hermes-agent` gesetzt (TODO raus).
   v7 bleibt Vorschlag; Aktivierung (`mv hupdate.v7.proposed.sh hupdate.sh`) + test1-Ablösung pendent.
 
 ## CUTOVER VOLLZOGEN (2026-08-31, Tims Go „Stell um, vorwärts")
 - **v7 scharf**: `~/.hermes/bin/hupdate.sh` = v7 (v6 gesichert als `hupdate.v6.bak`). `HERMES_REPO`
-  → `/Users/timw/Projects/hermes-agent`. `bash -n` grün, Banner „live seit 2026-08-31".
-- **Graph-E-Mail produktiv-bewährt** (Tim): Konto `hermes1_mac@sjanasek.de`, sendet täglich,
+  → `~/Projects/hermes-agent`. `bash -n` grün, Banner „live seit 2026-08-31".
+- **Graph-E-Mail produktiv-bewährt** (Tim): Konto `<agent-mailbox>`, sendet täglich,
   empfängt. consolidations `graph_adapter.py` ist **byte-identisch** zur laufenden test1-Version
   → kein Regressionsrisiko. Kein separater Smoke nötig.
 - **„Nichts verlieren" verifiziert:** alle Graph-Live-Daten liegen in `~/.hermes`

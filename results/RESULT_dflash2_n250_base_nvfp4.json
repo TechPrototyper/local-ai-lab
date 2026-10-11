@@ -1,7 +1,7 @@
 {
  "experiment": "DFlash2 paired quality gate n=250 (GSM8K, greedy, deterministic)",
  "pass": "PM pre-night2 (Session A) \u2014 executed 2026-08-20 ~16:37\u201318:00 CEST, ahead of the 01:30 night2-gate.sh window",
- "host": "gx10-a2e4 / 10.1.0.229 (DGX Spark, GB10, sm121)",
+ "host": "<spark-host> / <spark-host> (DGX Spark, GB10, sm121)",
  "model": "qwen3.8-27b (prismaaqua55, dense 27B)",
  "image": "vllm-sm121:f4c27c0da",
  "vllm_branch": "dflash2-sm121 @ e24d26638 (f4c27c0da + DFlash2 cherry-picks vllm#52816/#52883 + shim)",

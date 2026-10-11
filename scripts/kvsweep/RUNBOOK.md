@@ -30,7 +30,7 @@ Notebook.
    Dauer grob: die 8×262k-Prefills dominieren (~Minuten pro Run) — Budget
    1–2 h. Bei Zeitdruck: `--runs 4` und 262144 zuerst messen.
 4. Optional zweiter Arm: Spark/AQUA+DFlash (gleiches Script gegen
-   10.1.0.229:8000 — dann aber SPARK-Flag-Logik umgekehrt planen; nur wenn
+   <spark-host>:8000 — dann aber SPARK-Flag-Logik umgekehrt planen; nur wenn
    Zeit und beide Seiten je einmal einzeln tragen können).
 5. JSON einsammeln (`kubectl cp`), nach `results/` legen, Teardown:
    `RTX_DOWN=0`, Verifikations-Completion.

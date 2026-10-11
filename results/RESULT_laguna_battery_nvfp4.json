@@ -1,7 +1,7 @@
 {
  "label": "nvfp4",
  "model": "poolside/Laguna-S-2.1-NVFP4",
- "endpoint": "http://10.1.0.229:8000/v1",
+ "endpoint": "http://<spark-host>:8000/v1",
  "started": "2026-08-01 09:46:29",
  "modules": [
   "coding",

@@ -1,16 +1,16 @@
 # Far-Window First-Pass — Morgen-Runbook (supervised)
 
 **Scope:** Extended-Window **Needle + Determinismus** First-Pass auf GridBook-13GB,
-exklusiv neo26, `max-model-len 524288`, single-seq. **NICHT** das Verdikt-tier
+exklusiv <rtx-node>, `max-model-len 524288`, single-seq. **NICHT** das Verdikt-tier
 Qualitäts-Gate (das braucht echtes Long-Doc-Set + Referenz + gepaarte Wertung).
 
 **Regel (Memory `rtx-erst-runter-dann-arbeiten`): ZUERST RTX runter, dann arbeiten.**
 
 ## 0) Vorbedingung — DGX/Spark-Failover verifizieren (VOR dem Kippen!)
 ```
-curl -s http://10.1.0.240:4000/health -H "Authorization: Bearer $LLKEY" | jq '.healthy_endpoints|length'
-# sicherstellen: es gibt einen gesunden qwen3.8-27b-Endpunkt, der NICHT neo26/RTX ist.
-# (Heute Nacht NICHT sicher verifizierbar gewesen — Cluster ist single-node neo26,
+curl -s http://<gateway-host>:4000/health -H "Authorization: Bearer $LLKEY" | jq '.healthy_endpoints|length'
+# sicherstellen: es gibt einen gesunden qwen3.8-27b-Endpunkt, der NICHT <rtx-node>/RTX ist.
+# (Heute Nacht NICHT sicher verifizierbar gewesen — Cluster ist single-node <rtx-node>,
 #  DGX läuft extern; Topologie mit Tim klären, bevor Prod auf 0 geht.)
 ```
 
@@ -18,7 +18,7 @@ curl -s http://10.1.0.240:4000/health -H "Authorization: Bearer $LLKEY" | jq '.h
 ```
 kubectl -n inference scale deploy vllm-qwen38-mtp-gridbook --replicas=0
 kubectl -n inference rollout status deploy vllm-qwen38-mtp-gridbook --timeout=200s || true
-# verifizieren: Inferenz läuft weiter über DGX (kurzer Test-Call an LiteLLM 10.1.0.240:4000)
+# verifizieren: Inferenz läuft weiter über DGX (kurzer Test-Call an LiteLLM <gateway-host>:4000)
 ```
 
 ## 2) Safety-Net-Restore setzen (Rückfallnetz, unabhängig von der Session)

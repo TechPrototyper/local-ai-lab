@@ -1,7 +1,7 @@
 {
   "spike": "NVIDIA Model-Optimizer AutoQuantize feasibility (Kanban #13, precursor to AURA head-to-head)",
   "date": "2026-08-20",
-  "host": "neo26 / RTX 5090 (sm120, 32GB, single physical card time-sliced x2)",
+  "host": "<rtx-node> / RTX 5090 (sm120, 32GB, single physical card time-sliced x2)",
   "env": {
     "vllm": "0.1.dev1+gf4c27c0da.d20260818 (parity build)",
     "torch": "2.13.0+cu130",
