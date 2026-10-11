@@ -4,6 +4,12 @@ My personal lab notebook: making local AI **measurably** excellent on hardware
 people actually own. Spare-time research on my own machines — this repo tracks
 what I tried, what I measured, and where it led.
 
+**Try it in two minutes** (RTX 5090): our production serve as one image —
+Qwen3.8-27B GridBook 13 GB with vision, NVFP4 KV, 262k context.
+`docker run … ghcr.io/techprototyper/vllm-sm12x:sm120-stock-7d0b4e57` →
+[copy-paste command](containers/stock-nightly/README.md#quickstart-pull-and-run-rtx-5090-sm120).
+DGX Spark / GB10 image follows.
+
 **Start here.** One stack, top to bottom: the serving engine measured to
 a verdict ([framing](#the-framing), [findings](#findings-so-far)) · the
 same serve as Kubernetes objects, Flux-managed, with the gateway that makes

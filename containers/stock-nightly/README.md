@@ -13,15 +13,70 @@ source build anymore:
 | `gridbook==0.8.8` (RTX only) | [RobTand/gridbook](https://github.com/RobTand/gridbook) vLLM plugin | serves the 13 GB GridBook checkpoint; works unchanged on stock vLLM |
 | [`verify.py`](verify.py) | runs at build time | fails the build if the wrapper or the patch is missing |
 
+
+## Quickstart: pull and run (RTX 5090, sm120)
+
+Ready-made image on GHCR, CUDA headers for GridBook's JIT build included:
+
+```bash
+docker run --gpus all --ipc=host -p 8000:8000 \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  -v ~/.cache/vllm-sm120:/root/.cache/vllm-sm120 \
+  -e PRISMAQUANT_CB_EXT_DIR=/root/.cache/vllm-sm120/gridbook-ext \
+  -e FLASHINFER_WORKSPACE_BASE=/root/.cache/vllm-sm120/flashinfer \
+  -e VLLM_NVFP4_KV_SPLIT_KV=1 \
+  ghcr.io/techprototyper/vllm-sm12x:sm120-stock-7d0b4e57 \
+  --model TechPrototyper/Qwen3.8-27B-GridBook-13GB-vision-abliterated-vllm \
+  --served-model-name qwen3.8-27b --trust-remote-code \
+  --kv-cache-dtype nvfp4 --attention-backend FLASHINFER \
+  --attention-config '{"use_trtllm_attention": false}' \
+  --max-model-len 262144 --max-num-seqs 8 --block-size 32 \
+  --gpu-memory-utilization 0.97 \
+  --enable-prefix-caching --enable-chunked-prefill --max-num-batched-tokens 4096 \
+  --compilation-config '{"cudagraph_capture_sizes": [1, 2, 4]}' --async-scheduling \
+  --limit-mm-per-prompt '{"image": 2, "video": 0}' \
+  --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3 \
+  --generation-config vllm \
+  --override-generation-config '{"temperature":1.0,"top_p":0.95,"top_k":20}'
+```
+
+Then talk to it like any OpenAI endpoint:
+
+```bash
+curl -s localhost:8000/v1/chat/completions -H 'Content-Type: application/json' \
+  -d '{"model":"qwen3.8-27b","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+- **First start takes a while:** ~14 GB of weights download, and GridBook
+  compiles its CUDA extension for your card. The two cache mounts make every
+  later start fast (~30 s).
+- **`--gpu-memory-utilization 0.97`** assumes the card runs nothing else. If
+  your desktop draws on the same GPU, start at 0.90; the KV pool shrinks
+  accordingly (it's printed at start as `GPU KV cache size`).
+- **Expect:** a ~765k-token KV pool at 262k context, ~59 tok/s single stream,
+  ~153 tok/s across four streams, image input on.
+- **What's inside:** the exact layers this lab serves in production, plus one
+  layer with the CUDA library headers (verified: GridBook's extension
+  compiles with them and fails with `cusparse.h: No such file` without).
+  Production loads the same weights from a local copy, not from the Hub ID.
+- **A non-abliterated base:** [rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm)
+  (text only, no vision tower).
+
+**DGX Spark / GB10 (sm121, arm64):** image follows shortly, built from the
+same directory, with the Gemma-4 quickstart. Until then: build it yourself
+with the command below.
+
+## Build it yourself
+
+This directory is the complete build context. Build time is minutes, not
+hours.
+
 ```bash
 # GB10 / DGX Spark (sm121, arm64)
 docker build --platform linux/arm64 -t vllm-stock-nightly:gb10 .
 # RTX 5090 (sm120, amd64)
 docker build --platform linux/amd64 --build-arg GRIDBOOK_VERSION=0.8.8 -t vllm-stock-nightly:rtx .
 ```
-
-The images are not on GHCR yet; this directory is the complete build
-context. Build time is minutes, not hours.
 
 ## Serve: Gemma-4-31B on the GB10 (German, vision, MTP)
 
