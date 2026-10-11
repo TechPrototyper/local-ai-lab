@@ -19,101 +19,83 @@ optimize *that* — not the technology you happen to like:
 
 | Box | Bottleneck order | Consequence |
 |---|---|---|
-| [**RTX 5090**](nodes/rtx-5090.md) (32 GB consumer GPU) | quality → **memory** → speed | 4-bit KV cache (NVFP4) buys ~4× context; since 2026-08-22/27 speculation **no longer forces fp8 KV** — the non-causal seam serves DFlash2 (block-diffusion speculative decoding: a small drafter proposes, the target model verifies — output-identical by construction) over NVFP4 pages and is filed upstream ([#53977](https://github.com/vllm-project/vllm/pull/53977)/[#53978](https://github.com/vllm-project/vllm/pull/53978)/[#53979](https://github.com/vllm-project/vllm/pull/53979)). The last blocker — prefix caching got 0% hits under spec+hybrid-GDN — **fell on 2026-08-28**: [vllm#50897](https://github.com/vllm-project/vllm/pull/50897) ported and validated on this line (0 → 90.9% replay hits, byte-identical; [note](notes/night-2026-08-28-pc50897-scout-h2h.md)). On 2026-08-29 the fix was confirmed **on this card under live speculation** (hit rate 0 → 48.7% and climbing), and the 13 GB GridBook line was measured end to end — **898,037 tokens of KV pool** at verdict-tier quality (see Findings). The serving default here stays no-spec while the NVFP4-KV × SWA-drafter kernel-parity question is settled upstream ([`notes/dflash2-nvfp4-sm120-spec-serves.md`](notes/dflash2-nvfp4-sm120-spec-serves.md) · [`notes/gridbook-nvfp4-dflash2-rtx-triad.md`](notes/gridbook-nvfp4-dflash2-rtx-triad.md)) |
-| [**DGX Spark / GB10**](nodes/dgx-spark-gb10.md) (128 GB unified) | quality → **speed** → memory | memory is abundant, so it is spent on long context, throughput — and since 2026-08-21 on **speed via DFlash2 speculation in production** (draft length 7, 262k — and since **2026-08-29** on **NVFP4 KV**, verdict-backed: ≡ fp8 at n=1319 *and* at speed parity, for a 775,766-token pool) — and since **2026-08-28** the prefix cache under speculation actually *hits*: the #50897 fix serves in production here, 90.0% cache reuse on a 12.8k-token replay ([note](notes/night-2026-08-28-pc50897-scout-h2h.md)): every gate passed at verdict level, ~4× single-stream on reasoning traffic, up to ~227 tok/s aggregate ([`notes/dflash2-full-split-verdict.md`](notes/dflash2-full-split-verdict.md) · [recipe](recipes/dgx-spark-sm121.md)). MTP stays off for the record ([`notes/mtp-tool-calling.md`](notes/mtp-tool-calling.md)) |
+| [**RTX 5090**](nodes/rtx-5090.md) (32 GB consumer GPU) | quality → **memory** → speed | 13 GB weights ([GridBook](https://github.com/RobTand/gridbook)) + 4-bit KV cache (NVFP4) leave room for a **765k-token pool** at 262k context and eight parallel agents. Speculation is off: on 32 GB, draft weights compete with context, and the agent tier lives on context and the prefix cache. |
+| [**DGX Spark / GB10**](nodes/dgx-spark-gb10.md) (128 GB unified) | quality → **memory discipline** → speed | Unified memory is shared by the main LLM *and* a fleet of embedders, rerankers and transcribers. CUDA allocates only from physically free memory, and cgroup caps don't see it. So memory is a budget, pinned per service, not left to `gpu-memory-utilization`. Speed comes from MTP (the model's own drafter, n=4). |
 
-Same model (Qwen3.8-27B), same quantization toolchain (Robert Tand's
-PrismaQuant; "AQUA" is its mixed-precision NVFP4+FP8 production export) —
-opposite settings, each derived from measurement rather than habit. Each box name links to a node profile:
-what it runs in production, why those models, and what it is used for
-when it isn't running experiments. How the boxes hang together —
-cluster, switch, bridge host — is sketched in
-[`nodes/homelab.md`](nodes/homelab.md).
+## What runs now (2026-10-11)
 
-**Run this stack yourself:** the serving containers are public —
-[`ghcr.io/techprototyper/vllm-sm12x`](https://github.com/users/TechPrototyper/packages/container/package/vllm-sm12x).
-For the GB10, tag `sm121-dflash2-pc50897-dd02ed4d` is the 2026-08-28
-production state (DFlash2 + FlashInfer + warm caches baked, **including the
-#50897 prefix-cache fix**; no source mounts). Production has since moved to
-NVFP4-KV, which that image does not yet carry — the current state serves via
-the validated source-tree path while a refreshed image is queued. Image
-roster, provenance and build recipe: [`containers/`](containers/); per-box
-serve commands: [`recipes/`](recipes/). The sm120 (RTX) images are public
-too: `sm120-nvfp4-e2446da2-prod` (the production line) and
-`sm120-v4-2cf8b8a-validation` (the exact reproduction image for the vLLM
-upstream PRs #53977/#53978/#53979).
+| Box | Model | Serving stack | KV pool | Gates |
+|---|---|---|---|---|
+| RTX 5090 | **Qwen3.8-27B GridBook-13GB + BF16 vision tower, abliterated in format** ([HF](https://huggingface.co/TechPrototyper/Qwen3.8-27B-GridBook-13GB-vision-abliterated-vllm)) | stock vLLM nightly + FlashInfer 0.7.1 + GridBook plugin, NVFP4 KV, no spec | 765,668 tokens · 8 seqs | vision, tools 5/5, needle, determinism 5/5 |
+| GB10 | **Gemma-4-31B-IT PrismaQuant 6-bit, abliterated in format** ([HF](https://huggingface.co/TechPrototyper/Gemma4-31B-IT-PrismaQuant-6bit-abliterated-vllm)) — the German model | stock vLLM nightly + FlashInfer 0.7.1 + [vllm#46558](https://github.com/vllm-project/vllm/pull/46558), NVFP4 KV, MTP n=4 | 398,934 tokens (temporarily; target 524,903 = 2 × 256k) | vision 3/3, German 9/12, tools, needle 3/3, determinism 5/5 |
+
+How we got here, in three chapters:
+
+1. **[Making it boring](notes/making-it-boring-sep-2026.md)** (September):
+   the August measurements turned into two serves that stay up. Vision tower
+   reattached to GridBook, Gemma-4 with MTP as the German model, KV pools
+   pinned, a fleet incident that produced the drift checker.
+2. **[Abliteration in format](notes/abliteration-in-format-2026-10.md)**
+   (early October): both production models abliterated *inside* their existing
+   quantization. Only the residual-writing matrices are transplanted from
+   Heretic-ARA donors onto the frozen production grid; the file size is the
+   same, and every other tensor stays bit-identical. Hard refusals 100 → 36
+   (Gemma) and 100 → 29 (Qwen), primary gates held.
+3. **[Off the fork](notes/vllm-stock-nightly-migration-2026-10.md)**
+   (2026-10-11): from a hand-assembled vLLM with up to thirteen carried patch
+   lines to an unmodified nightly + one cherry-pick. Prefill +29 to +68 % at
+   long context on the GB10, KV pools unchanged or larger — plus an afternoon
+   of wedges that taught us more about unified memory than the whole summer.
+
+Each box name links to a node profile: what it runs in production, why those
+models, and what it is used for when it isn't running experiments. How the
+boxes hang together — the cluster, the GB10, the bridge host, and the
+nodes being added — is sketched in [`nodes/homelab.md`](nodes/homelab.md).
+
+**Run this stack yourself:** the production image is a thin layer over the
+public vLLM nightly; build context and serve commands for both boxes are in
+[`containers/stock-nightly/`](containers/stock-nightly/). The August carry-line
+images stay on GHCR for reproducing the older findings ([`containers/`](containers/)).
 
 ## Next up
 
 The working set — what this lab is measuring next. Updated whenever work
-moves (last: **2026-08-29**); items graduate into Findings when the numbers
+moves (last: **2026-10-11**); items graduate into Findings when the numbers
 are in.
 
-- **Shepherd the vLLM upstream package** — three stacked PRs to vLLM (the
-  inference engine this lab serves with):
-  [#53977](https://github.com/vllm-project/vllm/pull/53977) /
-  [#53978](https://github.com/vllm-project/vllm/pull/53978) /
-  [#53979](https://github.com/vllm-project/vllm/pull/53979) through review
-  (the seam PR is stacked on #46329 with a fold-in offer to its author).
-  *Goal: the non-causal-NVFP4 chapter lands upstream, not just here.*
-- **Prefix caching × speculation × hybrid GDN** (GDN: the Qwen
-  architecture's linear-attention layers, interleaved with full attention) —
-  the one gap between
-  "the triad composes" and "the triad serves the agent tier". Two upstream
-  candidates now: [vllm#52244](https://github.com/vllm-project/vllm/pull/52244)
-  (stalled on a rebase) and
-  [vllm#50897](https://github.com/vllm-project/vllm/pull/50897), which its
-  own thread calls the more proper fix — an independent GB10 datapoint there
-  shows it moving cases #52244 leaves untouched. **Ported and validated
-  (2026-08-28)**: on our DFlash2×NVFP4 line, exact-replay cache hits go
-  0 → 11,648/12,812 (90.9%) on sm120 *and* sm121 — identical to the token —
-  with cold-vs-replayed completions byte-identical on every arm
-  ([note](notes/night-2026-08-28-pc50897-scout-h2h.md) ·
-  [raw](results/RESULT_pc50897_replay_probe.json)). The full validation is
-  [posted in the PR thread](https://github.com/vllm-project/vllm/pull/50897#issuecomment-5448682111);
-  remaining: the PR itself needs its rebase upstream. *Goal: turn the 08-24 cache-vs-speculation rollback (internally:
-  "Entscheidung B") from a forced choice into an operator tradeoff.*
-- **NVFP4-KV cutover decision on the GB10** — spec + NVFP4-KV serves on
-  sm121; ≈2× KV pool vs fp8 at the same budget. **Verdict-tier gate cleared
-  (2026-08-29)**: NVFP4-KV ≡ fp8-KV at n=1319 (p=0.77) *and* at perf-harness
-  speed parity, at half the KV memory — see Findings. On these numbers the
-  cutover would appear safe; the operational rollout (an image carrying both
-  the KV path and the spec seam) is its own step. *The pool, without paying
-  quality — the quality side reads clear.*
-- **Completing the 13 GB serving picture on the 32 GB card** — the quality
-  case closed on 2026-08-29 (n=1319: 0.9757, identical to both larger
-  artifacts; see Findings), and the serving map is measured. What separates
-  that state from the configuration this lab is actually after — verdict-tier
-  weights, the ~900k-token KV pool, a working prefix cache, *and* speculation
-  that pays on every workload — is now in active work: **a DFlash2 drafter
-  tuned on the GridBook distribution** (prose acceptance measured at 24% vs
-  ~54% on the drafter's original target — the one piece where speed is still
-  left on the table), the **kernel-parity test** for non-causal + sliding-window
-  attention on the FA2-NVFP4 path (what keeps NVFP4-KV and speculation apart
-  today, per the #53979 review), and a **far-window quality pass** on the
-  ~900k config. Every step keeps the same bar: no measurable quality loss,
-  paired statistics, raw data published. The 13 GB artifact itself is public:
-  [`rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm`](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaAQUA-gridbook-13GB-5080-vllm).
-  *Goal: the complete measured configuration for Qwen3.8-27B on a consumer
-  32 GB card — weights, cache, context, and speed, with nothing traded away.*
-- **PrismaScout-AQUA-20GB head-to-head** — rdtand published a
-  [20 GB AQUA export of Qwen3.8-27B](https://huggingface.co/rdtand/Qwen3.8-27B-PrismaScout-AQUA-20GB)
-  (19.97 GB verified; stock compressed-tensors, no plugin needed) — 3.4 GiB
-  below our serving 5.5-bpp AQUA export. On a 32 GiB card that difference is KV
-  pool. **Screening passed (2026-08-28)**: paired n=250 greedy, identical
-  config both arms — GSM 0.9720 vs 0.9720, discordants 2:2, McNemar p=1.0,
-  and the smaller artifact is ~10% *faster* (74.3 vs 67.4 tok/s single,
-  272.7 vs 247.5 at c=8). At prod shape (0.97/262k, NVFP4 KV) the pool goes
-  342,604 → **477,569 tokens (+39.4%)**
-  ([note](notes/night-2026-08-28-pc50897-scout-h2h.md)). **Verdict in
-  (2026-08-29)**: n=1319 gives 0.9757 vs 0.9757, McNemar p=1.0 — no
-  detectable difference at verdict tier (see Findings). *The same quality
-  bar, 3.4 GiB more context — on these numbers a production switch would
-  look justified.*
-- **Cross-method mixed-precision comparison**: AURA (KL-Fisher allocation)
-  vs. NVIDIA Model-Optimizer AutoQuantize (gradient/KL knapsack) —
-  feasibility spike first (checkpoint-format gap), then a paired
-  head-to-head. *Goal: quality per bit, method-level.*
+- **Restore the GB10's full KV pool.** Both Whisper transcribers are back in
+  the fleet for an application that needs them. Until that application
+  moves, Gemma runs with 398,934 instead of 524,903 tokens, so the memory
+  reserve sits well above the OOM threshold. *Goal: 2 × 256k again, with the
+  same reserve.*
+- **Finish measuring the new base.** RTX: CUDA-graph capture [1,2,4,8], without
+  the split-KV plugin, XQA decode ([vllm#60452](https://github.com/vllm-project/vllm/pull/60452)),
+  and an idle re-measure of the −4 % at eight streams. GB10: an image at
+  200k context, several images per prompt, MTP acceptance on image answers.
+  Then speculation on the new base, re-evaluated (RTX MTP k=1/2, GB10 draft
+  length). *Goal: every regression either explained or gone.*
+- **Shrink the patch stack to zero.** The only cherry-pick left is
+  [vllm#46558](https://github.com/vllm-project/vllm/pull/46558); the
+  FlashInfer swap drops out with [vllm#60948](https://github.com/vllm-project/vllm/pull/60948).
+  CUDA headers get baked into the RTX image; GridBook 0.9.1 gets measured
+  separately. *Goal: `docker pull` of an official image plus one plugin.*
+- **Abliteration, second pass.** Free scales (re-fitting the frozen scale
+  plane) are untried; Qwen's vision gate needs a matched baseline; Gemma's one
+  lost tool case deserves a look. *Goal: lower refusals without touching the
+  primary gates.*
+- **More nodes.** Two retired iMacs join the cluster as bulk-storage workers,
+  and an off-site edge node is being wired in over WireGuard
+  ([`nodes/homelab.md`](nodes/homelab.md)). The [agent platform](platform/README.md)
+  is where this will matter next; more on that when there is something to
+  measure.
+
+Closed since 2026-08-29: the NVFP4-KV cutover on the GB10 (done, then
+superseded by the Gemma role change); prefix caching under speculation (the
+nightly hits under MTP without the #50897 port); the 13 GB serving picture
+on the 32 GB card (in production since September, with vision). Our upstream
+package [#53977](https://github.com/vllm-project/vllm/pull/53977)–[#53979](https://github.com/vllm-project/vllm/pull/53979)
+is no longer needed for our own serving; its fate upstream is open. Parked:
+the AURA vs. ModelOpt AutoQuantize cross-method comparison.
 
 ## Findings so far
 
@@ -121,6 +103,11 @@ Newest first.
 
 | Date | Finding | Evidence |
 |---|---|---|
+| 2026-10-11 | **Both boxes off the fork: stock vLLM nightly + one cherry-pick, vision tower included.** [vllm#46963](https://github.com/vllm-project/vllm/pull/46963) (NVFP4 KV on sm12x) merged on 10-07. With FlashInfer 0.7.1 ([FI PR 5189](https://github.com/flashinfer-ai/flashinfer/pull/5189)) and [vllm#46558](https://github.com/vllm-project/vllm/pull/46558) for Gemma-4 image spans, all thirteen carried patch lines are gone or reduced to plugins. **GB10 (Gemma-4-31B, MTP):** prefill +12/+29/+58/+68 % at 8k/32k/128k/240k (TTFT at 240k 1525 → 908 s), KV pool identical, a second long session now hits the prefix cache (1.0 → 15.1 tok/s at 130k), decode −4 % at two streams. **RTX (GridBook):** KV pool +0.7 % (765,668), prefill up to +8 %, decode −4 % at eight streams. All quality gates identical; an NVFP4-vs-bf16-KV control arm on the GB10 matched. | [`note`](notes/vllm-stock-nightly-migration-2026-10.md) · [`containers/stock-nightly/`](containers/stock-nightly/) |
+| 2026-10-11 | **On GB10 unified memory, the safety net was not there.** Two wedges in one afternoon were traced to three defects lining up. earlyoom had been inert for two months: with `-s 10,5` it waits for swap to run low too, and with swappiness 10 swap stays 97 % free (`mem avail: 0 … swap free 97.64%`, no kill). cgroup caps don't count CUDA memory (49.6 GB in `nvidia-smi`, 10 GB in `memory.current`). And Docker autostart revived a memory-eating experiment container after the reboot. The "FP4 GEMM crash on the first image request" (seen since September) is the same physics: CUDA allocates from *free* memory, not *available*. Fixes: `-s 100,100`, `vm.min_free_kbytes` 3 GiB, a watchdog instead of autostart for the main LLM, and no restart policy for experiments. Stress-tested with the full fleet up. | [`note`](notes/vllm-stock-nightly-migration-2026-10.md#what-went-wrong-on-the-way) |
+| 2026-10-04 | **Abliteration *in format*: both production models, same bytes budget, no re-quantization.** The residual-writing matrices of a Heretic-ARA donor are re-encoded onto the frozen production grid and written into a copy of the artifact; every other tensor stays bit-identical (null test: unchanged weights re-encode byte-identically). Gemma-4-31B: hard refusals 100 → 36 (BF16 donor 33), German and vision unchanged. Qwen3.8 GridBook: a global dose failed the tool gate (α=1.0: 2/5; α=0.75: 3/5 *and* 88 refusals); leaving 15 coarse-grid modules untouched instead gave **29/100 with tools 5/5**, below the full BF16 abliteration. Both published on HF. | [`note`](notes/abliteration-in-format-2026-10.md) · [Gemma](https://huggingface.co/TechPrototyper/Gemma4-31B-IT-PrismaQuant-6bit-abliterated-vllm) · [Qwen](https://huggingface.co/TechPrototyper/Qwen3.8-27B-GridBook-13GB-vision-abliterated-vllm) |
+| 2026-09-16 | **A vision tower for the 13 GB GridBook checkpoint, with no extra quantization.** The GridBook export ships text-only. An index file plus symlinks combines its 1,363 language-model tensors with the 333 BF16 `model.visual.*` tensors (0.86 GiB) from the AQUA export; the vision tower stays BF16 and off the FP4 GEMM path. KV pool 760,477 tokens at 262k. | [`note`](notes/making-it-boring-sep-2026.md#the-rtx-from-boots-to-serves-eight-agents) |
+| 2026-09-13 | **The modelopt NVFP4 Gemma-4 export is 64 % BF16: its config skips every attention module.** Switching to [rdtand's PrismaQuant 6-bit](https://huggingface.co/rdtand/Gemma4-31B-IT-PrismaQuant-6bit-vllm) took 31.85 → 26.8 GiB loaded, decode 15.7 → 18.2 tok/s, determinism 4/5 → 5/5, with German and vision gates equal. Earlier, MTP with Google's own drafter took prose from 6.9 to 15.7 tok/s; DFlash on Gemma was rejected (14–23 % acceptance). | [`note`](notes/making-it-boring-sep-2026.md#the-gb10-a-german-model-and-the-memory-discipline-it-forced) |
 | 2026-08-29 | **The 13 GB endgame: GridBook holds at verdict tier, and the serving map is measured.** GridBook-13GB lands on **the same 1287/1319** (0.9757) as both the 23.6 GB and 20 GB artifacts — 9:9 discordants against each, McNemar p=1.0, needle 6/6, determinism 5/5. Served at prod shape (NVFP4-KV, 262k) the 5090 reports an **898,037-token KV pool** (2.62× the AQUA shape) at 60 tok/s single-stream, ~4.5–6.5k tok/s cold prefill, and **13–42× replay speedups** on 88k-token prompts via the #50897 prefix cache. One sobering measurement alongside: **DFlash2 draft acceptance appears to roughly halve on prose against the GridBook target** (24% vs ~54% on AQUA; retrieval-style stays ~54%), so speculation currently reads as a mid-concurrency win (c≈5–7, ~+55%/session) rather than a single-stream turbo there — a GridBook-tuned drafter would be the likely fix. NVFP4-KV × spec stays behind the #53979 SWA guard pending the kernel-parity test. | [`note`](notes/endgegner-gridbook-rtx-2026-08-29.md) · [`verdict`](results/RESULT_sm120-gridbook13-n1319.json) · [`sweeps`](results/) |
 | 2026-08-29 | **#50897 works on the RTX 5090 too — prefix caching hits under speculation on sm120.** An in-cluster kaniko overlay build (vLLM v4@`2cf8b8a` ∪ vllm#50897 ∪ the jethac SWA guard, python-only, no recompile) served DFlash2 + prefix caching on the 5090: **prefix-cache hit rate 37.8% → 48.7%** (climbing per replay of a shared prefix) with spec **acceptance 92.9% → 100%** — vs **0% pre-#50897**. The sm120 counterpart to the 08-28 sm121 result (0 → 90.9%): the agent-tier "cache **or** spec" tradeoff could now be **cache *and* spec** on the 5090. Side-finding: NVFP4-KV + this SWA drafter correctly tripped the new guard (`NotImplementedError`), so the cache test used fp8-KV (KV-dtype-agnostic). | [`note`](notes/pc50897-sm120-cache-under-spec-2026-08-29.md) · [`metrics`](results/sm120_pc50897_metrics.txt) |
 | 2026-08-29 | **Three n=1319 verdicts land as equivalence — with a noise-floor control that reads them.** The two open verdict-tier gates close: **Scout-20GB ≡ AQUA-5.5** on the 5090 (GSM8K 0.9757 vs 0.9757, McNemar exact p=1.0, discordants 7:7) and **NVFP4-KV ≡ fp8-KV** on the GB10 (0.9742 vs 0.9727, p=0.77, discordants 7:5) — the latter also at **perf-harness speed parity** (single-stream 23.1 vs 23.0 tok/s) and **half the KV-cache memory**. A fresh same-config repeat of the deployed prod-50897 config (0.9704; needle 6/6, determinism 5/5 with identical hashes) doubles as the **noise floor**: two byte-identical runs disagree on **15 items (10:5, p=0.30)** — *more* apparent divergence than either real comparison produced — so both equivalences sit within what run-to-run greedy flip-noise alone produces. (tools 0/6 on every arm is a `400 Bad Request` harness artifact, identical across arms, not a quality signal.) | [`scout·aqua`](notes/verdict-scout20gb-vs-aqua55-n1319-2026-08-29.md) · [`nvfp4·fp8`](notes/verdict-nvfp4kv-vs-fp8kv-cutover-n1319-2026-08-29.md) · [`nachlauf·noise`](notes/verdict-prod50897-nachlauf-noisefloor-n1319-2026-08-29.md) · [`results/`](results/) |
@@ -185,6 +172,7 @@ per change to this repo. Newest first.
 
 | Date | Change | Why | Detail |
 |---|---|---|---|
+| 2026-10-11 | **Notebook brought up to date from late August to the present.** Three chapter notes: September hardening, abliteration in format, and the stock-nightly migration. Front page rebuilt around "what runs now". Findings for September and October. `containers/stock-nightly/` holds the production build context and serve commands. Node profiles and the home-lab map updated with the two iMac workers and the planned WireGuard edge node. | Six weeks of production work were missing from the record. The front page described a stack that hasn't run since September. | [`notes/vllm-stock-nightly-migration-2026-10.md`](notes/vllm-stock-nightly-migration-2026-10.md) · [`nodes/homelab.md`](nodes/homelab.md) |
 | 2026-08-29 | **Verdict day recorded:** three n=1319 equivalence verdicts + the same-config noise-floor control; #50897 confirmed on the 5090 under live speculation; the 13 GB GridBook line measured end to end (KV pool, sessions, prefix replays, spec spectrum); front page updated to the current production states (NVFP4-KV on the GB10, honest container status) | the notebook's bar is the verdict tier — the day the gates closed belongs in the record, and the front page must not contradict its own findings | [`notes/verdict-scout20gb-vs-aqua55-n1319-2026-08-29.md`](notes/verdict-scout20gb-vs-aqua55-n1319-2026-08-29.md) · [`notes/endgegner-gridbook-rtx-2026-08-29.md`](notes/endgegner-gridbook-rtx-2026-08-29.md) |
 | 2026-08-28 | **Containers went public:** the GB10 fullstand image (incl. the #50897 fix) and both sm120 images on GHCR; `containers/` section added, replacing the archived scaffold repo; findings + Next-up carried the night's results | one `docker pull` instead of a source build — and the archived repo's dead links needed a live home | [`containers/`](containers/) |
 | 2026-08-27 | Consolidated 3.6→3.8 pipeline write-up published (`notes/qwen38-pipeline-story.md`): the full-split verdict, the 3.8 pivot, the speculation re-evaluation — extended through the week that closed the chapter (adoption, drafter fp8, portable container, GridBook, the triad, the non-causal seam + upstream package) and the per-platform recommendation as of today; Spark recipe detail-pass (adoption-candidate leftover removed, #52816-merge status, prefix-caching caveat under spec) | the "Consolidated write-up" Next-up item is done — the record exists as one document instead of ten | [`notes/qwen38-pipeline-story.md`](notes/qwen38-pipeline-story.md) · [`recipes/dgx-spark-sm121.md`](recipes/dgx-spark-sm121.md) |
@@ -236,9 +224,16 @@ per change to this repo. Newest first.
 ## Context
 
 Kernel and serving work this builds on: FlashInfer sm12x kernels
-([flashinfer#3684](https://github.com/flashinfer-ai/flashinfer/pull/3684)),
+([flashinfer#3684](https://github.com/flashinfer-ai/flashinfer/pull/3684),
+[FI PR 5189](https://github.com/flashinfer-ai/flashinfer/pull/5189)),
 vLLM consumer-Blackwell NVFP4-KV enablement
-([vllm#46329](https://github.com/vllm-project/vllm/pull/46329)), and the
+([vllm#46329](https://github.com/vllm-project/vllm/pull/46329), which carried
+this lab through the summer, and the merged
+[vllm#46963](https://github.com/vllm-project/vllm/pull/46963) it now runs on),
+Gemma-4 image spans on FlashInfer ([vllm#46558](https://github.com/vllm-project/vllm/pull/46558)),
+Robert Tand's [PrismaQuant](https://github.com/RobTand/prismaquant) and
+[GridBook](https://github.com/RobTand/gridbook), p-e-w's
+[Heretic](https://github.com/p-e-w/heretic), and the
 calibration discussion in
 [llm-compressor#2936](https://github.com/vllm-project/llm-compressor/issues/2936).
 

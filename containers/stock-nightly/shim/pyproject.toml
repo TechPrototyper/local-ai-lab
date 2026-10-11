@@ -1,0 +1,10 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "nvfp4-splitkv-shim"
+version = "0.1.0"
+[project.entry-points."vllm.general_plugins"]
+nvfp4_splitkv = "nvfp4_splitkv_shim:register"
+[tool.setuptools]
+packages = ["nvfp4_splitkv_shim"]

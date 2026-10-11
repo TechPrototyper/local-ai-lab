@@ -1,5 +1,9 @@
 # Build stack — sm12x custom vLLM image
 
+> **Historical (August 2026).** Production left this stack on 2026-10-11. Current
+> image, serve commands and pitfalls: [`containers/stock-nightly/`](../containers/stock-nightly/).
+> Kept for reproducing the August findings.
+
 Provenance for the image line both recipes serve from.
 
 ## Image

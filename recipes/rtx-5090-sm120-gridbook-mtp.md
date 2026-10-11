@@ -1,5 +1,9 @@
 # Recipe: Qwen3.8-27B drafter-free MTP-Turbo on RTX 5090 (sm120)
 
+> **Historical (August 2026).** Production left this stack on 2026-10-11. Current
+> image, serve commands and pitfalls: [`containers/stock-nightly/`](../containers/stock-nightly/).
+> Kept for reproducing the August findings.
+
 **Was:** Qwen3.8-27B als GridBook-13GB-Quant, mit nativer **MTP** (Multi-Token-
 Prediction) statt externem Drafter, NVFP4-KV, Prefix-Caching unter Spekulation.
 Ergebnis: drafter-frei, **~624k Token KV-Pool**, agentisch tauglich (Tool-Calling +

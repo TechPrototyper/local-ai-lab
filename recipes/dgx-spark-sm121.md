@@ -1,5 +1,9 @@
 # DGX Spark / GB10 (sm_121) — quality → speed → memory
 
+> **Historical (August 2026).** Production left this stack on 2026-10-11. Current
+> image, serve commands and pitfalls: [`containers/stock-nightly/`](../containers/stock-nightly/).
+> Kept for reproducing the August findings.
+
 Same 27B as the RTX recipe — opposite dials, and since 2026-08-21 a
 different KV dtype: fp8, historically the price of DFlash2 speculation.
 (Since 2026-08-27 that price is optional — spec now serves over NVFP4 KV

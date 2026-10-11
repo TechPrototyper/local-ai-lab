@@ -5,29 +5,40 @@ pre-merge carry line for consumer Blackwell (sm120 = RTX 5090, x86_64;
 sm121 = DGX Spark / GB10, arm64). When a serving line merges upstream, prefer
 an official image; the tags here stay pullable for reproducibility.
 
-All images are public on GHCR:
+## Current (since 2026-10-11): stock vLLM nightly + one cherry-pick
+
+Both boxes left the carry line on 2026-10-11. Production now runs a thin
+layer over an **unmodified vLLM nightly**: FlashInfer 0.7.1,
+[vllm#46558](https://github.com/vllm-project/vllm/pull/46558), and the
+GridBook plugin on the RTX. Build context, serve commands for both boxes and
+the pitfalls are in **[`stock-nightly/`](stock-nightly/)**. The story is in
+[`../notes/vllm-stock-nightly-migration-2026-10.md`](../notes/vllm-stock-nightly-migration-2026-10.md).
+
+Everything below is the **historical carry line** (August 2026). It stays
+pullable for reproducing the August measurements and the upstream PRs
+#53977–#53979. None of it is in production anymore.
+
+All carry-line images are public on GHCR:
 [`ghcr.io/techprototyper/vllm-sm12x`](https://github.com/users/TechPrototyper/packages/container/package/vllm-sm12x).
 
 ## Published images (2026-08-28)
 
 | Tag | Arch | What it is | Provenance |
 |---|---|---|---|
-| `sm120-nvfp4-e2446da2-prod` | sm120 (x86_64) | **RTX production** — NVFP4-KV serving, `use_trtllm_attention:false` load-bearing | vllm#46329 head `e2446da2` + flashinfer main |
+| `sm120-nvfp4-e2446da2-prod` | sm120 (x86_64) | RTX production until 08-31 — NVFP4-KV serving, `use_trtllm_attention:false` load-bearing | vllm#46329 head `e2446da2` + flashinfer main |
 | `sm120-v4-2cf8b8a-validation` | sm120 (x86_64) | The **reproduction image** for the upstream PRs — main ∪ #46329@`7a5cf14` ∪ #53977/#53978/#53979 | fork branch `integrate/dflash2-nvfp4-v4` @ `2cf8b8ae0`, flashinfer main @ `09da2e70` |
 | `sm121-dflash2-f4c27c0da` | sm121 (arm64) | GB10 DFlash2 line, self-contained (tree + FlashInfer + warm caches baked) | base `f4c27c0da` |
-| `sm121-dflash2-pc50897-dd02ed4d` | sm121 (arm64) | **GB10 production** — the above + #53122 fused-KV pick (`58f998f84`) + the vllm#50897 prefix-cache fix (`dd02ed4da1`) | see [`../notes/night-2026-08-28-pc50897-scout-h2h.md`](../notes/night-2026-08-28-pc50897-scout-h2h.md) |
+| `sm121-dflash2-pc50897-dd02ed4d` | sm121 (arm64) | GB10 production until early Sept — the above + #53122 fused-KV pick (`58f998f84`) + the vllm#50897 prefix-cache fix (`dd02ed4da1`) | see [`../notes/night-2026-08-28-pc50897-scout-h2h.md`](../notes/night-2026-08-28-pc50897-scout-h2h.md) |
 
 ### 2026-08-31 — RTX drafter-free MTP-on-GridBook (new line)
 
 | Tag | Arch | What it is | Provenance |
 |---|---|---|---|
-| [`vllm-sm120:gridbook-mtp-088`](https://github.com/users/TechPrototyper/packages/container/package/vllm-sm120) | sm120 (x86_64) | **RTX production (current)** — drafter-free **MTP-on-GridBook**: GridBook-13GB + native MTP@2, NVFP4-KV, prefix-cache under speculation (~77% hit), **~624k KV pool**. Qualitäts-äquivalent zu no-spec (n=1319, p=0.83), volle Tool-Batterie grün. | image = #50897 prefix-cache + GridBook-Plugin 0.8.8 + #53977–79-Seam (`sm120-pc50897-gridbook-088`); checkpoint = GridBook-13GB + bit-exakter AQUA-BF16-embed-swap (`gridbook-13gb-mtpfix`). |
+| [`vllm-sm120:gridbook-mtp-088`](https://github.com/users/TechPrototyper/packages/container/package/vllm-sm120) | sm120 (x86_64) | RTX production 08-31 → 09-10 — drafter-free **MTP-on-GridBook**: GridBook-13GB + native MTP@2, NVFP4-KV, prefix-cache under speculation (~77% hit), **~624k KV pool**. Quality-equivalent to no-spec (n=1319, p=0.83), full tool battery green. | image = #50897 prefix-cache + GridBook-Plugin 0.8.8 + #53977–79-Seam (`sm120-pc50897-gridbook-088`); checkpoint = GridBook-13GB + bit-exact AQUA BF16 embed swap (`gridbook-13gb-mtpfix`). |
 
-Serve-Kommando + der Embed-Swap: **[`../recipes/rtx-5090-sm120-gridbook-mtp.md`](../recipes/rtx-5090-sm120-gridbook-mtp.md)** ·
-Cutover-Doku: [`../notes/rtx-gridbook-mtp-cutover-2026-08-31.md`](../notes/rtx-gridbook-mtp-cutover-2026-08-31.md).
-*(Hinweis: dieses Image liegt aktuell im separaten GHCR-Paket `vllm-sm120` statt im
-Sammel-Paket `vllm-sm12x` — bei Bedarf per `crane` ins `vllm-sm12x` re-taggen für
-Namens-Konsistenz.)*
+Serve command + the embed swap: **[`../recipes/rtx-5090-sm120-gridbook-mtp.md`](../recipes/rtx-5090-sm120-gridbook-mtp.md)** ·
+Cutover write-up: [`../notes/rtx-gridbook-mtp-cutover-2026-08-31.md`](../notes/rtx-gridbook-mtp-cutover-2026-08-31.md).
+*(This image lives in the separate GHCR package `vllm-sm120`, not in `vllm-sm12x`.)*
 
 All four are fully baked — **no source mounts needed**. One honest caveat:
 GB10 production has since moved to NVFP4-KV, which the baked sm121 image
